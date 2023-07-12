@@ -1,6 +1,7 @@
 project_dir = projectDir
 
 process competitiveMapping {
+    container 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:latest'
 
     publishDir "${params.output_dir}/$sample_name", mode: 'copy', overwrite: 'true', pattern: '*{_err.json,_competitive_mapping.json}'
     publishDir "${params.output_dir}/$sample_name/competitive_mapping_out", mode: 'copy', pattern: '*_cm_{1,2}.fastq', overwrite: 'true'
@@ -11,7 +12,7 @@ process competitiveMapping {
     output:
     tuple val(sample_name), path(fq1), path(fq2), stdout, emit: cm_paths
     tuple val(sample_name), path("${sample_name}_cm_1.fastq"), path("${sample_name}_cm_2.fastq"), emit: cm_sample
-    path ("${sample_name}_competitive_mapping.json"), emit: cm_report
+    path("${sample_name}_competitive_mapping.json"), emit: cm_report
 
     script:
     competitive_mapping_json = "${sample_name}_competitive_mapping.json"
