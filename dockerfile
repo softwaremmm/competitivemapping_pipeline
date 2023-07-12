@@ -16,5 +16,8 @@ RUN conda install minimap2~=2.26
 # Install samtools
 RUN conda install samtools~=1.17
 
+# Include temporary dummy data in container
+COPY test_data/cov_sorted_h37rv_100k.json /app/cov_sorted_h37rv_100k.json
+
 # Run minimap2 (In practice this command will be overriden by NextFlow)
 CMD ["minimap2"]
