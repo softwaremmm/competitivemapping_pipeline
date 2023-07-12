@@ -22,7 +22,7 @@ process competitiveMapping {
     """
     cp ${fq1} ${competitive_mapping_file_1}
     cp ${fq2} ${competitive_mapping_file_2}
-    cp ${baseDir}/lib/test_data/cov_sorted_h37rv_100k.json ${competitive_mapping_json}
+    cp /app/cov_sorted_h37rv_100k.json ${competitive_mapping_json}
     """
 
     stub:
