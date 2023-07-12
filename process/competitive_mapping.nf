@@ -7,8 +7,8 @@ process competitiveMapping {
     tuple val(sample_name), path(fq1), path(fq2)
 
     output:
-    tuple val(sample_name), path(fq1), path(fq2), stdout,  emit: cm_sample
-    tuple val(sample_name), path({sample_name}_cm_1.fastq), path({sample_name}_cm_2.fastq), stdout,  emit: cm_sample
+    tuple val(sample_name), path(fq1), path(fq2), emit: cm_sample
+    tuple val(sample_name), path("${sample_name}_cm_1.fastq"), path("${sample_name}_cm_2.fastq"), emit: cm_sample
 
     script:
     competitive_mapping_json = "${sample_name}_competitive_mapping.json"

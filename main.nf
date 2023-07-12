@@ -42,7 +42,7 @@ workflow competitive_mapping{
         .set { input_files }
   input_files.view { it }
 
-  competitive_mapping(input_files)
+  competitive_mapping(input_files, output_dir)
 
 }
 
@@ -65,6 +65,7 @@ workflow.onComplete {
 
 
 workflow{
+
     main:
         competitive_mapping(params.input_dir, params.output_dir)
 }
