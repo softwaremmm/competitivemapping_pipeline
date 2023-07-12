@@ -1,5 +1,8 @@
 #!/usr/bin/env nextflow
 
+//Set DSL2 syntax
+nextflow.enable.dsl=2
+
 include {competitiveMapping} from './process/competitive_mapping.nf'
 
 params.help = ""
@@ -8,9 +11,9 @@ params.help = ""
 fastq_pattern = '*_*{1,2}.f*q*'
 
 workflow competitive_mapping{
-     take:
-        input_dir
-        output_dir
+    take:
+    input_dir
+    output_dir
 
     main:
         // Setup so --help triggers the help message
@@ -22,6 +25,7 @@ workflow competitive_mapping{
             Parameters:
             ------------------------------------------------------------------------
             --input_dir    Path to the sample's directory
+            --output_dir   Path to the workflow's output directory
 
             """
             .stripIndent()
@@ -29,20 +33,24 @@ workflow competitive_mapping{
         }
 
     if (params.input_dir == '') {
-      exit 1, 'error: --input_dir is mandatory'
+        exit 1, 'error: --input_dir is mandatory'
+    }
+
+    if (params.output_dir == '') {
+        exit 1, 'error: --output_dir is mandatory'
     }
 
 
-  inputdir_amended = "${params.input_dir}".replaceFirst(/$/, '/')
-  indir = "${inputdir_amended}"
-  reads = indir + fastq_pattern
+    inputdir_amended = "${params.input_dir}".replaceFirst(/$/, '/')
+    indir = "${inputdir_amended}"
+    reads = indir + fastq_pattern
 
-  Channel.fromFilePairs(reads, flat: true, checkIfExists: true, size: -1)
-        .ifEmpty { error "cannot find any reads matching ${fastq_pattern} in ${indir}" }
-        .set { input_files }
-  input_files.view { it }
+    Channel.fromFilePairs(reads, flat: true, checkIfExists: true, size: -1)
+            .ifEmpty { error "cannot find any reads matching ${fastq_pattern} in ${indir}" }
+            .set { input_files }
+    input_files.view { it }
 
-  competitive_mapping(input_files, output_dir)
+    competitiveMapping(input_files)
 
 }
 
