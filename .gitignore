@@ -1,0 +1,19 @@
+# NextFlow
+/work/
+/.nextflow.log*
+/.nextflow/
+trace*.txt
+
+# DATA
+*.*fastq*
+*.*fq*
+*.*bam*
+*.*sam*
+*.json
+
+# nf-test
+.nf-test/*
+*.snap
+
+# test data
+!test_data
