@@ -24,7 +24,7 @@ include { competitiveMapping } from './process/competitive_mapping.nf'
 params.help = ''
 
 //Constants
-fastq_pattern = '*_*{1,2}.f*q*'
+fastq_pattern = '*_*{1,2}.fastq.gz'
 
 workflow competitive_mapping {
     take:
