@@ -1,16 +1,16 @@
 #!/usr/bin/env nextflow
 
 //Set DSL2 syntax
-nextflow.enable.dsl=2
+nextflow.enable.dsl = 2
 
-include {competitiveMapping} from './process/competitive_mapping.nf'
+include { competitiveMapping } from './process/competitive_mapping.nf'
 
-params.help = ""
+params.help = ''
 
 //Constants
 fastq_pattern = '*_*{1,2}.f*q*'
 
-workflow competitive_mapping{
+workflow competitive_mapping {
     take:
     input_dir
     output_dir
@@ -18,7 +18,7 @@ workflow competitive_mapping{
     main:
         // Setup so --help triggers the help message
         if (params.help) {
-            log.info """
+        log.info """
             ========================================================================
             Competitive Mapping Workflow
 
@@ -29,7 +29,7 @@ workflow competitive_mapping{
 
             """
             .stripIndent()
-            exit(0)
+        exit(0)
         }
 
     if (params.input_dir == '') {
@@ -39,7 +39,6 @@ workflow competitive_mapping{
     if (params.output_dir == '') {
         exit 1, 'error: --output_dir is mandatory'
     }
-
 
     inputdir_amended = "${params.input_dir}".replaceFirst(/$/, '/')
     indir = "${inputdir_amended}"
@@ -51,19 +50,18 @@ workflow competitive_mapping{
     input_files.view { it }
 
     competitiveMapping(input_files)
-
 }
 
 workflow.onComplete {
     if (workflow.success) {
-    log.info '''
+        log.info '''
         ===========================================
         Workflow completed successfully
         '''
         .stripIndent()
     }
     else {
-    log.info '''
+        log.info '''
         ===========================================
         Finished with errors
         '''
@@ -71,12 +69,7 @@ workflow.onComplete {
     }
 }
 
-
-workflow{
-
+workflow {
     main:
         competitive_mapping(params.input_dir, params.output_dir)
 }
-
-
-
