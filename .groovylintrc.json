@@ -4,7 +4,13 @@
         "CompileStatic": {
             "enabled": false
         },
+        "DuplicateStringLiteral": {
+            "enabled": false
+        },
         "ImplicitClosureParameter": {
+            "enabled": false
+        },
+        "LineLength": {
             "enabled": false
         }
     }
