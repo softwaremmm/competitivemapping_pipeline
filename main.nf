@@ -7,7 +7,6 @@ ANSI_RESET = '\033[0m'
 
 params.help = ''
 params.input_dir = ''
-params.output_dir = ''
 
 if (workflow.profile != 'kubernetes') {
     params.knowledge_bucket = "$projectDir/data/relatedness/knowledge"
@@ -76,7 +75,6 @@ workflow {
                 ------------------------------------------------------------------------
 
                 --input_dir  Directory holding the fastq files *_{1,2}.fastq.gz
-                --output_dir Directory for output (optional)
 
                 '''
                 .stripIndent()
@@ -94,7 +92,6 @@ workflow {
         ------------------------------------------------------------------------
 
         --input_dir    $params.input_dir
-        --output_dir   $params.output_dir  (optional)
 
         Runtime data:
         ------------------------------------------------------------------------
