@@ -1,9 +1,5 @@
 #!/usr/bin/env nextflow
 
-//Set DSL2 syntax
-
-nextflow.enable.dsl = 2
-
 //Define ANSI colours for ease
 
 ANSI_GREEN = '\033[1;32m'
@@ -21,52 +17,28 @@ if (workflow.profile != 'kubernetes') {
 
 include { competitiveMapping } from './process/competitive_mapping.nf'
 
-params.help = ''
-
 //Constants
 fastq_pattern = '*_*{1,2}.fastq.gz'
 
 workflow competitive_mapping {
     take:
-    input_dir
-    output_dir
+        input_dir
 
     main:
-        // Setup so --help triggers the help message
-        if (params.help) {
-            log.info """
-            ========================================================================
-            Competitive Mapping Workflow
 
-            Parameters:
-            ------------------------------------------------------------------------
-            --input_dir    Path to the sample's directory
-            --output_dir   Path to the workflow's output directory
-
-            """
-            .stripIndent()
-            exit(0)
+        if (params.input_dir == '') {
+            exit 1, 'error: --input_dir is mandatory'
         }
 
-    if (params.input_dir == '') {
-        exit 1, 'error: --input_dir is mandatory'
-    }
+        inputdir_amended = "${params.input_dir}".replaceFirst(/$/, '/')
+        indir = "${inputdir_amended}"
+        reads = indir + fastq_pattern
 
-    if (params.output_dir == '') {
-        exit 1, 'error: --output_dir is mandatory'
-    }
+        Channel.fromFilePairs(reads, flat: true, checkIfExists: true, size: -1)
+                .ifEmpty { error "cannot find any reads matching ${fastq_pattern} in ${indir}" }
+                .set { input_files }
+        input_files.view { it }
 
-
-    inputdir_amended = "${params.input_dir}".replaceFirst(/$/, '/')
-    indir = "${inputdir_amended}"
-    reads = indir + fastq_pattern
-
-    Channel.fromFilePairs(reads, flat: true, checkIfExists: true, size: -1)
-            .ifEmpty { error "cannot find any reads matching ${fastq_pattern} in ${indir}" }
-            .set { input_files }
-    input_files.view { it }
-
-        competitiveMapping(input_files)
         competitive_mapping_output = competitiveMapping(input_files)
 
     emit:
@@ -104,7 +76,7 @@ workflow {
                 ------------------------------------------------------------------------
 
                 --input_dir  Directory holding the fastq files *_{1,2}.fastq.gz
-                --output_dir Directory for output
+                --output_dir Directory for output (optional)
 
                 '''
                 .stripIndent()
@@ -122,7 +94,7 @@ workflow {
         ------------------------------------------------------------------------
 
         --input_dir    $params.input_dir
-        --output_dir   $params.output_dir
+        --output_dir   $params.output_dir  (optional)
 
         Runtime data:
         ------------------------------------------------------------------------
@@ -134,5 +106,5 @@ workflow {
         """
         .stripIndent()
 
-        competitive_mapping(params.input_dir, params.output_dir)
+        competitive_mapping(params.input_dir)
 }
