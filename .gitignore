@@ -17,3 +17,6 @@ trace*.txt
 
 # test data
 !test_data
+
+# Linter
+!.groovylintrc.json
