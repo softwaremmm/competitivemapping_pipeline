@@ -1,9 +1,5 @@
 #!/usr/bin/env nextflow
 
-//Set DSL2 syntax
-
-nextflow.enable.dsl = 2
-
 //Define ANSI colours for ease
 
 ANSI_GREEN = '\033[1;32m'
@@ -11,7 +7,6 @@ ANSI_RESET = '\033[0m'
 
 params.help = ''
 params.input_dir = ''
-params.output_dir = ''
 
 if (workflow.profile != 'kubernetes') {
     params.knowledge_bucket = "$projectDir/data/relatedness/knowledge"
@@ -21,24 +16,17 @@ if (workflow.profile != 'kubernetes') {
 
 include { competitiveMapping } from './process/competitive_mapping.nf'
 
-params.help = ''
-
 //Constants
 fastq_pattern = '*_*{1,2}.fastq.gz'
 
 workflow competitive_mapping {
     take:
-    input_dir
-    output_dir
+        input_dir
 
     main:
 
         if (params.input_dir == '') {
-        exit 1, 'error: --input_dir is mandatory'
-        }
-
-        if (params.output_dir == '') {
-        exit 1, 'error: --output_dir is mandatory'
+            exit 1, 'error: --input_dir is mandatory'
         }
 
         inputdir_amended = "${params.input_dir}".replaceFirst(/$/, '/')
@@ -50,7 +38,11 @@ workflow competitive_mapping {
                 .set { input_files }
         input_files.view { it }
 
-        competitiveMapping(input_files)
+        competitive_mapping_output = competitiveMapping(input_files)
+
+    emit:
+        cm_sample_paths = competitive_mapping_output.cm_sample
+        cm_report = competitive_mapping_output.cm_report
 }
 
 workflow.onComplete {
@@ -83,7 +75,6 @@ workflow {
                 ------------------------------------------------------------------------
 
                 --input_dir  Directory holding the fastq files *_{1,2}.fastq.gz
-                --output_dir Directory for output
 
                 '''
                 .stripIndent()
@@ -101,7 +92,6 @@ workflow {
         ------------------------------------------------------------------------
 
         --input_dir    $params.input_dir
-        --output_dir   $params.output_dir
 
         Runtime data:
         ------------------------------------------------------------------------
@@ -113,5 +103,5 @@ workflow {
         """
         .stripIndent()
 
-        competitive_mapping(params.input_dir, params.output_dir)
+        competitive_mapping(params.input_dir)
 }
