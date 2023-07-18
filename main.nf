@@ -1,11 +1,9 @@
 #!/usr/bin/env nextflow
 
-//Set DSL2 syntax
-nextflow.enable.dsl=2
-
 include {competitiveMapping} from './process/competitive_mapping.nf'
 
 params.help = ""
+params.input_dir = ""
 
 //Constants
 fastq_pattern = '*_*{1,2}.f*q*'
@@ -32,26 +30,25 @@ workflow competitive_mapping{
             exit(0)
         }
 
-    if (params.input_dir == '') {
-        exit 1, 'error: --input_dir is mandatory'
-    }
-
-    if (params.output_dir == '') {
-        exit 1, 'error: --output_dir is mandatory'
-    }
+        if (params.input_dir == '') {
+            exit 1, 'error: --input_dir is mandatory'
+        }
 
 
-    inputdir_amended = "${params.input_dir}".replaceFirst(/$/, '/')
-    indir = "${inputdir_amended}"
-    reads = indir + fastq_pattern
+        inputdir_amended = "${params.input_dir}".replaceFirst(/$/, '/')
+        indir = "${inputdir_amended}"
+        reads = indir + fastq_pattern
 
-    Channel.fromFilePairs(reads, flat: true, checkIfExists: true, size: -1)
-            .ifEmpty { error "cannot find any reads matching ${fastq_pattern} in ${indir}" }
-            .set { input_files }
-    input_files.view { it }
+        Channel.fromFilePairs(reads, flat: true, checkIfExists: true, size: -1)
+                .ifEmpty { error "cannot find any reads matching ${fastq_pattern} in ${indir}" }
+                .set { input_files }
+        input_files.view { it }
 
-    competitiveMapping(input_files)
+        competitive_mapping_output = competitiveMapping(input_files)
 
+    emit:
+        cm_sample_paths = competitive_mapping_output.cm_sample
+        cm_report = competitive_mapping_output.cm_report
 }
 
 workflow.onComplete {
