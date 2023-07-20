@@ -1,0 +1,44 @@
+nextflow_process {
+
+    name "Test Process competitiveMapping"
+    script "process/competitive_mapping.nf"
+    process "competitiveMapping"
+
+    test("Process should output a bam file") {
+
+        when {
+            process{
+                """
+                input[0] = ['sample_test', file("tests/samples/local/test_clinic_sample_1.fastq.gz"), file("tests/samples/local/test_clinic_sample_2.fastq.gz")]
+                input[1] = file("/home/marcela/code/dev/wp4/input_manifest/target_101_new.fasta")
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert process.exitStatus == 0
+
+            assert process.out[3][0].contains("sample_test_sorted_alignments.bam")
+        }
+    }
+
+    test("Process should output a summary manifest") {
+
+        when {
+            process{
+                """
+                input[0] = ['sample_test', file("tests/samples/local/test_clinic_sample_1.fastq.gz"), file("tests/samples/local/test_clinic_sample_2.fastq.gz")]
+                input[1] = file("/home/marcela/code/dev/wp4/input_manifest/target_101_new.fasta")
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert process.exitStatus == 0
+
+            assert process.out[2][0].contains("manifest_summary.tsv")
+        }
+    }
+}

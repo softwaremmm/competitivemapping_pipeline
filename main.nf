@@ -8,12 +8,6 @@ ANSI_RESET = '\033[0m'
 params.help = ''
 params.input_dir = ''
 
-if (workflow.profile != 'kubernetes') {
-    params.knowledge_bucket = "$projectDir/data/relatedness/knowledge"
-} else {
-    params.knowledge_bucket = '/data/relatedness/knowledge'
-}
-
 include { competitiveMapping } from './process/competitive_mapping.nf'
 
 //Constants
@@ -22,6 +16,7 @@ fastq_pattern = '*_*{1,2}.fastq.gz'
 workflow competitive_mapping {
     take:
         input_dir
+        manifest
 
     main:
 
@@ -38,7 +33,7 @@ workflow competitive_mapping {
                 .set { input_files }
         input_files.view { it }
 
-        competitive_mapping_output = competitiveMapping(input_files)
+        competitive_mapping_output = competitiveMapping(input_files, manifest)
 
     emit:
         cm_sample_paths = competitive_mapping_output.cm_sample
@@ -75,6 +70,7 @@ workflow {
                 ------------------------------------------------------------------------
 
                 --input_dir  Directory holding the fastq files *_{1,2}.fastq.gz
+                --manifest
 
                 '''
                 .stripIndent()
@@ -103,5 +99,5 @@ workflow {
         """
         .stripIndent()
 
-        competitive_mapping(params.input_dir)
+        competitive_mapping(params.input_dir,params.manifest)
 }

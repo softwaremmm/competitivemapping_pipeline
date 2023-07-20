@@ -1,0 +1,11 @@
+name: cm-env
+channels:
+  - defaults
+  - conda-forge
+  - bioconda
+
+dependencies:
+  - python~=3.11
+  - minimap2~=2.26
+  - samtools~=1.17
+  - csvkit~=1.0
