@@ -7,6 +7,7 @@ ANSI_RESET = '\033[0m'
 
 params.help = ''
 params.input_dir = ''
+params.manifest = ''
 
 include { competitiveMapping } from './process/competitive_mapping.nf'
 
@@ -23,6 +24,9 @@ workflow competitive_mapping {
         if (params.input_dir == '') {
             exit 1, 'error: --input_dir is mandatory'
         }
+         if (params.manifest == '') {
+            exit 1, 'error: --manifest is mandatory'
+        }
 
         inputdir_amended = "${params.input_dir}".replaceFirst(/$/, '/')
         indir = "${inputdir_amended}"
@@ -33,7 +37,10 @@ workflow competitive_mapping {
                 .set { input_files }
         input_files.view { it }
 
-        competitive_mapping_output = competitiveMapping(input_files, manifest)
+        Channel.fromPath(params.manifest)
+            .set{ manifest_ch }
+
+        competitive_mapping_output = competitiveMapping(input_files, manifest_ch)
 
     emit:
         cm_sample_paths = competitive_mapping_output.cm_sample
@@ -88,6 +95,7 @@ workflow {
         ------------------------------------------------------------------------
 
         --input_dir    $params.input_dir
+        --manifest     $params.manifest
 
         Runtime data:
         ------------------------------------------------------------------------
