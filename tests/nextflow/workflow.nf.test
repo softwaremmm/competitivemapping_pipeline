@@ -1,0 +1,43 @@
+nextflow_workflow {
+
+    name "Test Workflow"
+    script "main.nf"
+    workflow "competitive_mapping"
+
+    test("Should succeed producing a competitive mapping json and the path to h37rv positive filtered files") {
+
+        when {
+            params {
+                input_dir = "tests/samples/local/"
+                manifest = "tests/samples/local/target_101_new.fasta"
+            }
+
+            workflow {
+                """
+                input[0]  = "tests/samples/local/"
+                input[1]  = "tests/samples/local/target_101_new.fasta"
+                """
+            }
+
+        }
+
+        then {
+             assert workflow.success
+
+             with(workflow.out.cm_report) {
+                assert size() == 1
+                assert get(0).contains("competitivemapping_report.json")
+            }
+
+            with(workflow.out.cm_sample_paths) {
+                assert size() == 1
+                assert get(0)[0].contains("h37rv_1.fastq.gz")
+                assert get(0)[1].contains("h37rv_2.fastq.gz")
+            }
+
+        }
+
+    }
+
+
+}
