@@ -5,6 +5,9 @@ competitive_mapping_file_1 = "h37rv_1.fastq.gz"
 competitive_mapping_file_2 = "h37rv_2.fastq.gz"
 
 process competitiveMapping{
+
+    container 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:latest'
+
     input:
     tuple val(sample_name), path(fq1), path(fq2)
     path (manifest)
