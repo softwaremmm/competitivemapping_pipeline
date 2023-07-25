@@ -28,7 +28,6 @@ process competitiveMapping{
     bash ${baseDir}/lib/manifest_summary.sh ${manifest} ${manifest_summary}
 
     # Perform competitive mapping
-    # May need to be `-ax sr` in production, but this does not work with test data
     minimap2 -ax sr -t12 ${manifest} ${fq1} ${fq2} |
 
     # Sort competitive mapping output
