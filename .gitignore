@@ -10,6 +10,7 @@ trace*.txt
 *.*bam*
 *.*sam*
 *.json
+*.fasta
 
 # nf-tests
 .nf-test/*
@@ -20,3 +21,6 @@ trace*.txt
 
 # Linter
 !.groovylintrc.json
+
+
+
