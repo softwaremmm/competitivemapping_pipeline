@@ -28,7 +28,7 @@ process competitiveMapping{
 
     """
     # Create manifest summary
-    bash ${baseDir}/lib/manifest_summary.sh ${manifest} ${manifest_summary}
+    bash ${moduleDir}/../lib/manifest_summary.sh ${manifest} ${manifest_summary}
 
     # Perform competitive mapping
     minimap2 -ax sr -t12 ${manifest} ${fq1} ${fq2} |
@@ -53,9 +53,6 @@ process competitiveMapping{
 
     # Generate competitive mapping json
     bash ${moduleDir}/../lib/generate_competitive_mapping_json.sh --cov ${cov}  --manifest-summary ${manifest_summary} --competitive-mapping-json ${competitive_mapping_json}
-
-
-
 
     """
     stub:
