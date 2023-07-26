@@ -52,7 +52,9 @@ process competitiveMapping{
     samtools fastq -@ 2 -1 ${competitive_mapping_file_1} -2 ${competitive_mapping_file_2}  -0 /dev/null -s /dev/null h37rv_sorted.bam
 
     # Generate competitive mapping json
-     bash ${baseDir}/lib/generate_competitive_mapping_json.sh --cov ${cov}  --manifest-summary ${manifest_summary} --competitive-mapping-json ${competitive_mapping_json}
+    bash ${moduleDir}/../lib/generate_competitive_mapping_json.sh --cov ${cov}  --manifest-summary ${manifest_summary} --competitive-mapping-json ${competitive_mapping_json}
+
+
 
 
     """
