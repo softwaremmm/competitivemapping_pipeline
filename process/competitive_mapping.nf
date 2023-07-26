@@ -13,7 +13,7 @@ process competitiveMapping{
     path (manifest)
 
     output:
-    tuple path("h37rv_1.fastq.gz"), path("h37rv_2.fastq.gz"), emit: cm_sample
+    tuple val(sample), path("h37rv_1.fastq.gz"), path("h37rv_2.fastq.gz"), emit: cm_sample
     path("competitivemapping_report.json"), emit: cm_report
 
 
