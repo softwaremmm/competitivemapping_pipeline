@@ -16,26 +16,10 @@ fastq_pattern = '*_*{1,2}.fastq.gz'
 
 workflow competitive_mapping {
     take:
-        input_dir
+        input_files
         manifest
 
     main:
-
-        if (params.input_dir == '') {
-            exit 1, 'error: --input_dir is mandatory'
-        }
-         if (params.manifest == '') {
-            exit 1, 'error: --manifest is mandatory'
-        }
-
-        inputdir_amended = "${params.input_dir}".replaceFirst(/$/, '/')
-        indir = "${inputdir_amended}"
-        reads = indir + fastq_pattern
-
-        Channel.fromFilePairs(reads, flat: true, checkIfExists: true, size: -1)
-                .ifEmpty { error "cannot find any reads matching ${fastq_pattern} in ${indir}" }
-                .set { input_files }
-        input_files.view { it }
 
         Channel.fromPath(params.manifest)
             .set{ manifest_ch }
@@ -51,14 +35,14 @@ workflow.onComplete {
     if (workflow.success) {
         log.info '''
         ===========================================
-        Workflow completed successfully
+        Competitive Mapping Workflow completed successfully
         '''
         .stripIndent()
     }
     else {
         log.info '''
         ===========================================
-        Finished with errors
+        Competitive Mapping finished with errors
         '''
         .stripIndent()
     }
@@ -84,6 +68,14 @@ workflow {
         exit(0)
         }
 
+        if (params.input_dir == '') {
+            exit 1, 'error: --input_dir is mandatory'
+        }
+         if (params.manifest == '') {
+            exit 1, 'error: --manifest is mandatory'
+        }
+
+
         log.info """
         ========================================================================
 
@@ -107,5 +99,10 @@ workflow {
         """
         .stripIndent()
 
-        competitive_mapping(params.input_dir,params.manifest)
+        Channel.fromFilePairs("${params.input_dir}/${fastq_pattern}", flat: true, checkIfExists: true, size: -1)
+                .ifEmpty { error "cannot find any reads matching ${fastq_pattern} in ${indir}" }
+                .set { input_files }
+        input_files.view { it }
+
+        competitive_mapping(input_files,params.manifest)
 }

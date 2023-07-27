@@ -13,7 +13,7 @@ process competitiveMapping{
     path (manifest)
 
     output:
-    tuple path("h37rv_1.fastq.gz"), path("h37rv_2.fastq.gz"), emit: cm_sample
+    tuple val(sample_name), path("h37rv_1.fastq.gz"), path("h37rv_2.fastq.gz"), emit: cm_sample
     path("competitivemapping_report.json"), emit: cm_report
 
 
@@ -28,7 +28,7 @@ process competitiveMapping{
 
     """
     # Create manifest summary
-    bash ${baseDir}/lib/manifest_summary.sh ${manifest} ${manifest_summary}
+    bash ${moduleDir}/../lib/manifest_summary.sh ${manifest} ${manifest_summary}
 
     # Perform competitive mapping
     minimap2 -ax sr -t12 ${manifest} ${fq1} ${fq2} |
@@ -52,8 +52,7 @@ process competitiveMapping{
     samtools fastq -@ 2 -1 ${competitive_mapping_file_1} -2 ${competitive_mapping_file_2}  -0 /dev/null -s /dev/null h37rv_sorted.bam
 
     # Generate competitive mapping json
-     bash ${baseDir}/lib/generate_competitive_mapping_json.sh --cov ${cov}  --manifest-summary ${manifest_summary} --competitive-mapping-json ${competitive_mapping_json}
-
+    bash ${moduleDir}/../lib/generate_competitive_mapping_json.sh --cov ${cov}  --manifest-summary ${manifest_summary} --competitive-mapping-json ${competitive_mapping_json}
 
     """
     stub:

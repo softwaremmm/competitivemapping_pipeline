@@ -27,8 +27,8 @@ nextflow_process {
 
             with(process.out.cm_sample) {
                 assert size() == 1
-                assert get(0)[0].contains("h37rv_1.fastq.gz")
-                assert get(0)[1].contains("h37rv_2.fastq.gz")
+                assert get(0)[1].contains("h37rv_1.fastq.gz")
+                assert get(0)[2].contains("h37rv_2.fastq.gz")
             }
         }
     }
