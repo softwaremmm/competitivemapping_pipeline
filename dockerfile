@@ -17,5 +17,8 @@ RUN conda install samtools~=1.17
 # Install csvkit
 RUN conda install csvkit~=1.1.1
 
-# Run minimap2 (In practice this command will be overriden by NextFlow)
-CMD ["minimap2"]
+# Install jq
+RUN conda install jq=1.6
+
+# Run jq (In practice this command will be overriden by NextFlow)
+CMD ["jq"]
