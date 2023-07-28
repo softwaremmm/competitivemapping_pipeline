@@ -29,6 +29,7 @@ workflow competitive_mapping {
     emit:
         cm_sample_paths = competitive_mapping_output.cm_sample
         cm_report = competitive_mapping_output.cm_report
+        cm_enough_reads = competitive_mapping_output.enough_reads
 }
 
 workflow.onComplete {
@@ -100,7 +101,7 @@ workflow {
         .stripIndent()
 
         Channel.fromFilePairs("${params.input_dir}/${fastq_pattern}", flat: true, checkIfExists: true, size: -1)
-                .ifEmpty { error "cannot find any reads matching ${fastq_pattern} in ${indir}" }
+                .ifEmpty { error "cannot find any reads matching ${fastq_pattern} in ${params.input_dir}" }
                 .set { input_files }
         input_files.view { it }
 

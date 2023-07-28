@@ -3,7 +3,7 @@ project_dir = projectDir
 competitive_mapping_json = "competitivemapping_report.json"
 competitive_mapping_file_1 = "h37rv_1.fastq.gz"
 competitive_mapping_file_2 = "h37rv_2.fastq.gz"
-
+enough_reads = false
 process competitiveMapping{
 
     container 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:latest'
@@ -15,12 +15,14 @@ process competitiveMapping{
     output:
     tuple val(sample_name), path("h37rv_1.fastq.gz"), path("h37rv_2.fastq.gz"), emit: cm_sample
     path("competitivemapping_report.json"), emit: cm_report
+    val (enough_reads), emit: enough_reads
 
 
     script:
     competitive_mapping_json = "competitivemapping_report.json"
     competitive_mapping_file_1 = "h37rv_1.fastq.gz"
     competitive_mapping_file_2 = "h37rv_2.fastq.gz"
+    enough_reads = false
 
     manifest_summary = "manifest_summary.tsv"
     cov = "cov_${sample_name}.tsv"
@@ -54,6 +56,10 @@ process competitiveMapping{
     # Generate competitive mapping json
     bash ${moduleDir}/../lib/generate_competitive_mapping_json.sh --cov ${cov}  --manifest-summary ${manifest_summary} --competitive-mapping-json ${competitive_mapping_json}
 
+    num_reads=\$(jq '.[] | select(.genome_name == "Mycobacterium tuberculosis H37Rv complete genome") | .numreads' ${competitive_mapping_json})
+
+    enough_reads=\$((\$num_reads >= 100000))
+
     """
     stub:
     competitive_mapping_json = "competitive_mapping.json"
@@ -61,6 +67,7 @@ process competitiveMapping{
     competitive_mapping_file_2 = "h37rv_2.fastq.gz"
 
     """
+    printf {enough_reads}
     touch ${competitive_mapping_json}
     touch "${competitive_mapping_file_1}"
     touch "${competitive_mapping_file_2}"
