@@ -69,6 +69,9 @@ process competitiveMapping{
 }
 
 process has_enough_reads {
+
+    container 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:latest'
+
     input:
     path (json)
 
