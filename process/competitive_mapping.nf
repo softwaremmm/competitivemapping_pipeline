@@ -1,9 +1,5 @@
 project_dir = projectDir
 
-competitive_mapping_json = "competitivemapping_report.json"
-competitive_mapping_file_1 = "h37rv_1.fastq.gz"
-competitive_mapping_file_2 = "h37rv_2.fastq.gz"
-enough_reads = false
 process competitiveMapping{
 
     container 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:latest'
@@ -52,8 +48,6 @@ process competitiveMapping{
 
     # Generate competitive mapping json
     bash ${moduleDir}/../lib/generate_competitive_mapping_json.sh --cov ${cov}  --manifest-summary ${manifest_summary} --competitive-mapping-json ${competitive_mapping_json}
-
-   
     """
 
     stub:
@@ -82,14 +76,7 @@ process has_enough_reads {
 
     """
     num_reads=\$(jq '.[] | select(.genome_name == "Mycobacterium tuberculosis H37Rv complete genome") | .numreads' ${json})
-    enough_reads=\$((\$((num_reads)) >= 100000))
-
-    if [ "\$enough_reads" -eq 1 ]; then
-        echo "true" | tr -d '\n'
-    else
-        echo "false" | tr -d '\n'
-    fi
-
+    ((enough_reads = num_reads >= 100000)) && echo "true" | tr -d '\n' || echo "false" | tr -d '\n'
     """  
     
 }
