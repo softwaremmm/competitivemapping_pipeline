@@ -10,9 +10,12 @@ params.input_dir = ''
 params.manifest = ''
 
 include { competitiveMapping } from './process/competitive_mapping.nf'
+include { has_enough_reads } from './process/competitive_mapping.nf'
 
 //Constants
-fastq_pattern = '*_*{1,2}.fastq.gz'
+fastq_pattern = "*_{1,2}.fastq.gz"
+
+
 
 workflow competitive_mapping {
     take:
@@ -20,16 +23,16 @@ workflow competitive_mapping {
         manifest
 
     main:
+  
+    Channel.fromPath(params.manifest)
+        .set{ manifest_ch }
 
-        Channel.fromPath(params.manifest)
-            .set{ manifest_ch }
-
-        competitive_mapping_output = competitiveMapping(input_files, manifest_ch)
+    competitive_mapping_output = competitiveMapping(input_files, manifest_ch)
 
     emit:
         cm_sample_paths = competitive_mapping_output.cm_sample
         cm_report = competitive_mapping_output.cm_report
-        cm_enough_reads = competitive_mapping_output.enough_reads
+        cm_enough_reads =  has_enough_reads(cm_report)
 }
 
 workflow.onComplete {
