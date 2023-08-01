@@ -4,17 +4,17 @@ nextflow_workflow {
     script "main.nf"
     workflow "competitive_mapping"
 
-    test("Should succeed producing a competitive mapping json and the path to h37rv positive filtered files") {
+    test("Workflow should return enough reads false if sample is not TB") {
 
         when {
             params {
-                input_dir = "tests/samples/local/"
+                input_dir = "tests/samples/abscessus/"
                 manifest = "tests/samples/local/target_101_new.fasta"
             }
 
             workflow {
                 """
-                input[0]  = ['sample_test', file("tests/samples/local/test_clinic_sample_1.fastq.gz"), file("tests/samples/local/test_clinic_sample_2.fastq.gz")]
+                input[0] = ['sample_test', file("tests/samples/abscessus/output_R1.fastq.gz"), file("tests/samples/abscessus/output_R2.fastq.gz")]
                 input[1]  = "tests/samples/local/target_101_new.fasta"
                 """
             }

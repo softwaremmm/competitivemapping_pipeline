@@ -13,7 +13,7 @@ include { competitiveMapping } from './process/competitive_mapping.nf'
 include { has_enough_reads } from './process/competitive_mapping.nf'
 
 //Constants
-fastq_pattern = "*_{1,2}.fastq.gz"
+fastq_pattern = "*{1,2}.fastq.gz"
 
 
 
@@ -33,6 +33,7 @@ workflow competitive_mapping {
         cm_sample_paths = competitive_mapping_output.cm_sample
         cm_report = competitive_mapping_output.cm_report
         cm_enough_reads =  has_enough_reads(cm_report)
+        cm_enough_reads.view{it}
 }
 
 workflow.onComplete {

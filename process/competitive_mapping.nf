@@ -2,7 +2,7 @@ project_dir = projectDir
 
 process competitiveMapping{
 
-    container 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:latest'
+    //container 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:latest'
 
     input:
     tuple val(sample_name), path(fq1), path(fq2)
@@ -64,7 +64,7 @@ process competitiveMapping{
 
 process has_enough_reads {
 
-    container 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:latest'
+    //container 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:latest'
 
     input:
     path (json)
@@ -76,7 +76,14 @@ process has_enough_reads {
 
     """
     num_reads=\$(jq '.[] | select(.genome_name == "Mycobacterium tuberculosis H37Rv complete genome") | .numreads' ${json})
-    ((enough_reads = num_reads >= 100000)) && echo "true" | tr -d '\n' || echo "false" | tr -d '\n'
+
+    enough_reads=\$((\$((num_reads)) >= 100000))
+
+    if [ "\$enough_reads" -eq 1 ]; then
+        echo "true"
+    else
+        echo "false"
+    fi
     """  
     
 }
