@@ -13,7 +13,7 @@ include { competitiveMapping } from './process/competitive_mapping.nf'
 include { has_enough_reads } from './process/competitive_mapping.nf'
 
 //Constants
-fastq_pattern = "*{1,2}.fastq.gz"
+fastq_pattern = "*{1,2}.f*q.gz"
 
 
 

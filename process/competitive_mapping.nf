@@ -2,7 +2,7 @@ project_dir = projectDir
 
 process competitiveMapping{
 
-    //container 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:latest'
+    container 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:latest'
 
     input:
     tuple val(sample_name), path(fq1), path(fq2)
@@ -64,7 +64,7 @@ process competitiveMapping{
 
 process has_enough_reads {
 
-    //container 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:latest'
+    container 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:latest'
 
     input:
     path (json)
