@@ -1,0 +1,43 @@
+nextflow_process {
+
+    name "Test Process competitiveMapping"
+    script "process/competitive_mapping.nf"
+    process "has_enough_reads"
+
+    test("Should return true if Json file has key Mycobacterium tuberculosis H37Rv complete genome and the the number of reads is bigger or equals to the threshold specified") {
+
+        when {
+            process{
+                """
+                input[0] = file("tests/samples/json/enough_tb.json")
+                input[1] = 100000
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert process.exitStatus == 0
+            assert process.out[0][0] == 'true'
+        }
+    }
+
+        test("Should return false if Json file has key Mycobacterium tuberculosis H37Rv complete genome and the the number of reads is smaller than threshold specified") {
+
+        when {
+            process{
+                """
+                input[0] = file("tests/samples/json/not_enough_tb.json")
+                input[1] = 100000
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert process.exitStatus == 0
+            assert process.out[0][0]  == 'false'
+        }
+    }
+
+}

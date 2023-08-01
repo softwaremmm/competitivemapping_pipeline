@@ -68,6 +68,7 @@ process has_enough_reads {
 
     input:
     path (json)
+    val (threshold)
 
     output:
     stdout
@@ -76,14 +77,7 @@ process has_enough_reads {
 
     """
     num_reads=\$(jq '.[] | select(.genome_name == "Mycobacterium tuberculosis H37Rv complete genome") | .numreads' ${json})
-
-    enough_reads=\$((\$((num_reads)) >= 100000))
-
-    if [ "\$enough_reads" -eq 1 ]; then
-        echo "true"
-    else
-        echo "false"
-    fi
+    ((enough_reads = num_reads >= ${threshold})) && echo "true" | tr -d '\n' || echo "false" | tr -d '\n'
     """  
     
 }
