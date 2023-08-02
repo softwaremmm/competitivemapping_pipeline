@@ -74,10 +74,14 @@ process has_enough_reads {
     stdout
 
     script:
-
     """
     num_reads=\$(jq '.[] | select(.genome_name == "Mycobacterium tuberculosis H37Rv complete genome") | .numreads' ${json})
-    ((enough_reads = num_reads >= ${threshold})) && echo "true" | tr -d '\n' || echo "false" | tr -d '\n'
+
+    if \$num_reads >= ${threshold}; then
+        echo "false" | tr -d '\n'
+    else
+        echo "true" | tr -d '\n'
+    fi
     """  
     
 }
