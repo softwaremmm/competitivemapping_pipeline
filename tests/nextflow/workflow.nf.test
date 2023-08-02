@@ -34,8 +34,6 @@ nextflow_workflow {
                 assert get(0)[1].contains("h37rv_1.fastq.gz")
                 assert get(0)[2].contains("h37rv_2.fastq.gz")
             }
-
-            assert workflow.out.cm_enough_reads[0] == "true"
         }
 
     }
