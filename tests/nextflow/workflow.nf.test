@@ -4,17 +4,17 @@ nextflow_workflow {
     script "main.nf"
     workflow "competitive_mapping"
 
-    test("Should succeed producing a competitive mapping json and the path to h37rv positive filtered files") {
+    test("Should succeed producing a competitive mapping json and the path to the positive filtered files") {
 
         when {
             params {
-                input_dir = "tests/samples/local/"
+                input_dir = "tests/samples/local/clinic/"
                 manifest = "tests/samples/local/target_101_new.fasta"
             }
 
             workflow {
                 """
-                input[0]  = ['sample_test', file("tests/samples/local/test_clinic_sample_1.fastq.gz"), file("tests/samples/local/test_clinic_sample_2.fastq.gz")]
+                input[0]  = ['sample_test', file("tests/samples/local/clinic/test_clinic_sample_1.fastq.gz"), file("tests/samples/local/clinic/test_clinic_sample_2.fastq.gz")]
                 input[1]  = "tests/samples/local/target_101_new.fasta"
                 """
             }
@@ -34,11 +34,57 @@ nextflow_workflow {
                 assert get(0)[1].contains("h37rv_1.fastq.gz")
                 assert get(0)[2].contains("h37rv_2.fastq.gz")
             }
-
-            assert workflow.out.cm_enough_reads[0] == "false"
         }
 
     }
 
+
+    test("Should return enough reads false if sample is not TB") {
+
+        when {
+            params {
+                input_dir = "tests/samples/local/clinic/"
+                manifest = "tests/samples/local/target_101_new.fasta"
+            }
+
+            workflow {
+                """
+                input[0] = ['sample_test', file("tests/samples/local/abscessus/file_R1.fastq.gz"), file("tests/samples/local/abscessus/file_R2.fastq.gz")]
+                input[1]  = "tests/samples/local/target_101_new.fasta"
+                """
+            }
+
+        }
+
+        then {
+            assert workflow.success
+            assert workflow.out.cm_enough_reads[0] == 'false'
+        }
+
+    }
+
+    test("Should return enough reads true if sample is TB") {
+
+        when {
+            params {
+                input_dir = "tests/samples/local/tb/"
+                manifest = "tests/samples/local/target_101_new.fasta"
+            }
+
+            workflow {
+                """
+                input[0] = ['sample_test', file("tests/samples/local/tb/WTCHG_885333_73205296_1.fastq.gz"), file("tests/samples/local/tb/WTCHG_885333_73205296_2.fastq.gz")]
+                input[1]  = "tests/samples/local/target_101_new.fasta"
+                """
+            }
+
+        }
+
+        then {
+             assert workflow.success
+             assert workflow.out.cm_enough_reads[0] == 'true'
+        }
+
+    }
 
 }

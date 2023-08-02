@@ -9,7 +9,6 @@ trace*.txt
 *.*fq*
 *.*bam*
 *.*sam*
-*.json
 *.fasta
 
 # nf-tests
