@@ -77,10 +77,11 @@ process has_enough_reads {
     """
     num_reads=\$(jq '.[] | select(.genome_name == "Mycobacterium tuberculosis H37Rv complete genome") | .numreads' ${json})
 
-    if \$num_reads >= ${threshold}; then
-        echo "false" | tr -d '\n'
-    else
+    if  [ \$num_reads -ge ${threshold} ]
+    then
         echo "true" | tr -d '\n'
+    else
+        echo "false" | tr -d '\n'
     fi
     """  
     
