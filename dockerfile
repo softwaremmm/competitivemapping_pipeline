@@ -20,5 +20,7 @@ RUN conda install csvkit~=1.1.1
 # Install jq
 RUN conda install jq=1.6
 
+RUN conda install s3fs-fuse
+
 # Run jq (In practice this command will be overriden by NextFlow)
 CMD ["jq"]
