@@ -11,12 +11,13 @@ process competitiveMapping{
     output:
     tuple val(sample_name), path("h37rv_1.fastq.gz"), path("h37rv_2.fastq.gz"), emit: cm_sample
     path("competitivemapping_report.json"), emit: cm_report
+    path("competitivemapping_error.json"), emit: cm_error
 
     script:
-    competitive_mapping_json = "competitivemapping_report.json"
     competitive_mapping_file_1 = "h37rv_1.fastq.gz"
     competitive_mapping_file_2 = "h37rv_2.fastq.gz"
-
+    competitive_mapping_report = "competitive_mapping.json"
+    competitive_mapping_error = "competitivemapping_error.json"
     manifest_summary = "manifest_summary.tsv"
     cov = "cov_${sample_name}.tsv"
     h37rv_rname="AL123456.3"
@@ -53,18 +54,21 @@ process competitiveMapping{
     samtools fastq -@ 2 -1 ${competitive_mapping_file_1} -2 ${competitive_mapping_file_2}  -0 /dev/null -s /dev/null h37rv_sorted.bam
 
     # Generate competitive mapping json
-    bash ${moduleDir}/../lib/generate_competitive_mapping_json.sh --cov ${cov}  --manifest-summary ${manifest_summary} --competitive-mapping-json ${competitive_mapping_json}
+    bash ${moduleDir}/../lib/generate_competitive_mapping_json.sh --cov ${cov}  --manifest-summary ${manifest_summary} --competitive-mapping-json ${competitive_mapping_report}
     """
 
     stub:
-    competitive_mapping_json = "competitive_mapping.json"
     competitive_mapping_file_1 = "h37rv_1.fastq.gz"
     competitive_mapping_file_2 = "h37rv_2.fastq.gz"
+    competitive_mapping_report = "competitive_mapping.json"
+    competitive_mapping_error = "competitivemapping_error.json"
+
 
     """
-    touch ${competitive_mapping_json}
-    touch "${competitive_mapping_file_1}"
-    touch "${competitive_mapping_file_2}"
+    touch ${competitive_mapping_file_1}
+    touch ${competitive_mapping_file_2}
+    touch ${competitive_mapping_report}
+    touch ${competitive_mapping_error}
     """
 }
 
