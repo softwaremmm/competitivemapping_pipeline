@@ -84,7 +84,6 @@ process has_enough_reads {
     """
     if [ ${workflow.profile} == 'kubernetes' ]
     then
-        echo "Running with kubernetes"
         /bin/bash ${projectDir}/lib/s3fs_setup.sh $WORKSPACE
     fi
 
