@@ -25,6 +25,11 @@ nextflow_process {
                 assert get(0).contains("competitivemapping_report.json")
             }
 
+            with(process.out.cm_error) {
+                assert size() == 1
+                assert get(0).contains("competitivemapping_error.json")
+            }
+
             with(process.out.cm_sample) {
                 assert size() == 1
                 assert get(0)[1].contains("h37rv_1.fastq.gz")

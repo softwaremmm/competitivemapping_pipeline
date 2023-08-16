@@ -16,7 +16,7 @@ process competitiveMapping{
     script:
     competitive_mapping_file_1 = "h37rv_1.fastq.gz"
     competitive_mapping_file_2 = "h37rv_2.fastq.gz"
-    competitive_mapping_report = "competitive_mapping.json"
+    competitive_mapping_report = "competitivemapping_report.json"
     competitive_mapping_error = "competitivemapping_error.json"
     manifest_summary = "manifest_summary.tsv"
     cov = "cov_${sample_name}.tsv"
@@ -60,7 +60,7 @@ process competitiveMapping{
     stub:
     competitive_mapping_file_1 = "h37rv_1.fastq.gz"
     competitive_mapping_file_2 = "h37rv_2.fastq.gz"
-    competitive_mapping_report = "competitive_mapping.json"
+    competitive_mapping_report = "competitivemapping_report.json"
     competitive_mapping_error = "competitivemapping_error.json"
 
 
