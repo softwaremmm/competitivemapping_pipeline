@@ -9,8 +9,8 @@ nextflow_process {
         when {
             process{
                 """
-                input[0] = ['sample_test', file("tests/samples/local/clinic/test_clinic_sample_1.fastq.gz"), file("tests/samples/local/clinic/test_clinic_sample_2.fastq.gz")]
-                input[1] = file("tests/samples/local/target_101_new.fasta")
+                input[0] = ['sample_test', file("/mnt/volume_data/work_packages/data/clinic/test_clinic_sample_1.fastq.gz"), file("/mnt/volume_data/work_packages/data/clinic/test_clinic_sample_2.fastq.gz")]
+                input[1] = file("/mnt/volume_data/work_packages/data/manifest/target_101_new.fasta")
                 """
             }
         }
