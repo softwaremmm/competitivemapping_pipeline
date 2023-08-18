@@ -7,7 +7,8 @@ ANSI_RESET = '\033[0m'
 
 params.help = ''
 params.input_dir = ''
-params.manifest = ''
+params.manifest_dir = ''
+params.manifest_filename = 'manifest_v2.fasta'
 
 include { competitiveMapping } from './process/competitive_mapping.nf'
 include { has_enough_reads } from './process/competitive_mapping.nf'
@@ -77,10 +78,12 @@ workflow {
         if (params.input_dir == '') {
             exit 1, 'error: --input_dir is mandatory'
         }
-         if (params.manifest == '') {
-            exit 1, 'error: --manifest is mandatory'
+        if (params.manifest_dir == '') {
+            exit 1, 'error: --manifest_dir is mandatory'
         }
-
+        if (params.manifest_file == '') {
+            exit 1, 'error: --manifest_file is mandatory'
+        }
 
         log.info """
         ========================================================================
@@ -92,8 +95,9 @@ workflow {
         Parameters:
         ------------------------------------------------------------------------
 
-        --input_dir    $params.input_dir
-        --manifest     $params.manifest
+        --input_dir          $params.input_dir
+        --manifest_dir       $params.manifest_dir
+        --manifest_filename  $params.manifest_filename
 
         Runtime data:
         ------------------------------------------------------------------------
@@ -110,5 +114,5 @@ workflow {
                 .set { input_files }
         input_files.view { it }
 
-        competitive_mapping(input_files,params.manifest)
+        competitive_mapping(input_files,params.manifest_dir,params.manifest_filename)
 }
