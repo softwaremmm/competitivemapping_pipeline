@@ -28,7 +28,9 @@ process competitiveMapping{
         echo "Running with kubernetes"
         /bin/bash ${projectDir}/lib/s3fs_setup.sh $WORKSPACE
     fi
-set +e
+
+    set +e
+
     touch ${competitive_mapping_error}
 
     # Create manifest summary
@@ -96,10 +98,9 @@ process has_enough_reads {
 
     if  [ \$num_reads -ge ${threshold} ]
     then
-        echo "true" | tr -d '\n'
+        echo -n "true"
     else
-        echo "false" | tr -d '\n'
-    fi
+        echo -n "false"
     """  
     
 }
