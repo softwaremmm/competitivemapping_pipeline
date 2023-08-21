@@ -38,19 +38,19 @@ process competitiveMapping{
     minimap2 -ax sr -t12 ${manifest} ${fq1} ${fq2} |
 
     # Sort competitive mapping output
-    samtools sort -@ 2 -o ${sample_name}_sorted_alignments.bam 2>${competitive_mapping_error}
+    samtools sort -@ 2 -o ${sample_name}_sorted_alignments.bam 2>>${competitive_mapping_error}
 
     # Generate a TSV file summarising coverage against each reference genome
-    samtools coverage ${sample_name}_sorted_alignments.bam > ${cov} 2>${competitive_mapping_error}
+    samtools coverage ${sample_name}_sorted_alignments.bam > ${cov} 2>>${competitive_mapping_error}
 
     # Index alignments
-    samtools index ${sample_name}_sorted_alignments.bam index.bai 2>${competitive_mapping_error}
+    samtools index ${sample_name}_sorted_alignments.bam index.bai 2>>${competitive_mapping_error}
 
     # Extract reads aligned to AL123456.3 Mycobacterium tuberculosis H37Rv complete genome
-    samtools view -X ${sample_name}_sorted_alignments.bam index.bai index.bai ${h37rv_rname} -o h37rv.bam 2>${competitive_mapping_error}
+    samtools view -X ${sample_name}_sorted_alignments.bam index.bai index.bai ${h37rv_rname} -o h37rv.bam 2>>${competitive_mapping_error}
 
     # Sort reads
-    samtools sort -n h37rv.bam -o h37rv_sorted.bam 2>${competitive_mapping_error}
+    samtools sort -n h37rv.bam -o h37rv_sorted.bam 2>>${competitive_mapping_error}
 
     # Convert BAM output to FASTQ
     samtools fastq -@ 2 -1 ${competitive_mapping_file_1} -2 ${competitive_mapping_file_2}  -0 /dev/null -s /dev/null h37rv_sorted.bam
