@@ -1,8 +1,6 @@
 
 # Competitive Mapping Pipeline
 
-A brief description of what this project does and who it's for
-
 Competitive Mapping is an algorithm that compares the sample reads with the references in the manifest and makes a positive selection of the reads matching a specific `rname`. 
 
 The pipeline for competitive mapping that takes a pair of FASTQ files and outputs the positive filtering of the h37_rv reads, a report with the mapping rank and an error report.
