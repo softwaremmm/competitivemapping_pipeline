@@ -4,7 +4,7 @@ nextflow_process {
     script "process/competitive_mapping.nf"
     process "has_enough_reads"
 
-    test("Should return true if Json file has key Mycobacterium tuberculosis H37Rv complete genome and the the number of reads is bigger or equals to the threshold specified") {
+    test("Should return true if Json file has value Mycobacterium tuberculosis H37Rv complete genome and the the number of reads is bigger or equals to the threshold specified") {
 
         when {
             process{
@@ -22,7 +22,8 @@ nextflow_process {
         }
     }
 
-        test("Should return false if Json file has key Mycobacterium tuberculosis H37Rv complete genome and the the number of reads is smaller than threshold specified") {
+
+    test("Should return false if Json file has value Mycobacterium tuberculosis H37Rv complete genome and the the number of reads is smaller than threshold specified") {
 
         when {
             process{
@@ -40,4 +41,40 @@ nextflow_process {
         }
     }
 
+
+    test("Should return false if Json file does not have value Mycobacterium tuberculosis H37Rv complete genome") {
+
+        when {
+            process{
+                """
+                input[0] = file("tests/samples/json/no_mb_value.json")
+                input[1] = 100000
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert process.exitStatus == 0
+            assert process.out[0][0]  == 'false'
+        }
+    }
+
+    test("Should return false if Json file does not have genome_name key") {
+
+        when {
+            process{
+                """
+                input[0] = file("tests/samples/json/no_genome_name_key.json")
+                input[1] = 100000
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert process.exitStatus == 0
+            assert process.out[0][0]  == 'false'
+        }
+    }
 }

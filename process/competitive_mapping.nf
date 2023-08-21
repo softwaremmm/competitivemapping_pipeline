@@ -98,9 +98,10 @@ process has_enough_reads {
 
     if  [ \$num_reads -ge ${threshold} ]
     then
-        echo -n "true"
+        echo "true" | tr -d '\n'
     else
-        echo -n "false"
+        echo "false" | tr -d '\n'
+    fi
     """  
     
 }
