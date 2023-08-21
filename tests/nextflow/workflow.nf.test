@@ -4,18 +4,18 @@ nextflow_workflow {
     script "main.nf"
     workflow "competitive_mapping"
 
-    test("Should succeed producing a competitive mapping json and the path to the positive filtered files") {
+    test("Should succeed producing a competitive mapping json, en error json file, and the path to the positive filtered files") {
 
         when {
             params {
-                input_dir = "tests/samples/local/clinic/"
-                manifest = "tests/samples/local/target_101_new.fasta"
+                input_dir = "/mnt/volume_data/work_packages/data/clinic/"
+                manifest = "/mnt/volume_data/work_packages/data/manifest/target_101_new.fasta"
             }
 
             workflow {
                 """
-                input[0]  = ['sample_test', file("tests/samples/local/clinic/test_clinic_sample_1.fastq.gz"), file("tests/samples/local/clinic/test_clinic_sample_2.fastq.gz")]
-                input[1]  = "tests/samples/local/target_101_new.fasta"
+                input[0]  = ['sample_test', file("/mnt/volume_data/work_packages/data/clinic/test_clinic_sample_1.fastq.gz"), file("/mnt/volume_data/work_packages/data/clinic/test_clinic_sample_2.fastq.gz")]
+                input[1]  = file("/mnt/volume_data/work_packages/data/manifest/target_101_new.fasta")
                 """
             }
 
@@ -27,6 +27,11 @@ nextflow_workflow {
              with(workflow.out.cm_report) {
                 assert size() == 1
                 assert get(0).contains("competitivemapping_report.json")
+            }
+
+            with(workflow.out.cm_error) {
+                assert size() == 1
+                assert get(0).contains("competitivemapping_error.json")
             }
 
             with(workflow.out.cm_sample_paths) {
@@ -43,14 +48,14 @@ nextflow_workflow {
 
         when {
             params {
-                input_dir = "tests/samples/local/clinic/"
-                manifest = "tests/samples/local/target_101_new.fasta"
+                input_dir = "/mnt/volume_data/work_packages/data/nmtb/1/"
+                manifest = "/mnt/volume_data/work_packages/data/manifest/target_101_new.fasta"
             }
 
             workflow {
                 """
-                input[0] = ['sample_test', file("tests/samples/local/abscessus/file_R1.fastq.gz"), file("tests/samples/local/abscessus/file_R2.fastq.gz")]
-                input[1]  = "tests/samples/local/target_101_new.fasta"
+                input[0] = ['sample_test', file("/mnt/volume_data/work_packages/data/nmtb/1/file_R1.fastq.gz"), file("/mnt/volume_data/work_packages/data/nmtb/1/file_R2.fastq.gz")]
+                input[1]  = file("/mnt/volume_data/work_packages/data/manifest/target_101_new.fasta")
                 """
             }
 
@@ -67,14 +72,14 @@ nextflow_workflow {
 
         when {
             params {
-                input_dir = "tests/samples/local/tb/"
-                manifest = "tests/samples/local/target_101_new.fasta"
+                input_dir = "/mnt/volume_data/work_packages/data/h37rv_tb/1/"
+                manifest = "/mnt/volume_data/work_packages/data/manifest/target_101_new.fasta"
             }
 
             workflow {
                 """
-                input[0] = ['sample_test', file("tests/samples/local/tb/WTCHG_885333_73205296_1.fastq.gz"), file("tests/samples/local/tb/WTCHG_885333_73205296_2.fastq.gz")]
-                input[1]  = "tests/samples/local/target_101_new.fasta"
+                input[0] = ['sample_test', file("/mnt/volume_data/work_packages/data/h37rv_tb/1/WTCHG_885333_73205296_1.fastq.gz"), file("/mnt/volume_data/work_packages/data/h37rv_tb/1/WTCHG_885333_73205296_2.fastq.gz")]
+                input[1]  = file("/mnt/volume_data/work_packages/data/manifest/target_101_new.fasta")
                 """
             }
 
