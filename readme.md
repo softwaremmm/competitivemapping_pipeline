@@ -56,7 +56,8 @@ Expected output:
 If you want to use the Competitive Mapping Pipeline as subworkflow in your pipeline, use the competitive_mapping named workflow. 
 Parameters: 
 
-Channel with a tuple of _val_, _path_, _path_ 
-_path_ to tha manifest file
+* Channel with a tuple of _val_, _path_, _path_ 
+
+* _path_ to tha manifest file
 
 
