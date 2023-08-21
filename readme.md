@@ -3,7 +3,7 @@
 
 Competitive Mapping is an algorithm that compares the sample reads with the references in the manifest and makes a positive selection of the reads matching a specific `rname`. 
 
-The pipeline for competitive mapping that takes a pair of FASTQ files and outputs the positive filtering of the h37_rv reads, a report with the mapping rank and an error report.
+The pipeline for competitive mapping takes a pair of FASTQ files and outputs the positive filtering of the h37_rv reads, a report with the mapping rank and an error report.
 
 ## Dependencies
 * Docker
@@ -48,9 +48,7 @@ To run tests, run the following command
 ## Screenshots
 
 Expected output:
-
-![App Screenshot](/home/marcela/Desktop/Screenshot from 2023-08-21 10-45-19.png)
-
+![output](https://github.com/GlobalPathogenAnalysisService/competitivemapping_pipeline/assets/65816841/b43b60f9-87c9-417a-b11c-67ef9c491f2d)
 
 
 ## Integrating to a pipeline
