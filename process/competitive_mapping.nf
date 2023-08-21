@@ -28,7 +28,7 @@ process competitiveMapping{
         echo "Running with kubernetes"
         /bin/bash ${projectDir}/lib/s3fs_setup.sh $WORKSPACE
     fi
-
+set +e
     touch ${competitive_mapping_error}
 
     # Create manifest summary
