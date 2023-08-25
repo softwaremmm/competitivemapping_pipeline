@@ -1,6 +1,6 @@
 nextflow_process {
 
-    name "Test Process competitiveMapping"
+    name "Test Process has has_enough_reads"
     script "process/competitive_mapping.nf"
     process "has_enough_reads"
 
