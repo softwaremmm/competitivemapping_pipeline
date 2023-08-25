@@ -8,6 +8,7 @@ The pipeline for competitive mapping takes a pair of FASTQ files and outputs the
 ## Dependencies
 * Docker
 * 1G hard-disk 
+* Nextflow
 
 
 ## Run Locally
@@ -32,7 +33,7 @@ Run the pipeline
 ```
 
 where $PATH is the path to a folder that contains a pair of FAST.GZ files following a *{1,2}.f*q.gz regex convention, and
-$PATH_TO_MANIFEST_FILE is the path to the FASTA file putting together the list of target sequences.
+$PATH_TO_MANIFEST_FILE is the path to the FASTA file putting together the list of target sequences. Those paths do not need to be absolute paths.
 
 
 ## Running Tests
