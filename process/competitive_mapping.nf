@@ -13,14 +13,14 @@ process competitiveMapping{
 
     output:
     tuple val(sample_name), path("h37rv_1.fastq.gz"), path("h37rv_2.fastq.gz"), emit: cm_sample
-    path("competitivemapping_report.json"), emit: cm_report
-    path("competitivemapping_error.json"), emit: cm_error
+    path("species_comparison_report.json"), emit: cm_report
+    path("species_comparison_error.json"), emit: cm_error
 
     script:
     competitive_mapping_file_1 = "h37rv_1.fastq.gz"
     competitive_mapping_file_2 = "h37rv_2.fastq.gz"
-    competitive_mapping_report = "competitivemapping_report.json"
-    competitive_mapping_error = "competitivemapping_error.json"
+    competitive_mapping_report = "species_comparison_report.json"
+    competitive_mapping_error = "species_comparison_error.json"
     manifest_summary = "manifest_summary.tsv"
     cov = "cov_${sample_name}.tsv"
     h37rv_rname="AL123456.3"
@@ -65,8 +65,8 @@ process competitiveMapping{
     stub:
     competitive_mapping_file_1 = "h37rv_1.fastq.gz"
     competitive_mapping_file_2 = "h37rv_2.fastq.gz"
-    competitive_mapping_report = "competitivemapping_report.json"
-    competitive_mapping_error = "competitivemapping_error.json"
+    competitive_mapping_report = "species_comparison_report.json"
+    competitive_mapping_error = "species_comparison_error.json"
 
     """
     touch ${competitive_mapping_file_1}
