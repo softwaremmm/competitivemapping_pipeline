@@ -26,12 +26,12 @@ nextflow_workflow {
 
              with(workflow.out.cm_report) {
                 assert size() == 1
-                assert get(0).contains("competitivemapping_report.json")
+                assert get(0).contains("species_comparison_report.json")
             }
 
             with(workflow.out.cm_error) {
                 assert size() == 1
-                assert get(0).contains("competitivemapping_error.json")
+                assert get(0).contains("species_comparison_error.json")
             }
 
             with(workflow.out.cm_sample_paths) {
