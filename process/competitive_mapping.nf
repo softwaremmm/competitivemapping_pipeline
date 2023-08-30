@@ -6,7 +6,7 @@ process competitiveMapping{
 
     cpus = 4
     memory = "8GB"
-        
+
     input:
     tuple val(sample_name), path(fq1), path(fq2)
     path (manifest)
@@ -31,7 +31,9 @@ process competitiveMapping{
         echo "Running with kubernetes"
         /bin/bash ${projectDir}/lib/s3fs_setup.sh $WORKSPACE
     fi
+
     set +e
+
     touch ${competitive_mapping_error}
 
     # Create manifest summary
@@ -82,7 +84,7 @@ process has_enough_reads {
 
     cpus = 1
     memory = "20MB"
-    
+
 
     input:
     path (json)
