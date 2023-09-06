@@ -83,7 +83,7 @@ process has_enough_reads {
     container 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:latest'
 
     cpus = 1
-    memory = "20MB"
+    memory = "128MB"
 
 
     input:
