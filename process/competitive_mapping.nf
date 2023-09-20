@@ -2,7 +2,7 @@ project_dir = projectDir
 
 process competitiveMapping{
 
-    container 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:v0.0.1.-rc1'
+    container 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:v0.0.1-rc1'
 
     cpus = 4
     memory = "8GB"
