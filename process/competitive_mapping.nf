@@ -2,7 +2,7 @@ project_dir = projectDir
 
 process competitiveMapping{
 
-    container 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:latest'
+    container 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:v0.0.1.-rc1'
 
     cpus = 4
     memory = "8GB"
@@ -109,7 +109,6 @@ process has_enough_reads {
     else
         echo "false" | tr -d '\n'
     fi
-    """  
-    
+    """
 }
 
