@@ -20,6 +20,4 @@ trace*.txt
 
 # Linter
 !.groovylintrc.json
-
-
-
+.idea/
