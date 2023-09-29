@@ -39,6 +39,13 @@ $PATH_TO_MANIFEST_FILE is the path to the FASTA file putting together the list o
 ## Running Tests
 The tests are executed using [nf-test](https://github.com/askimed/nf-test). 
 
+Before running the tests, you will need to ensure appropriate test data is available by setting up the following symlinks in
+the root of the repository:
+
+* `data/manifest/target_101_new.fasta` - a manifest (reference data)
+* `data/WTCHG_885333_73205296_1` containing `WTCHG_885333_73205296_1.fastq.gz` and `WTCHG_885333_73205296_1.fastq.gz` - these should be TB FASTQs
+* `data/abscessus` containing `file_R1.fastq.gz` and `file_R2.fastq.gz` - these should be NTM FASTQs
+
 To run tests, run the following command
 
 ```bash

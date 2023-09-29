@@ -4,13 +4,13 @@ nextflow_process {
     script "process/competitive_mapping.nf"
     process "competitiveMapping"
 
-    test("Process should success with path channel with sample files and a manifest has been provided") {
+    test("Process should succeed when sample files and a manifest are provided") {
 
         when {
             process{
                 """
-                input[0] = ['sample_test', file("/mnt/volume_data/work_packages/data/clinic/test_clinic_sample_1.fastq.gz"), file("/mnt/volume_data/work_packages/data/clinic/test_clinic_sample_2.fastq.gz")]
-                input[1] = file("/mnt/volume_data/work_packages/data/manifest/target_101_new.fasta")
+                input[0] = ['sample_test', file("data/WTCHG_885333_73205296_1/WTCHG_885333_73205296_1.fastq.gz"), file("data/WTCHG_885333_73205296_1/WTCHG_885333_73205296_2.fastq.gz")]
+                input[1] = file("data/manifest/target_101_new.fasta")
                 """
             }
         }
