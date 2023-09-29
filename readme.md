@@ -29,7 +29,7 @@ Go to the project directory
 Run the pipeline
 
 ```bash
-  nextflow run . -input_dir $PATH -manifest $PATH_TO_MANIFEST_FILE
+  nextflow run . --input_dir $PATH --manifest $PATH_TO_MANIFEST_FILE
 ```
 
 where $PATH is the path to a folder that contains a pair of FAST.GZ files following a *{1,2}.f*q.gz regex convention, and
