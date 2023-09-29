@@ -8,14 +8,14 @@ nextflow_workflow {
 
         when {
             params {
-                input_dir = "/mnt/volume_data/work_packages/data/clinic/"
-                manifest = "/mnt/volume_data/work_packages/data/manifest/target_101_new.fasta"
+                input_dir = "data/WTCHG_885333_73205296_1/"
+                manifest = "data/manifest/target_101_new.fasta"
             }
 
             workflow {
                 """
-                input[0]  = ['sample_test', file("/mnt/volume_data/work_packages/data/clinic/test_clinic_sample_1.fastq.gz"), file("/mnt/volume_data/work_packages/data/clinic/test_clinic_sample_2.fastq.gz")]
-                input[1]  = file("/mnt/volume_data/work_packages/data/manifest/target_101_new.fasta")
+                input[0]  = ['sample_test', file("data/WTCHG_885333_73205296_1/WTCHG_885333_73205296_1.fastq.gz"), file("data/WTCHG_885333_73205296_1/WTCHG_885333_73205296_2.fastq.gz")]
+                input[1]  = file("data/manifest/target_101_new.fasta")
                 """
             }
 
@@ -48,14 +48,14 @@ nextflow_workflow {
 
         when {
             params {
-                input_dir = "/mnt/volume_data/work_packages/data/nmtb/1/"
-                manifest = "/mnt/volume_data/work_packages/data/manifest/target_101_new.fasta"
+                input_dir = "data/abscessus/"
+                manifest = "data/manifest/target_101_new.fasta"
             }
 
             workflow {
                 """
-                input[0] = ['sample_test', file("/mnt/volume_data/work_packages/data/nmtb/1/file_R1.fastq.gz"), file("/mnt/volume_data/work_packages/data/nmtb/1/file_R2.fastq.gz")]
-                input[1]  = file("/mnt/volume_data/work_packages/data/manifest/target_101_new.fasta")
+                input[0] = ['sample_test', file("data/abscessus/file_R1.fastq.gz"), file("data/abscessus/file_R2.fastq.gz")]
+                input[1]  = file("data/manifest/target_101_new.fasta")
                 """
             }
 
@@ -72,14 +72,14 @@ nextflow_workflow {
 
         when {
             params {
-                input_dir = "/mnt/volume_data/work_packages/data/h37rv_tb/1/"
-                manifest = "/mnt/volume_data/work_packages/data/manifest/target_101_new.fasta"
+                input_dir = "data/WTCHG_885333_73205296_1/"
+                manifest = "data/manifest/target_101_new.fasta"
             }
 
             workflow {
                 """
-                input[0] = ['sample_test', file("/mnt/volume_data/work_packages/data/h37rv_tb/1/WTCHG_885333_73205296_1.fastq.gz"), file("/mnt/volume_data/work_packages/data/h37rv_tb/1/WTCHG_885333_73205296_2.fastq.gz")]
-                input[1]  = file("/mnt/volume_data/work_packages/data/manifest/target_101_new.fasta")
+                input[0] = ['sample_test', file("data/WTCHG_885333_73205296_1/WTCHG_885333_73205296_1.fastq.gz"), file("data/WTCHG_885333_73205296_1/WTCHG_885333_73205296_2.fastq.gz")]
+                input[1]  = file("data/manifest/target_101_new.fasta")
                 """
             }
 
