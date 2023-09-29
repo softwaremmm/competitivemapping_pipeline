@@ -11,6 +11,7 @@ trace*.txt
 *.*sam*
 *.fasta
 data*
+h37rv_100k*
 
 # nf-tests
 .nf-test/*
