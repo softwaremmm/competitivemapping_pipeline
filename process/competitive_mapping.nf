@@ -54,11 +54,14 @@ process competitiveMapping{
     # Extract reads aligned to AL123456.3 Mycobacterium tuberculosis H37Rv complete genome
     samtools view -X ${sample_name}_sorted_alignments.bam index.bai index.bai ${h37rv_rname} -o h37rv.bam 2>>${competitive_mapping_error}
 
-    # Sort reads
-    samtools sort -n h37rv.bam -o h37rv_sorted.bam 2>>${competitive_mapping_error}
+    # Extract unmapped reads
+    samtools view -X ${sample_name}_sorted_alignments.bam index.bai index.bai "*" -o unmapped.bam 2>>${competitive_mapping_error}
+
+    # Merge reads aligned to AL123456.3 Mycobacterium tuberculosis H37Rv complete genome and unmapped reads
+    samtools merge -o merged.bam h37rv.bam unmapped.bam
 
     # Convert BAM output to FASTQ
-    samtools fastq -@ 2 -1 ${competitive_mapping_file_1} -2 ${competitive_mapping_file_2}  -0 /dev/null -s /dev/null h37rv_sorted.bam
+    samtools fastq -@ 2 -1 ${competitive_mapping_file_1} -2 ${competitive_mapping_file_2}  -0 /dev/null -s /dev/null merged.bam
 
     # Generate competitive mapping json
     bash ${moduleDir}/../lib/generate_competitive_mapping_json.sh --cov ${cov}  --manifest-summary ${manifest_summary} --competitive-mapping-json ${competitive_mapping_report}
