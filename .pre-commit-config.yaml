@@ -20,4 +20,4 @@ repos:
     hooks:
       - id: mypy
         exclude: ^tests/
-        args: [--strict]
+        args: [--strict, --install-types]
