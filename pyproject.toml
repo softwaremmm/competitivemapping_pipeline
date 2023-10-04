@@ -14,6 +14,9 @@ classifiers = [
 requires-python = "~=3.11"
 version = "0.2.2"
 
+[project.scripts]
+process_mapping = "competitivemapping.process_mapping:cli_entry_point"
+
 [project.optional-dependencies]
 release = [
     "commitizen"
