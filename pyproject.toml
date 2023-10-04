@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools~=68.0.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "competitivemapping_pipeline"
+description = "Calls mycobacterial species by Competitive Mapping."
+dependencies = ["pandas ~=2.0"]
+classifiers = [
+    "Environment :: Console",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+]
+requires-python = "~=3.11"
+version = "0.0.0"
+
+[project.optional-dependencies]
+release = [
+    "commitizen"
+]
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+bump_message = "version $current_version → $new_version" # [skip ci]"
+version_type = "semver"
+version_provider = "pep621"
+tag_format = "$version"
+version_files = [
+    "main.nf",
+    ".github/workflows/docker.yaml"
+]
