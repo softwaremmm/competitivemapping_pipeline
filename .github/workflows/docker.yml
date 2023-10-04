@@ -4,7 +4,9 @@ on:
   workflow_dispatch:
   push:
     tags:
-      - 'v*.*.*'
+      - '*'
+    branches:
+      - main
 
       name: Build and push Docker images
       #Based on the docker build action for FN5
