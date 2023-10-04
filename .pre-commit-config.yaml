@@ -3,11 +3,13 @@ fail_fast: false
 repos:
   - hooks:
       - id: black
+        exclude: ^tests/
     repo: https://github.com/psf/black
     rev: 23.7.0
 
   - hooks:
       - id: pylint
+        exclude: ^tests/
         name: pylint
         entry: pylint
         language: system
