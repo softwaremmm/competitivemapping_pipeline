@@ -39,3 +39,6 @@ version_files = [
 
 [tool.black]
 line-length = 120
+
+[tool.pylint]
+max-line-length = 120
