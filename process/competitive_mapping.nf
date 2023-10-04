@@ -10,6 +10,7 @@ process competitiveMapping{
     input:
     tuple val(sample_name), path(fq1), path(fq2)
     path (manifest)
+    path (species_list)
 
     output:
     tuple val(sample_name), path("h37rv_1.fastq.gz"), path("h37rv_2.fastq.gz"), emit: cm_sample
