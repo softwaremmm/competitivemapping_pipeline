@@ -18,6 +18,13 @@ version = "0.2.2"
 release = [
     "commitizen"
 ]
+dev = [
+  "pytest>=7.0",
+  "pytest-cov",
+  "black",
+  "pre-commit",
+  "pylint"
+]
 
 [tool.commitizen]
 name = "cz_conventional_commits"
@@ -29,3 +36,6 @@ version_files = [
     "process/competitive_mapping.nf",
     ".github/workflows/docker.yaml"
 ]
+
+[tool.black]
+line-length = 120
