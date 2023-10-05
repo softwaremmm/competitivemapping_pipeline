@@ -59,13 +59,20 @@ def aggregate_contigs(referenced_table: pd.DataFrame) -> pd.DataFrame:
         references joined on
 
     Returns:
-        pd.DataFrame: Aggregated coverage for each reference
+        pd.DataFrame: reference, overall_coverage, total_reads, totallength, mean_depth
     """
     return (
         referenced_table.groupby("reference")
         .apply(
-            lambda x: pd.Series({"overall_coverage": (x["coverage"] * x["endpos"]).sum() / x["totallength"].iloc[0]})
+            lambda x: pd.Series(
+                {
+                    "overall_coverage": (x["coverage"] * x["endpos"]).sum() / x["totallength"].iloc[0],
+                    "total_reads": x["numreads"].sum(),
+                    "totallength": x["totallength"].iloc[0],
+                }
+            )
         )
+        .assign(mean_depth=lambda x: x["total_reads"] / (x["totallength"] * x["overall_coverage"]))
         .reset_index()
     )
 
@@ -84,7 +91,7 @@ def determine_overall_coverage(coverage_table: pd.DataFrame, species_table: pd.D
         so an error is raised.
 
     Returns:
-        pd.DataFrame: Aggregated coverage for each reference
+        pd.DataFrame: reference, overall_coverage, total_reads, totallength, mean_depth
     """
     not_in_coverage, not_in_species = unmatched_rnames(coverage_table, species_table)
 
