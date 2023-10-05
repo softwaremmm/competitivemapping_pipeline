@@ -107,4 +107,11 @@ def lookup_and_aggregate(coverage_table: pd.DataFrame, species_table: pd.DataFra
 
 def cli_entry_point() -> None:
     """CLI entry point."""
-    Arguments(sys.argv[1:])
+    cli_args = Arguments(sys.argv[1:])
+
+    coverage_table = pd.read_table(cli_args.coverage)
+    species_table = pd.read_csv(cli_args.species_list)
+
+    aggregated = lookup_and_aggregate(coverage_table, species_table)
+
+    aggregated.to_json(cli_args.output, orient="records", indent=4)

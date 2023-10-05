@@ -1,5 +1,8 @@
-import pandas as pd
+import json
 import pytest
+
+import pandas as pd
+
 import competitivemapping.process_mapping as process_mapping
 
 
@@ -37,3 +40,28 @@ def test_lookup_and_aggregate(coverage_table, species_table, expected_aggregated
 def test_lookup_and_aggregate(coverage_table, species_short):
     with pytest.raises(ValueError):
         process_mapping.lookup_and_aggregate(coverage_table, species_short)
+
+
+def test_cli_entry_point(coverage_table_path, species_table_path, tmp_path, mocker, expected_output):
+    tmp_file = str(tmp_path / "output.json")
+    args: list = [
+        "process_mapping",
+        "--coverage",
+        coverage_table_path,
+        "--species_list",
+        species_table_path,
+        "--output",
+        tmp_file,
+    ]
+
+    mocker.patch(
+        "sys.argv",
+        args,
+    )
+
+    process_mapping.cli_entry_point()
+
+    with open(tmp_file, "r") as file:
+        actual_output = json.load(file)
+
+    assert actual_output == expected_output
