@@ -29,11 +29,11 @@ def test_aggregate_contigs(expected_joined, expected_aggregated):
     pd.testing.assert_frame_equal(actual_aggregated, expected_aggregated)
 
 
-def test_determine_overall_coverage(coverage_table, species_table, expected_aggregated):
+def test_lookup_and_aggregate(coverage_table, species_table, expected_aggregated):
     actual_aggregated = process_mapping.determine_overall_coverage(coverage_table, species_table)
     pd.testing.assert_frame_equal(actual_aggregated, expected_aggregated)
 
 
-def test_determine_overall_coverage_error(coverage_table, species_short):
+def test_lookup_and_aggregate(coverage_table, species_short):
     with pytest.raises(ValueError):
-        process_mapping.determine_overall_coverage(coverage_table, species_short)
+        process_mapping.lookup_and_aggregate(coverage_table, species_short)

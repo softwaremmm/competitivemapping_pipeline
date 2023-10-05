@@ -49,7 +49,7 @@ def join_references(coverage_table: pd.DataFrame, species_table: pd.DataFrame) -
 
 
 def aggregate_contigs(referenced_table: pd.DataFrame) -> pd.DataFrame:
-    """Aggregate coverage over multiple contigs.
+    """Aggregate data over multiple contigs.
 
     Makes the assumption that all of the `totallength` values in a group
     are identical, and uses the first.
@@ -77,9 +77,9 @@ def aggregate_contigs(referenced_table: pd.DataFrame) -> pd.DataFrame:
     )
 
 
-def determine_overall_coverage(coverage_table: pd.DataFrame, species_table: pd.DataFrame) -> pd.DataFrame:
-    """Determines the "overall coverage" from `samtools coverage` output where the manifest contains
-    contigs over which coverage must be aggregated.
+def lookup_and_aggregate(coverage_table: pd.DataFrame, species_table: pd.DataFrame) -> pd.DataFrame:
+    """Determines the aggregated values from `samtools coverage` output where the manifest contains
+    contigs.
 
     Args:
         coverage_table (pd.DataFrame): Output of `samtools coverage`
