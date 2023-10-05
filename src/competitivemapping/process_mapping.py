@@ -1,9 +1,38 @@
+# pylint: disable=logging-fstring-interpolation
 """Competitive Mapping"""
 
+import logging
 import sys
 import pandas as pd
 
 from competitivemapping.cli_args import Arguments
+
+logging.basicConfig(
+    format="%(asctime)s — %(name)s — %(levelname)s — %(funcName)s:%(lineno)d — %(message)s",
+    datefmt="%Y-%m-%dT%H:%M:%S%z",
+    level=logging.DEBUG,
+)
+
+
+def unmatched_rnames(coverage_table: pd.DataFrame, species_table: pd.DataFrame) -> [pd.Series, pd.Series]:
+    """Check if any rnames do not have a reference (species name)
+
+    Args:
+        coverage_table (pd.DataFrame): Output of `samtools coverage`
+        species_table (pd.DataFrame): Table for rnames and references (reference data)
+
+    Returns:
+        [pd.Series, pd.Series]: A series listing those rnames in the species output, but
+        not in the coverage table, and another listing those in the coverage output but not
+        in the species table
+    """
+
+    all_rnames = coverage_table.merge(species_table, left_on="#rname", right_on="rname", how="outer")
+
+    not_in_coverage = all_rnames[all_rnames["#rname"].isna()]["rname"]
+    not_in_species = all_rnames[all_rnames["rname"].isna()]["#rname"]
+
+    return not_in_coverage, not_in_species
 
 
 def join_references(coverage_table: pd.DataFrame, species_table: pd.DataFrame) -> pd.DataFrame:
