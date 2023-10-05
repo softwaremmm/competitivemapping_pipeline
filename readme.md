@@ -66,6 +66,6 @@ Parameters:
 
 * Channel with a tuple of _val_, _path_, _path_ 
 
-* _path_ to tha manifest file
+* _path_ to the manifest file
 
 
