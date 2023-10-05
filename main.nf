@@ -22,17 +22,13 @@ workflow competitive_mapping {
     take:
         input_files
         manifest
-        species_list
 
     main:
   
     Channel.fromPath(params.manifest)
         .set{ manifest_ch }
 
-    Channel.fromPath(params.species_list)
-        .set{ species_list_ch }
-
-    competitive_mapping_output = competitiveMapping(input_files, manifest_ch, species_list_ch)
+    competitive_mapping_output = competitiveMapping(input_files, manifest_ch)
 
     emit:
         cm_sample_paths = competitive_mapping_output.cm_sample
@@ -72,7 +68,6 @@ workflow {
 
                 --input_dir  Directory holding the fastq files *_{1,2}.fastq.gz
                 --manifest
-                --species_list
 
                 '''
                 .stripIndent()
@@ -82,11 +77,8 @@ workflow {
         if (params.input_dir == '') {
             exit 1, 'error: --input_dir is mandatory'
         }
-        if (params.manifest == '') {
+         if (params.manifest == '') {
             exit 1, 'error: --manifest is mandatory'
-        }
-        if (params.manifest == '') {
-            exit 1, 'error: --species_list is mandatory'
         }
 
 
@@ -102,7 +94,6 @@ workflow {
 
         --input_dir    $params.input_dir
         --manifest     $params.manifest
-        --species_list $params.species_list
 
         Runtime data:
         ------------------------------------------------------------------------
@@ -119,5 +110,5 @@ workflow {
                 .set { input_files }
         input_files.view { it }
 
-        competitive_mapping(input_files, params.manifest, params.species_list)
+        competitive_mapping(input_files,params.manifest)
 }
