@@ -48,6 +48,28 @@ def join_references(coverage_table: pd.DataFrame, species_table: pd.DataFrame) -
     return coverage_table.merge(species_table, left_on="#rname", right_on="rname", how="left")
 
 
+def aggregate_contigs(referenced_table: pd.DataFrame) -> pd.DataFrame:
+    """Aggregate coverage over multiple contigs.
+
+    Makes the assumption that all of the `totallength` values in a group
+    are identical, and uses the first.
+
+    Args:
+        referenced_table (pd.DataFrame): Output of `samtools coverage` with
+        references joined on
+
+    Returns:
+        pd.DataFrame: Aggregated coverage for each reference
+    """
+    return (
+        referenced_table.groupby("reference")
+        .apply(
+            lambda x: pd.Series({"overall_coverage": (x["coverage"] * x["endpos"]).sum() / x["totallength"].iloc[0]})
+        )
+        .reset_index()
+    )
+
+
 def cli_entry_point() -> None:
     """CLI entry point."""
     Arguments(sys.argv[1:])

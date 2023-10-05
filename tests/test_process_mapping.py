@@ -21,3 +21,8 @@ def test_full_match(coverage_long, species_long):
 def test_join_references(coverage_table, species_table, expected_joined):
     actual_joined = process_mapping.join_references(coverage_table, species_table)
     pd.testing.assert_frame_equal(actual_joined, expected_joined)
+
+
+def test_aggregate_contigs(expected_joined, expected_aggregated):
+    actual_aggregated = process_mapping.aggregate_contigs(expected_joined)
+    pd.testing.assert_frame_equal(actual_aggregated, expected_aggregated)

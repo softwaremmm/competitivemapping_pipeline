@@ -35,3 +35,8 @@ def species_table() -> pd.DataFrame:
 @pytest.fixture
 def expected_joined() -> pd.DataFrame:
     return pd.read_csv("test_data/expected_joined.csv")
+
+
+@pytest.fixture
+def expected_aggregated() -> pd.DataFrame:
+    return pd.read_csv("test_data/expected_aggregated.csv")
