@@ -26,6 +26,6 @@ version_type = "semver"
 version_provider = "pep621"
 tag_format = "$version"
 version_files = [
-    "main.nf",
+    "process/competitive_mapping.nf",
     ".github/workflows/docker.yaml"
 ]
