@@ -70,6 +70,34 @@ def aggregate_contigs(referenced_table: pd.DataFrame) -> pd.DataFrame:
     )
 
 
+def determine_overall_coverage(coverage_table: pd.DataFrame, species_table: pd.DataFrame) -> pd.DataFrame:
+    """Determines the "overall coverage" from `samtools coverage` output where the manifest contains
+    contigs over which coverage must be aggregated.
+
+    Args:
+        coverage_table (pd.DataFrame): Output of `samtools coverage`
+        species_table (pd.DataFrame): Table for rnames and references (reference data)
+
+    Raises:
+        ValueError: If there are contigs in the `samtools coverage` output that there
+        aren't references for in the species table, calculations will be incorrect
+        so an error is raised.
+
+    Returns:
+        pd.DataFrame: Aggregated coverage for each reference
+    """
+    not_in_coverage, not_in_species = unmatched_rnames(coverage_table, species_table)
+
+    if not_in_species.size > 0:
+        raise ValueError(f"Some #rnames could not be found in species list: {not_in_species.to_string()}")
+    if not_in_coverage.size > 0:
+        logging.info(f"Species contains rnames not in manifest: {not_in_coverage.to_string()}")
+
+    joined = join_references(coverage_table, species_table)
+
+    return aggregate_contigs(joined)
+
+
 def cli_entry_point() -> None:
     """CLI entry point."""
     Arguments(sys.argv[1:])
