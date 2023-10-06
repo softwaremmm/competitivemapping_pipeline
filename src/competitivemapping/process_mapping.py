@@ -65,9 +65,10 @@ def aggregate_contigs(referenced_table: pd.DataFrame) -> pd.DataFrame:
 
     Returns:
         pd.DataFrame: genome_name,length,coverage,numreads,meandepth
-        Sorted in descending order of coverage.
+        Sorted in descending order of coverage. Without genomes that
+        have no reads.
     """
-    return (
+    aggregated = (
         referenced_table.groupby("reference")
         .apply(
             lambda contig: pd.Series(
@@ -83,6 +84,10 @@ def aggregate_contigs(referenced_table: pd.DataFrame) -> pd.DataFrame:
         .reset_index()
         .rename(columns={"reference": "genome_name"})
     )
+
+    filtered = aggregated[aggregated["coverage"] > 0]
+
+    return filtered
 
 
 def lookup_and_aggregate(coverage_table: pd.DataFrame, species_table: pd.DataFrame) -> pd.DataFrame:
