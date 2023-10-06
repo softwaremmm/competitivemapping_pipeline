@@ -27,7 +27,7 @@ jobs:
         with:
           file: Dockerfile
           tags: |
-            lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:0.3.0
+            lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:0.4.0
           push: true
           no-cache: true
       - name: Docker digest

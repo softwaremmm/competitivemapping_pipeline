@@ -1,3 +1,16 @@
+## 0.4.0 (2023-10-06)
+
+### Feat
+
+- Add schema checking of output
+- Add cli entrypoint
+
+### Fix
+
+- Sort output
+- pre-commit and mypy
+- Add JSON Schema
+
 ## 0.3.0 (2023-10-06)
 
 ### Feat
