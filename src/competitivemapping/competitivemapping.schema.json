@@ -1,0 +1,42 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "Competitive Mapping",
+    "description": "List of genomes and associated data from Competitive Mapping.",
+    "type": "array",
+    "items": [
+        {
+            "type": "object",
+            "properties": {
+                "genome_name": {
+                    "type": "string"
+                },
+                "length": {
+                    "type": "number"
+                },
+                "coverage": {
+                    "type": "number"
+                },
+                "numreads": {
+                    "type": "number"
+                },
+                "meandepth": {
+                    "anyOf": [
+                        {
+                            "type": "number"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                }
+            },
+            "required": [
+                "genome_name",
+                "length",
+                "coverage",
+                "numreads",
+                "meandepth"
+            ]
+        }
+    ]
+}
