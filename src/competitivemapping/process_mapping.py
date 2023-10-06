@@ -64,15 +64,15 @@ def aggregate_contigs(referenced_table: pd.DataFrame) -> pd.DataFrame:
     return (
         referenced_table.groupby("reference")
         .apply(
-            lambda x: pd.Series(
+            lambda contig: pd.Series(
                 {
-                    "length": x["totallength"].iloc[0],
-                    "coverage": (x["coverage"] * x["endpos"]).sum() / x["totallength"].iloc[0],
-                    "numreads": x["numreads"].sum(),
+                    "length": contig.totallength.iloc[0],
+                    "coverage": (contig.coverage * contig.endpos).sum() / contig.totallength.iloc[0],
+                    "numreads": contig.numreads.sum(),
                 }
             )
         )
-        .assign(meandepth=lambda x: x["numreads"] / (x["length"] * x["coverage"]))
+        .assign(meandepth=lambda contig: contig.numreads / (contig.length * contig.coverage))
         .reset_index()
         .rename(columns={"reference": "genome_name"})
     )
