@@ -69,10 +69,10 @@ def aggregate_contigs(referenced_table: pd.DataFrame) -> pd.DataFrame:
                     "length": contig.totallength.iloc[0],
                     "coverage": (contig.coverage * contig.endpos).sum() / contig.totallength.iloc[0],
                     "numreads": contig.numreads.sum(),
+                    "meandepth": (contig.meandepth * contig.endpos / contig.totallength.iloc[0]).sum(),
                 }
             )
         )
-        .assign(meandepth=lambda contig: contig.numreads / (contig.length * contig.coverage))
         .reset_index()
         .rename(columns={"reference": "genome_name"})
     )
