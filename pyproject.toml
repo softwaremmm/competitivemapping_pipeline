@@ -30,6 +30,7 @@ dev = [
     "pandas-stubs",
     "types-jsonschema",
 ]
+docs = ["json-schema-for-humans"]
 
 [tool.commitizen]
 name = "cz_conventional_commits"
