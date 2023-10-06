@@ -1,3 +1,9 @@
+## 0.2.2 (2023-10-06)
+
+### Fix
+
+- Typo for the sake of commitizen
+
 ## 0.2.1 (2023-10-05)
 
 ### Fix
