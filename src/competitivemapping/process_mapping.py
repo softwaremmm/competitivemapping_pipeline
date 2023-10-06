@@ -64,7 +64,8 @@ def aggregate_contigs(referenced_table: pd.DataFrame) -> pd.DataFrame:
         references joined on
 
     Returns:
-        pd.DataFrame: reference, overall_coverage, total_reads, totallength, mean_depth
+        pd.DataFrame: genome_name,length,coverage,numreads,meandepth
+        Sorted in descending order of coverage.
     """
     return (
         referenced_table.groupby("reference")
@@ -78,6 +79,7 @@ def aggregate_contigs(referenced_table: pd.DataFrame) -> pd.DataFrame:
                 }
             )
         )
+        .sort_values(by=["coverage"], ascending=False)
         .reset_index()
         .rename(columns={"reference": "genome_name"})
     )
