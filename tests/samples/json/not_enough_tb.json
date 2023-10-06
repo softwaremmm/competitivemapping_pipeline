@@ -1,7 +1,6 @@
 [
     {
-        "#rname": "AL123456.3",
-        "genome_name": "Mycobacterium tuberculosis H37Rv complete genome",
+        "genome_name": "M.tuberculosis",
         "length": 4411532.0,
         "coverage": 24.3784,
         "numreads": 0,

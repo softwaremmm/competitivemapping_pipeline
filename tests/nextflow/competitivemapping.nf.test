@@ -10,7 +10,8 @@ nextflow_process {
             process{
                 """
                 input[0] = ['sample_test', file("data/WTCHG_885333_73205296_1/WTCHG_885333_73205296_1.fastq.gz"), file("data/WTCHG_885333_73205296_1/WTCHG_885333_73205296_2.fastq.gz")]
-                input[1] = file("data/manifest/target_101_new.fasta")
+                input[1] = file("data/manifest/manifest_20231001")
+                input[2] = file("test_data/species_list_manifest_20231001.csv")
                 """
             }
         }
