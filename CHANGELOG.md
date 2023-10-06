@@ -1,3 +1,26 @@
+## 0.3.0 (2023-10-06)
+
+### Feat
+
+- Enable CLI use
+- Function to determine overall coverage
+- Contig coverage aggreation function
+- QA checks on species list
+- Function to add references to samtools out
+- Empty CLI function
+- Add cli entrypoint
+- Add cli args class
+- Accept species_list file
+
+### Fix
+
+- meandepth calculation
+- Match previous field names
+- Better naming
+- Add fields to output
+- Add species list for testing
+- Remove symlink
+
 ## 0.2.2 (2023-10-06)
 
 ### Fix
