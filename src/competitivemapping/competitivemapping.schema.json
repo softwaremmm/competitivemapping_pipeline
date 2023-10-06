@@ -1,0 +1,45 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "Competitive Mapping",
+    "description": "List of genomes and associated data from Competitive Mapping.",
+    "type": "array",
+    "items": {
+        "type": "object",
+        "properties": {
+            "genome_name": {
+                "type": "string",
+                "description": "The name of the reference genome"
+            },
+            "length": {
+                "type": "number",
+                "description": "Total length of genome, taken from reference data"
+            },
+            "coverage": {
+                "type": "number",
+                "description": "Genome coverage derived from `sum(contig coverage * contig length) / length`"
+            },
+            "numreads": {
+                "type": "number",
+                "description": "Number of reads mapped to the genome (sum of reads over contigs)"
+            },
+            "meandepth": {
+                "anyOf": [
+                    {
+                        "type": "number"
+                    },
+                    {
+                        "type": "null"
+                    }
+                ],
+                "description": "Depth derived from `sum(contig meandepth * contig length / length)`"
+            }
+        },
+        "required": [
+            "genome_name",
+            "length",
+            "coverage",
+            "numreads",
+            "meandepth"
+        ]
+    }
+}

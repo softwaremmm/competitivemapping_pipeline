@@ -62,7 +62,7 @@ Expected output:
 ## Python
 
 A Python package that processes the output from command line tools orchestrated by NextFlow is included in this repository. For normal
-use it doesn't need to be installed by the user, instructions here are for testing and development.
+use it doesn't need to be installed by the user, instructions here are for testing and development. 
 
 ### Installation
 
@@ -76,6 +76,16 @@ testing e.g.
 
 ```
 process_mapping --coverage test_data/cov_WTCHG_885333_73205296.tsv --species_list test_data/species_list_manifest_20231001.csv
+```
+
+### Outputs
+
+The output from the Python CLI is
+validated against a [JSON Schema](src/competitivemapping/competitivemapping.schema.json). [Documentation for the schema](schema_doc.md) 
+can be built / updated using:
+
+```
+generate-schema-doc src/competitivemapping/competitivemapping.schema.json --config template_name=md
 ```
 
 ### Tests

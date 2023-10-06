@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 import pytest
 
 import pandas as pd
@@ -55,7 +56,12 @@ def expected_aggregated() -> pd.DataFrame:
 
 
 @pytest.fixture
+def path_invalid_output() -> pd.DataFrame:
+    return Path("test_data/species_comparison_report_invalid.json")
+
+
+@pytest.fixture
 def expected_output() -> pd.DataFrame:
-    with open("test_data/expected_output.json", "r") as file:
+    with open("test_data/species_comparison_report.json", "r", encoding="utf-8") as file:
         output = json.load(file)
     return output

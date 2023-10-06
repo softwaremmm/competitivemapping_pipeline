@@ -1,11 +1,16 @@
 # pylint: disable=logging-fstring-interpolation
 """Process output from Competitive Mapping"""
 
+import json
 import logging
+from pathlib import Path
 import sys
+from importlib.resources import files
+
+from jsonschema import validate
 import pandas as pd
 
-from competitivemapping.cli_args import Arguments
+import competitivemapping.cli_args
 
 logging.basicConfig(
     format="%(asctime)s — %(name)s — %(levelname)s — %(funcName)s:%(lineno)d — %(message)s",
@@ -14,7 +19,7 @@ logging.basicConfig(
 )
 
 
-def unmatched_rnames(coverage_table: pd.DataFrame, species_table: pd.DataFrame) -> [pd.Series, pd.Series]:
+def unmatched_rnames(coverage_table: pd.DataFrame, species_table: pd.DataFrame) -> tuple[pd.Series, pd.Series]:
     """Check if any rnames do not have a reference (species name)
 
     Args:
@@ -59,7 +64,8 @@ def aggregate_contigs(referenced_table: pd.DataFrame) -> pd.DataFrame:
         references joined on
 
     Returns:
-        pd.DataFrame: reference, overall_coverage, total_reads, totallength, mean_depth
+        pd.DataFrame: genome_name,length,coverage,numreads,meandepth
+        Sorted in descending order of coverage.
     """
     return (
         referenced_table.groupby("reference")
@@ -73,6 +79,7 @@ def aggregate_contigs(referenced_table: pd.DataFrame) -> pd.DataFrame:
                 }
             )
         )
+        .sort_values(by=["coverage"], ascending=False)
         .reset_index()
         .rename(columns={"reference": "genome_name"})
     )
@@ -106,13 +113,31 @@ def lookup_and_aggregate(coverage_table: pd.DataFrame, species_table: pd.DataFra
     return aggregate_contigs(joined)
 
 
+def validate_output(file_to_validate: Path):
+    """Check if output is schema compliant (raises an error if not)
+
+    Args:
+        file_to_validate (Path): Output JSON file
+    """
+    with open(file_to_validate, "r", encoding="utf-8") as file:
+        output = json.load(file)
+
+    schema_path = files("competitivemapping").joinpath("competitivemapping.schema.json").read_text()
+
+    schema = json.loads(schema_path)
+
+    validate(instance=output, schema=schema)
+
+
 def cli_entry_point() -> None:
     """CLI entry point."""
-    cli_args = Arguments(sys.argv[1:])
+    args = competitivemapping.cli_args.Arguments(sys.argv[1:])
 
-    coverage_table = pd.read_table(cli_args.coverage)
-    species_table = pd.read_csv(cli_args.species_list)
+    coverage_table = pd.read_table(args.coverage)
+    species_table = pd.read_csv(args.species_list)
 
     aggregated = lookup_and_aggregate(coverage_table, species_table)
 
-    aggregated.to_json(cli_args.output, orient="records", indent=4)
+    aggregated.to_json(args.output, orient="records", indent=4)
+
+    validate_output(Path(args.output))
