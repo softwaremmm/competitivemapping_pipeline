@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "competitivemapping_pipeline"
 description = "Calls mycobacterial species by Competitive Mapping."
-dependencies = ["pandas ~=2.0"]
+dependencies = ["pandas ~=2.0", "jsonschema~=4.19"]
 classifiers = [
     "Environment :: Console",
     "Operating System :: OS Independent",
@@ -17,21 +17,18 @@ version = "0.2.2"
 [project.scripts]
 process_mapping = "competitivemapping.process_mapping:cli_entry_point"
 
-[project.scripts]
-process_mapping = "competitivemapping.process_mapping:cli_entry_point"
-
 [project.optional-dependencies]
-release = [
-    "commitizen"
-]
+release = ["commitizen"]
 dev = [
-  "pytest>=7.0",
-  "pytest-cov",
-  "pytest-mock",
-  "black",
-  "pre-commit",
-  "pylint",
-  "mypy"
+    "pytest>=7.0",
+    "pytest-cov",
+    "pytest-mock",
+    "black",
+    "pre-commit",
+    "pylint",
+    "mypy",
+    "pandas-stubs",
+    "types-jsonschema",
 ]
 
 [tool.commitizen]
@@ -42,7 +39,7 @@ version_provider = "pep621"
 tag_format = "$version"
 version_files = [
     "process/competitive_mapping.nf",
-    ".github/workflows/docker.yaml"
+    ".github/workflows/docker.yaml",
 ]
 
 [tool.black]
