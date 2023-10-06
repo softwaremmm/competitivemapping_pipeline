@@ -1,6 +1,7 @@
 import json
 import pytest
 
+from jsonschema import exceptions
 import pandas as pd
 
 import competitivemapping.process_mapping as process_mapping
@@ -42,6 +43,11 @@ def test_lookup_and_aggregate(coverage_table, species_short):
         process_mapping.lookup_and_aggregate(coverage_table, species_short)
 
 
+def test_validate_output(path_invalid_output):
+    with pytest.raises(exceptions.ValidationError):
+        process_mapping.validate_output(path_invalid_output)
+
+
 def test_cli_entry_point(coverage_table_path, species_table_path, tmp_path, mocker, expected_output):
     tmp_file = str(tmp_path / "output.json")
     args: list = [
@@ -61,7 +67,7 @@ def test_cli_entry_point(coverage_table_path, species_table_path, tmp_path, mock
 
     process_mapping.cli_entry_point()
 
-    with open(tmp_file, "r") as file:
+    with open(tmp_file, "r", encoding="utf-8") as file:
         actual_output = json.load(file)
 
     assert actual_output == expected_output
