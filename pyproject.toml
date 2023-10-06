@@ -14,9 +14,21 @@ classifiers = [
 requires-python = "~=3.11"
 version = "0.2.2"
 
+[project.scripts]
+process_mapping = "competitivemapping.process_mapping:cli_entry_point"
+
 [project.optional-dependencies]
 release = [
     "commitizen"
+]
+dev = [
+  "pytest>=7.0",
+  "pytest-cov",
+  "pytest-mock",
+  "black",
+  "pre-commit",
+  "pylint",
+  "mypy"
 ]
 
 [tool.commitizen]
@@ -29,3 +41,9 @@ version_files = [
     "process/competitive_mapping.nf",
     ".github/workflows/docker.yaml"
 ]
+
+[tool.black]
+line-length = 120
+
+[tool.pylint]
+max-line-length = 120
