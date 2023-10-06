@@ -66,14 +66,15 @@ def aggregate_contigs(referenced_table: pd.DataFrame) -> pd.DataFrame:
         .apply(
             lambda x: pd.Series(
                 {
-                    "overall_coverage": (x["coverage"] * x["endpos"]).sum() / x["totallength"].iloc[0],
-                    "total_reads": x["numreads"].sum(),
-                    "totallength": x["totallength"].iloc[0],
+                    "length": x["totallength"].iloc[0],
+                    "coverage": (x["coverage"] * x["endpos"]).sum() / x["totallength"].iloc[0],
+                    "numreads": x["numreads"].sum(),
                 }
             )
         )
-        .assign(mean_depth=lambda x: x["total_reads"] / (x["totallength"] * x["overall_coverage"]))
+        .assign(meandepth=lambda x: x["numreads"] / (x["length"] * x["coverage"]))
         .reset_index()
+        .rename(columns={"reference": "genome_name"})
     )
 
 
