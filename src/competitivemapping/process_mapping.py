@@ -1,5 +1,5 @@
 # pylint: disable=logging-fstring-interpolation
-"""Competitive Mapping"""
+"""Process output from Competitive Mapping"""
 
 import logging
 import sys
