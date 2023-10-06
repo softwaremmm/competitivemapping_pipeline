@@ -32,6 +32,9 @@ dev = [
 ]
 docs = ["json-schema-for-humans"]
 
+[tool.setuptools.package-data]
+competitivemapping = ["*.json"]
+
 [tool.commitizen]
 name = "cz_conventional_commits"
 bump_message = "version $current_version → $new_version" # [skip ci]"
