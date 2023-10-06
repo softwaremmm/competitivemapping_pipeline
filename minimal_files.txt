@@ -1,4 +1,2 @@
-lib/generate_competitive_mapping_json.sh
-lib/manifest_summary.sh
 process/competitive_mapping.nf
 main.nf
