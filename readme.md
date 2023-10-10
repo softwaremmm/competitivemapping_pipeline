@@ -30,12 +30,13 @@ Go to the project directory
 Run the pipeline
 
 ```bash
-  nextflow run . --input_dir $PATH --manifest $PATH_TO_MANIFEST_FILE
+  nextflow run . --input_dir $PATH --manifest $PATH_TO_MANIFEST_FILE --species_list $PATH_TO_SPECIES_LIST_FILE
 ```
 
-where $PATH is the path to a folder that contains a pair of FAST.GZ files following a *{1,2}.f*q.gz regex convention, and
-$PATH_TO_MANIFEST_FILE is the path to the FASTA file putting together the list of target sequences. Those paths do not need to be absolute paths.
+where $PATH is the path to a folder that contains a pair of FAST.GZ files following a *{1,2}.f*q.gz regex convention, 
+$PATH_TO_MANIFEST_FILE is the path to a manifest file containing a list of target contigs and $PATH_TO_SPECIES_LIST_FILE is the path to a species list file where contig rnames are mapped to genomes. Those paths do not need to be absolute paths.
 
+ Manifest and species list can be found in a [bucket on OCI](https://cloud.oracle.com/object-storage/buckets/lrbvkel2wjot/dev-relatedness/objects?region=uk-london-1).
 
 ### Running Tests
 The tests are executed using [nf-test](https://github.com/askimed/nf-test). 
@@ -52,6 +53,8 @@ To run tests, run the following command
 ```bash
  nf-test test tests/nextflow/*.test
 ```
+
+_A copy of a species list file is [included in this repository](test_data/species_list_manifest_20231001.csv) for convenience when running the tests._
 
 ### Screenshots
 
