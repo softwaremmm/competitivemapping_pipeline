@@ -4,8 +4,8 @@ process competitiveMapping{
 
     container 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:dev'
 
-    cpus = 4
-    memory = "8GB"
+    cpus = 8
+    memory = "24GB"
 
     input:
     tuple val(sample_name), path(fq1), path(fq2)
