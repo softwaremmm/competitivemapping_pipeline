@@ -85,7 +85,7 @@ workflow {
         if (params.manifest == '') {
             exit 1, 'error: --manifest is mandatory'
         }
-        if (params.manifest == '') {
+        if (params.species_list == '') {
             exit 1, 'error: --species_list is mandatory'
         }
 
