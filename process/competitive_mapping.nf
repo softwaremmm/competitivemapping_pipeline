@@ -2,14 +2,17 @@ project_dir = projectDir
 
 process competitiveMapping{
 
+
     container 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:0.4.1'
 
-    cpus = 4
-    memory = "8GB"
+
+    cpus = 8
+    memory = "24GB"
 
     input:
     tuple val(sample_name), path(fq1), path(fq2)
     path (manifest)
+    path (species_list)
 
     output:
     tuple val(sample_name), path("h37rv_1.fastq.gz"), path("h37rv_2.fastq.gz"), emit: cm_sample
@@ -21,7 +24,6 @@ process competitiveMapping{
     competitive_mapping_file_2 = "h37rv_2.fastq.gz"
     competitive_mapping_report = "species_comparison_report.json"
     competitive_mapping_error = "species_comparison_error.json"
-    manifest_summary = "manifest_summary.tsv"
     cov = "cov_${sample_name}.tsv"
     h37rv_rname="AL123456.3"
 
@@ -35,9 +37,6 @@ process competitiveMapping{
     set +e
 
     touch ${competitive_mapping_error}
-
-    # Create manifest summary
-    bash ${moduleDir}/../lib/manifest_summary.sh ${manifest} ${manifest_summary}
 
     # Perform competitive mapping
     minimap2 -ax sr -t12 ${manifest} ${fq1} ${fq2} |
@@ -70,7 +69,7 @@ process competitiveMapping{
     samtools fastq -@ 2 -1 ${competitive_mapping_file_1} -2 ${competitive_mapping_file_2}  -0 /dev/null -s /dev/null merged.bam
 
     # Generate competitive mapping json
-    bash ${moduleDir}/../lib/generate_competitive_mapping_json.sh --cov ${cov}  --manifest-summary ${manifest_summary} --competitive-mapping-json ${competitive_mapping_report}
+    process_mapping --coverage ${cov} --species_list ${species_list} --output ${competitive_mapping_report}
     """
 
     stub:
@@ -89,7 +88,9 @@ process competitiveMapping{
 
 process has_enough_reads {
 
+
     container 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:0.4.1'
+
 
     cpus = 1
     memory = "128MB"
@@ -110,7 +111,7 @@ process has_enough_reads {
         /bin/bash ${projectDir}/lib/s3fs_setup.sh $WORKSPACE
     fi
 
-    num_reads=\$(jq '.[] | select(.genome_name == "Mycobacterium tuberculosis H37Rv complete genome") | .numreads' ${json})
+    num_reads=\$(jq '.[] | select(.genome_name == "M.tuberculosis") | .numreads' ${json})
 
     if  [ \$num_reads -ge ${threshold} ]
     then
