@@ -1,3 +1,15 @@
+## 0.5.0 (2023-10-10)
+
+### Feat
+
+- Use Python to process output
+- Accept species_list file
+
+### Fix
+
+- Allocate more resources
+- Use correct variable name
+
 ## 0.4.1 (2023-10-10)
 
 ### Fix
