@@ -1,3 +1,9 @@
+## 0.5.1 (2023-10-16)
+
+### Fix
+
+- Unmount buckets when done
+
 ## 0.5.0 (2023-10-10)
 
 ### Feat
