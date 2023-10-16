@@ -7,7 +7,7 @@ process competitiveMapping{
 
 
     cpus = 8
-    memory = "24GB"
+    memory = "20GB"
 
     input:
     tuple val(sample_name), path(fq1), path(fq2)
