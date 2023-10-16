@@ -70,6 +70,10 @@ process competitiveMapping{
 
     # Generate competitive mapping json
     process_mapping --coverage ${cov} --species_list ${species_list} --output ${competitive_mapping_report}
+    if [ ${workflow.profile} == 'kubernetes' ]
+    then
+        /bin/bash ${projectDir}/lib/s3fs_teardown.sh
+    fi
     """
 
     stub:
@@ -118,6 +122,11 @@ process has_enough_reads {
         echo "true" | tr -d '\n'
     else
         echo "false" | tr -d '\n'
+    fi
+
+    if [ ${workflow.profile} == 'kubernetes' ]
+    then
+        /bin/bash ${projectDir}/lib/s3fs_teardown.sh
     fi
     """
 }
