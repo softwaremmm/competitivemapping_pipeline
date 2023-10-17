@@ -7,7 +7,7 @@ process competitiveMapping{
 
 
     cpus = 8
-    memory = "24GB"
+    memory = "20GB"
 
     input:
     tuple val(sample_name), path(fq1), path(fq2)
@@ -15,13 +15,13 @@ process competitiveMapping{
     path (species_list)
 
     output:
-    tuple val(sample_name), path("h37rv_1.fastq.gz"), path("h37rv_2.fastq.gz"), emit: cm_sample
+    tuple val(sample_name), path("reads_for_assembly_0_1.fastq.gz"), path("reads_for_assembly_0_2.fastq.gz"), emit: cm_sample
     path("species_comparison_report.json"), emit: cm_report
     path("species_comparison_error.json"), emit: cm_error
 
     script:
-    competitive_mapping_file_1 = "h37rv_1.fastq.gz"
-    competitive_mapping_file_2 = "h37rv_2.fastq.gz"
+    competitive_mapping_file_1 = "reads_for_assembly_0_1.fastq.gz"
+    competitive_mapping_file_2 = "reads_for_assembly_0_2.fastq.gz"
     competitive_mapping_report = "species_comparison_report.json"
     competitive_mapping_error = "species_comparison_error.json"
     cov = "cov_${sample_name}.tsv"
@@ -77,8 +77,8 @@ process competitiveMapping{
     """
 
     stub:
-    competitive_mapping_file_1 = "h37rv_1.fastq.gz"
-    competitive_mapping_file_2 = "h37rv_2.fastq.gz"
+    competitive_mapping_file_1 = "reads_for_assembly_0_1.fastq.gz"
+    competitive_mapping_file_2 = "reads_for_assembly_0_2.fastq.gz"
     competitive_mapping_report = "species_comparison_report.json"
     competitive_mapping_error = "species_comparison_error.json"
 

@@ -38,8 +38,8 @@ nextflow_workflow {
 
             with(workflow.out.cm_sample_paths) {
                 assert size() == 1
-                assert get(0)[1].contains("h37rv_1.fastq.gz")
-                assert get(0)[2].contains("h37rv_2.fastq.gz")
+                assert get(0)[1].contains("reads_for_assembly_0_1.fastq.gz")
+                assert get(0)[2].contains("reads_for_assembly_0_2.fastq.gz")
             }
         }
 

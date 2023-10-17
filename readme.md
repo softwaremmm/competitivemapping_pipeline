@@ -3,7 +3,7 @@
 
 Competitive Mapping is an algorithm that compares the sample reads with the references in the manifest and makes a positive selection of the reads matching a specific `rname`. 
 
-The pipeline for competitive mapping takes a pair of FASTQ files and outputs the positive filtering of the h37_rv reads (i.e. those reads that are judged to map to the *Mycobacterium tuberculosis* H37RV reference genome `h37rv_1.fastq.gz` and `h37rv_2.fastq.gz`) along with unmapped reads, a report with the mapping rank (a list of species in the manifest to which reads have mapped `competitivemapping_report.json`) and an error report (the concatenated standard error output from the minimap and samtools tools `competitivemapping_error.json` - the contents are not in JSON format).
+The pipeline for competitive mapping takes a pair of FASTQ files and outputs the positive filtering of the h37_rv reads (i.e. those reads that are judged to map to the *Mycobacterium tuberculosis* H37RV reference genome) along with unmapped reads, a report with the mapping rank (a list of species in the manifest to which reads have mapped `competitivemapping_report.json`) and an error report (the concatenated standard error output from the minimap and samtools tools `competitivemapping_error.json` - the contents are not in JSON format).
 
 ## Nextflow
 
