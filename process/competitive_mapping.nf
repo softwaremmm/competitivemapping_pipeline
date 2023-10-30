@@ -9,6 +9,11 @@ process competitiveMapping{
     cpus = 8
     memory = "20GB"
 
+    debug true
+    pod label: "name", value: "competitive_mapping_pipeline:competitiveMapping"
+    pod label: "sample_id", value: "${params.sample_id}"
+    pod label: "run_id", value: "${params.run_id}"
+
     input:
     tuple val(sample_name), path(fq1), path(fq2)
     path (manifest)
@@ -98,6 +103,11 @@ process has_enough_reads {
 
     cpus = 1
     memory = "128MB"
+
+    debug true
+    pod label: "name", value: "competitive_mapping_pipeline:has_enough_reads"
+    pod label: "sample_id", value: "${params.sample_id}"
+    pod label: "run_id", value: "${params.run_id}"
 
 
     input:
