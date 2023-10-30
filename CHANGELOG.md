@@ -1,3 +1,9 @@
+## 0.6.0 (2023-10-30)
+
+### Feat
+
+- Added pod labels to processes
+
 ## 0.5.3 (2023-10-17)
 
 ### Fix
