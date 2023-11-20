@@ -3,7 +3,7 @@ project_dir = projectDir
 process competitiveMapping{
 
 
-    container 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:0.6.0'
+    container 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:0.6.1'
 
 
     cpus = 8
@@ -98,7 +98,7 @@ process competitiveMapping{
 process has_enough_reads {
 
 
-    container 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:0.6.0'
+    container 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:0.6.1'
 
 
     cpus = 1
