@@ -7,7 +7,7 @@ process competitiveMapping{
 
 
     cpus = 8
-    memory = "20GB"
+    memory = "32GB"
 
     debug true
     pod label: "name", value: "competitive_mapping_pipeline:competitiveMapping"
