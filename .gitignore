@@ -18,7 +18,7 @@ h37rv_100k*
 *.snap
 
 # tests data
-!test_data
+!test_data/**
 
 # Linter
 !.groovylintrc.json

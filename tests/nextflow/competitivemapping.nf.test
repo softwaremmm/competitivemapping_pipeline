@@ -4,14 +4,15 @@ nextflow_process {
     script "process/competitive_mapping.nf"
     process "competitiveMapping"
 
-    test("Process should succeed when sample files and a manifest are provided") {
-
+    test("Illumina - Process should succeed when sample files and a manifest are provided") {
+        tag "illumina"
         when {
             process{
                 """
-                input[0] = ['sample_test', file("data/WTCHG_885333_73205296_1/WTCHG_885333_73205296_1.fastq.gz"), file("data/WTCHG_885333_73205296_1/WTCHG_885333_73205296_2.fastq.gz")]
-                input[1] = file("data/manifest/manifest_20231001")
-                input[2] = file("test_data/species_list_manifest_20231001.csv")
+                input[0] = ['sample_test', [file("$projectDir/test_data/TB_10k/TB_1.fastq.gz"), file("$projectDir/test_data/TB_10k/TB_2.fastq.gz")]]
+                input[1] = file("$projectDir/data/manifest/manifest_20231001")
+                input[2] = file("$projectDir/test_data/species_list_manifest_20231001.csv")
+                input[3] = Channel.value("illumina")
                 """
             }
         }
@@ -24,6 +25,7 @@ nextflow_process {
             with(process.out.cm_report) {
                 assert size() == 1
                 assert get(0).contains("species_comparison_report.json")
+                assert path(get(0)).json == path("$projectDir/test_data/TB_10k/species_comparison_report.json").json
             }
 
             with(process.out.cm_error) {
@@ -33,8 +35,81 @@ nextflow_process {
 
             with(process.out.cm_sample) {
                 assert size() == 1
-                assert get(0)[1].contains("reads_for_assembly_0_1.fastq.gz")
-                assert get(0)[2].contains("reads_for_assembly_0_2.fastq.gz")
+                assert get(0)[1][0].contains("reads_for_assembly_0_1.fastq.gz")
+                assert get(0)[1][1].contains("reads_for_assembly_0_2.fastq.gz")
+            }
+        }
+    }
+
+    test("Illumina - Process should succeed with NTM when sample files and a manifest are provided") {
+        tag "illumina"
+        when {
+            process{
+                """
+                input[0] = Channel.of(['sample_test', [file("$projectDir/test_data/chloro_10k/chloro_1.fastq.gz"), file("$projectDir/test_data/chloro_10k/chloro_2.fastq.gz")]])
+                input[1] = file("$projectDir/data/manifest/manifest_20231001")
+                input[2] = file("$projectDir/test_data/species_list_manifest_20231001.csv")
+                input[3] = Channel.value("illumina")
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert process.exitStatus == 0
+
+
+            with(process.out.cm_report) {
+                assert size() == 1
+                assert get(0).contains("species_comparison_report.json")
+                assert path(get(0)).json == path("$projectDir/test_data/chloro_10k/species_comparison_report.json").json
+            }
+
+            with(process.out.cm_error) {
+                assert size() == 1
+                assert get(0).contains("species_comparison_error.json")
+            }
+
+            with(process.out.cm_sample) {
+                assert size() == 1
+                assert get(0)[1][0].contains("reads_for_assembly_0_1.fastq.gz")
+                assert get(0)[1][1].contains("reads_for_assembly_0_2.fastq.gz")
+            }
+        }
+    }
+
+    test("ONT - Process should succeed when sample files and a manifest are provided") {
+        tag "ont"
+        when {
+            process{
+                """
+                input[0] = ['sample_test', file("$projectDir/test_data/TB_ont/ont_lineage4_10.fastq.gz")]
+                input[1] = file("$projectDir/data/manifest/manifest_20231001")
+                input[2] = file("$projectDir/test_data/species_list_manifest_20231001.csv")
+                input[3] = Channel.value("ont")
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert process.exitStatus == 0
+
+
+            with(process.out.cm_report) {
+                assert size() == 1
+                assert get(0).contains("species_comparison_report.json")
+                assert path(get(0)).json == path("$projectDir/test_data/TB_ont/species_comparison_report.json").json
+            }
+
+            with(process.out.cm_error) {
+                assert size() == 1
+                assert get(0).contains("species_comparison_error.json")
+            }
+
+            with(process.out.cm_sample) {
+                assert size() == 1
+                assert get(0)[1].contains("reads_for_assembly_0.fastq.gz")
             }
         }
     }

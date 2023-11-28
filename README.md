@@ -30,13 +30,14 @@ Go to the project directory
 Run the pipeline
 
 ```bash
-  nextflow run . --input_dir $PATH --manifest $PATH_TO_MANIFEST_FILE --species_list $PATH_TO_SPECIES_LIST_FILE
+  nextflow run . --input_dir $PATH --manifest $PATH_TO_MANIFEST_FILE --species_list $PATH_TO_SPECIES_LIST_FILE --seq_platform $SEQ_PLATFORM
 ```
 
 where $PATH is the path to a folder that contains a pair of FAST.GZ files following a *{1,2}.f*q.gz regex convention, 
 $PATH_TO_MANIFEST_FILE is the path to a manifest file containing a list of target contigs and $PATH_TO_SPECIES_LIST_FILE is the path to a species list file where contig rnames are mapped to genomes. Those paths do not need to be absolute paths.
+$SEQ_PLATFORM should be 'ont' or 'illumina' depending on platform used.
 
- Manifest and species list can be found in a [bucket on OCI](https://cloud.oracle.com/object-storage/buckets/lrbvkel2wjot/dev-relatedness/objects?region=uk-london-1).
+Manifest and species list can be found in a [bucket on OCI](https://cloud.oracle.com/object-storage/buckets/lrbvkel2wjot/dev-relatedness/objects?region=uk-london-1).
 
 ### Running Tests
 The tests are executed using [nf-test](https://github.com/askimed/nf-test). 
@@ -45,8 +46,6 @@ Before running the tests, you will need to ensure appropriate test data is avail
 the root of the repository:
 
 * `data/manifest/manifest_20231001` - a manifest (reference data)
-* `data/WTCHG_885333_73205296_1` containing `WTCHG_885333_73205296_1.fastq.gz` and `WTCHG_885333_73205296_1.fastq.gz` - these should be TB FASTQs
-* `data/abscessus` containing `file_R1.fastq.gz` and `file_R2.fastq.gz` - these should be NTM FASTQs
 
 To run tests, run the following command
 
@@ -54,7 +53,7 @@ To run tests, run the following command
  nf-test test tests/nextflow/*.test
 ```
 
-_A copy of a species list file is [included in this repository](test_data/species_list_manifest_20231001.csv) for convenience when running the tests._
+_A copy of a species list file is [included in this repository](test_data/species_list_manifest_20231001.csv) for convenience when running the tests, as well as small test fastqs for both TB and NTM._
 
 ### Screenshots
 
@@ -97,11 +96,6 @@ Tests are written in `pytest`. New code should be covered by tests.
 
 ## Integrating to a pipeline
 
-If you want to use the Competitive Mapping Pipeline as subworkflow in your pipeline, use the competitive_mapping named workflow. 
-Parameters: 
-
-* Channel with a tuple of _val_, _path_, _path_ 
-
-* _path_ to the manifest file
+If you want to use the Competitive Mapping Pipeline as subworkflow in your pipeline, use the competitive_mapping named workflow.
 
 
