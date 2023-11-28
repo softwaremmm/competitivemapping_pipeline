@@ -8,14 +8,18 @@ ANSI_RESET = '\033[0m'
 params.help = ''
 params.input_dir = ''
 params.manifest = ''
+params.seq_platform = ''
+
+params.illumina_threshold = 100000
+params.ont_threshold = 1000
 
 include { competitiveMapping } from './process/competitive_mapping.nf'
 include { has_enough_reads } from './process/competitive_mapping.nf'
 
 //Constants
-fastq_pattern = "*{1,2}.f*q.gz"
-
-
+input_paired_suffix = "*_{1,2}.fastq.gz"
+input_single_suffix = "*.fastq.gz"
+seq_platforms = ['ont', 'illumina']
 
 
 workflow competitive_mapping {
@@ -23,22 +27,32 @@ workflow competitive_mapping {
         input_files
         manifest
         species_list
+        seq_platform
 
     main:
-  
-    Channel.fromPath(params.manifest)
-        .set{ manifest_ch }
 
-    Channel.fromPath(params.species_list)
-        .set{ species_list_ch }
+    // Check seq_platform validity
+    if (seq_platform.getClass() != groovyx.gpars.dataflow.DataflowVariable &&
+        seq_platform.getClass() != groovyx.gpars.dataflow.DataflowBroadcast) {
+        throw new Exception("seq_platform should be a channel, not a ${seq_platform.getClass()}")
+    }
 
-    competitive_mapping_output = competitiveMapping(input_files, manifest_ch, species_list_ch)
+    seq_platform.count().filter{it == 1}
+        .ifEmpty{throw new Exception("seq platform channel should be single list!")}
+    seq_platform.filter{it in seq_platforms}
+        .ifEmpty{throw new Exception("seq platform invalid. Should be one of $seq_platforms!")}
+
+    // WARNING: Previous version used params for manifest and species_list, 
+    // instead of using input channels
+    competitive_mapping_output = competitiveMapping(input_files, manifest, species_list, seq_platform)
+    threshold = seq_platform.map{it == 'illumina' ? params.illumina_threshold : params.ont_threshold}
+    has_enough_reads(competitive_mapping_output.cm_report, threshold)
 
     emit:
         cm_sample_paths = competitive_mapping_output.cm_sample
         cm_report = competitive_mapping_output.cm_report
         cm_error = competitive_mapping_output.cm_error
-        cm_enough_reads =  has_enough_reads(cm_report, 100000)
+        cm_enough_reads =  has_enough_reads.out
 }
 
 workflow.onComplete {
@@ -73,7 +87,7 @@ workflow {
                 --input_dir  Directory holding the fastq files *_{1,2}.fastq.gz
                 --manifest
                 --species_list
-
+                --seq_platform
                 '''
                 .stripIndent()
         exit(0)
@@ -87,6 +101,9 @@ workflow {
         }
         if (params.species_list == '') {
             exit 1, 'error: --species_list is mandatory'
+        }
+        if (params.seq_platform == '') {
+            exit 1, 'error: --seq_platform is mandatory'
         }
 
 
@@ -103,6 +120,7 @@ workflow {
         --input_dir    $params.input_dir
         --manifest     $params.manifest
         --species_list $params.species_list
+        --seq_platform $params.seq_platform
 
         Runtime data:
         ------------------------------------------------------------------------
@@ -114,10 +132,25 @@ workflow {
         """
         .stripIndent()
 
-        Channel.fromFilePairs("${params.input_dir}/${fastq_pattern}", flat: true, checkIfExists: true, size: -1)
-                .ifEmpty { error "cannot find any reads matching ${fastq_pattern} in ${params.input_dir}" }
-                .set { input_files }
-        input_files.view { it }
+        if (params.seq_platform == 'ont') {
+            input_files = Channel.fromPath("${params.input_dir}/${input_single_suffix}", checkIfExists: true)
+                .ifEmpty { error "cannot find any reads matching ${input_single_suffix} in ${params.input_dir}" }
+                .map { it -> tuple(it.simpleName, it)}
+                .first()
+        }
+        else if (params.seq_platform == 'illumina') {
+            input_files = Channel
+                .fromFilePairs("${params.input_dir}/${input_paired_suffix}",
+                    flat: false,
+                    checkIfExists: true,
+                    size: -1)
+                .ifEmpty { error "cannot find any reads matching ${input_paired_suffix} in ${params.input_dir}" }
+                .first()
+        }
 
-        competitive_mapping(input_files, params.manifest, params.species_list)
+        input_files.view()
+
+        manifest = Channel.fromPath(params.manifest, checkIfExists: true)
+        species_list = Channel.fromPath(params.species_list, checkIfExists: true)
+        competitive_mapping(input_files, manifest, species_list, Channel.value(params.seq_platform))
 }
