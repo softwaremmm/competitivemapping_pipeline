@@ -31,21 +31,20 @@ workflow competitive_mapping {
 
     main:
 
-    // Check seq_platform validity
-    if (seq_platform.getClass() != groovyx.gpars.dataflow.DataflowVariable &&
-        seq_platform.getClass() != groovyx.gpars.dataflow.DataflowBroadcast) {
-        throw new Exception("seq_platform should be a channel, not a ${seq_platform.getClass()}")
+    // seq_platform should be a String, not a channel
+    if (seq_platform.getClass() != java.lang.String) {
+        throw new Exception("seq_platform should be a string, not a ${seq_platform.getClass()}")
     }
 
-    seq_platform.count().filter{it == 1}
-        .ifEmpty{throw new Exception("seq platform channel should be single list!")}
-    seq_platform.filter{it in seq_platforms}
-        .ifEmpty{throw new Exception("seq platform invalid. Should be one of $seq_platforms!")}
+    // Should be supported by this workflow
+    if (! (seq_platform in seq_platforms)) {
+        throw new Exception("seq platform invalid. Should be one of $seq_platforms!")
+    }
 
     // WARNING: Previous version used params for manifest and species_list, 
     // instead of using input channels
     competitive_mapping_output = competitiveMapping(input_files, manifest, species_list, seq_platform)
-    threshold = seq_platform.map{it == 'illumina' ? params.illumina_threshold : params.ont_threshold}
+    threshold = seq_platform == 'illumina' ? params.illumina_threshold : params.ont_threshold
     has_enough_reads(competitive_mapping_output.cm_report, threshold)
 
     emit:
@@ -152,5 +151,5 @@ workflow {
 
         manifest = Channel.fromPath(params.manifest, checkIfExists: true)
         species_list = Channel.fromPath(params.species_list, checkIfExists: true)
-        competitive_mapping(input_files, manifest, species_list, Channel.value(params.seq_platform))
+        competitive_mapping(input_files, manifest, species_list, params.seq_platform)
 }
