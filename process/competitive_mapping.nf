@@ -37,6 +37,7 @@ process competitiveMapping{
     then
         echo "Running with kubernetes"
         /bin/bash ${projectDir}/lib/s3fs_setup.sh $WORKSPACE
+        trap 'PROCESS_EXIT=\$?; /bin/bash ${projectDir}/lib/s3fs_teardown.sh; exit \$PROCESS_EXIT;' EXIT
     fi
 
     set +e
@@ -75,10 +76,6 @@ process competitiveMapping{
 
     # Generate competitive mapping json
     process_mapping --coverage ${cov} --species_list ${species_list} --output ${competitive_mapping_report}
-    if [ ${workflow.profile} == 'kubernetes' ]
-    then
-        /bin/bash ${projectDir}/lib/s3fs_teardown.sh
-    fi
     """
 
     stub:
@@ -123,6 +120,7 @@ process has_enough_reads {
     if [ ${workflow.profile} == 'kubernetes' ]
     then
         /bin/bash ${projectDir}/lib/s3fs_setup.sh $WORKSPACE
+        trap 'PROCESS_EXIT=\$?; /bin/bash ${projectDir}/lib/s3fs_teardown.sh; exit \$PROCESS_EXIT;' EXIT
     fi
 
     num_reads=\$(jq '.[] | select(.genome_name == "M.tuberculosis") | .numreads' ${json})
@@ -132,11 +130,6 @@ process has_enough_reads {
         echo "true" | tr -d '\n'
     else
         echo "false" | tr -d '\n'
-    fi
-
-    if [ ${workflow.profile} == 'kubernetes' ]
-    then
-        /bin/bash ${projectDir}/lib/s3fs_teardown.sh
     fi
     """
 }
