@@ -2,6 +2,7 @@ if [ ${workflow.profile} == 'kubernetes' ]
 then
     echo "Running with kubernetes"
     /bin/bash ${projectDir}/lib/s3fs_setup.sh $WORKSPACE
+    trap 'PROCESS_EXIT=\$?; /bin/bash $projectDir/lib/s3fs_teardown.sh; exit \$PROCESS_EXIT;' EXIT
 fi
 
 set +e
@@ -52,8 +53,3 @@ fi
 
 # Generate competitive mapping json
 process_mapping --coverage ${cov} --species_list ${species_list} --output ${competitive_mapping_report}
-
-if [ ${workflow.profile} == 'kubernetes' ]
-then
-    /bin/bash ${projectDir}/lib/s3fs_teardown.sh
-fi
