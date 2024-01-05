@@ -1,3 +1,11 @@
+## 0.6.2 (2024-01-05)
+
+## v0.6.2 (2023-12-13)
+
+### Fix
+
+- **s3fs**: ensure buckets are unmounted on exit
+
 ## 0.6.1 (2023-11-20)
 
 ### Fix
@@ -31,6 +39,8 @@
 
 ## 0.5.0 (2023-10-10)
 
+## 0.4.1 (2023-10-10)
+
 ### Feat
 
 - Use Python to process output
@@ -38,14 +48,9 @@
 
 ### Fix
 
+- commitizen ci
 - Allocate more resources
 - Use correct variable name
-
-## 0.4.1 (2023-10-10)
-
-### Fix
-
-- commitizen ci
 
 ## 0.4.0 (2023-10-06)
 
