@@ -37,7 +37,9 @@ competitivemapping = ["*.json"]
 
 [tool.commitizen]
 name = "cz_conventional_commits"
-bump_message = "version $current_version → $new_version" #[skip ci]
+bump_message = "bump: version $current_version → $new_version" 
+update_changelog_on_bump = true
+changelog_incremental = true
 version_type = "semver"
 version_provider = "pep621"
 tag_format = "$version"

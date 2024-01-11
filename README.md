@@ -21,10 +21,20 @@ On merging a Pull Request a [GitHub action will run](.github/workflows/version.y
 * Update the [CHANGELOG](CHANGELOG.md) based on commit messages.
 * Commit these changes to the `main` branch.
 * Create a tag for this commit with the tag name of the newly determined semver.
+* Build a docker container for this new tag
+* Create a new release from this tag.
 
-If you wish to release this version and make it available for use in the product, **do this by hand** e.g.
-by navigating to the repository on GitHub, clicking "Tags", clicking the desired tag, clicking "Generate
-Release Notes", then "Create Release from Tag".
+There is a workflow for manually triggering a docker build action.
+This shouldn't be required unless something has gone wrong with the commitizen action.
+
+### Pre-commit hooks
+The pre-commit hooks should help catch errors, and ensure conventional commits.
+Can run the following to install them:
+```bash
+pip install .[dev]
+pre-commit install
+pre-commit install -t commit-msg
+```
 
 ## Nextflow
 
