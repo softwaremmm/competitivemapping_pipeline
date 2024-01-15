@@ -17,7 +17,7 @@ are required to ensure correct version numbering and changelog population.
 
 On merging a Pull Request a [GitHub action will run](.github/workflows/version.yaml), causing Commitizen to:
 * Determine the new [semver](https://semver.org/) based on conventional commits.
-* Replace the previous semver in [pyporject.toml](pyproject.toml) and other files as specified therein.
+* Replace the previous semver in [pyproject.toml](pyproject.toml) and other files as specified therein.
 * Update the [CHANGELOG](CHANGELOG.md) based on commit messages.
 * Commit these changes to the `main` branch.
 * Create a tag for this commit with the tag name of the newly determined semver.
