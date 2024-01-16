@@ -1,3 +1,13 @@
+## 0.7.0 (2024-01-16)
+
+### Feat
+
+- commitizen for auto build and release
+
+### Fix
+
+- update version files
+
 ## 0.6.3 (2024-01-16)
 
 ### Fix
