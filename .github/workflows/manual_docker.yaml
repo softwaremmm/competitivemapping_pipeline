@@ -6,7 +6,7 @@ on:
       image_tag:
         description: 'container image tag'
         required: false
-        default: '0.6.2'
+        default: '0.6.3'
         type: string
 
 jobs:
@@ -26,7 +26,7 @@ jobs:
         with:
           file: Dockerfile
           tags: |
-            "lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:${{ inputs.image_tag }}"
+            lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:${{ inputs.image_tag }}
           push: true
           no-cache: true
       - name: Docker digest
