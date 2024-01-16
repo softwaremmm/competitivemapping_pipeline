@@ -1,3 +1,9 @@
+## 0.6.3 (2024-01-16)
+
+### Fix
+
+- remove integrate subworkflows action
+
 ## 0.6.2 (2024-01-05)
 
 - Manual bump to re-sync commitizen
