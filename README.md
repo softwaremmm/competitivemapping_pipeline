@@ -5,26 +5,41 @@ Competitive Mapping is an algorithm that compares the sample reads with the refe
 
 The pipeline for competitive mapping takes a pair of FASTQ files and outputs the positive filtering of the h37_rv reads (i.e. those reads that are judged to map to the *Mycobacterium tuberculosis* H37RV reference genome) along with unmapped reads, a report with the mapping rank (a list of species in the manifest to which reads have mapped `competitivemapping_report.json`) and an error report (the concatenated standard error output from the minimap and samtools tools `competitivemapping_error.json` - the contents are not in JSON format).
 
-## Commits
+## Conventional Commits
+Use [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) when developing for this repo.
+You should install the pre-commit hooks to check your commit messages. This can be done using the tool `pre-commit` which is a dev dependency in the `pyproject.toml`.
+You can also use `commitizen` (another dev dependency) to help with writing conventional commits.
+
+To install hooks run
+```bash
+pre-commit install --hook-type commit-msg
+pre-commit install # to get other hooks for formatting etc
+```
+
+To make commit with commitizen run
+```bash
+cz c
+```
+
+## Tags and Releases
 
 [Commitizen](https://commitizen-tools.github.io/commitizen/) is used to manage versioning of releases. This tool
 can be used to make commits to this repository. Regardless, [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) 
 are required to ensure correct version numbering and changelog population.
 
-## Tags and Releases
-
 **Do not add tags by hand.**
 
 On merging a Pull Request a [GitHub action will run](.github/workflows/version.yaml), causing Commitizen to:
 * Determine the new [semver](https://semver.org/) based on conventional commits.
-* Replace the previous semver in [pyporject.toml](pyproject.toml) and other files as specified therein.
+* Replace the previous semver in [pyproject.toml](pyproject.toml) and other files as specified therein.
 * Update the [CHANGELOG](CHANGELOG.md) based on commit messages.
 * Commit these changes to the `main` branch.
 * Create a tag for this commit with the tag name of the newly determined semver.
+* Build a docker container for this new tag
+* Create a new release from this tag.
 
-If you wish to release this version and make it available for use in the product, **do this by hand** e.g.
-by navigating to the repository on GitHub, clicking "Tags", clicking the desired tag, clicking "Generate
-Release Notes", then "Create Release from Tag".
+There is a workflow for manually triggering a docker build action.
+This shouldn't be required unless something has gone wrong with the commitizen action.
 
 ## Nextflow
 
