@@ -1,3 +1,29 @@
+## 0.7.0 (2024-01-16)
+
+### Feat
+
+- commitizen for auto build and release
+
+### Fix
+
+- update version files
+
+## 0.6.3 (2024-01-16)
+
+### Fix
+
+- remove integrate subworkflows action
+
+## 0.6.2 (2024-01-05)
+
+- Manual bump to re-sync commitizen
+
+## v0.6.2 (2023-12-13)
+
+### Fix
+
+- **s3fs**: ensure buckets are unmounted on exit
+
 ## 0.6.1 (2023-11-20)
 
 ### Fix

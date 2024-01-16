@@ -12,7 +12,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
 ]
 requires-python = "~=3.11"
-version = "0.6.1"
+version = "0.7.0"
 
 [project.scripts]
 process_mapping = "competitivemapping.process_mapping:cli_entry_point"
@@ -37,13 +37,15 @@ competitivemapping = ["*.json"]
 
 [tool.commitizen]
 name = "cz_conventional_commits"
-bump_message = "version $current_version → $new_version" #[skip ci]
+bump_message = "bump: version $current_version → $new_version" 
+update_changelog_on_bump = true
+changelog_incremental = true
 version_type = "semver"
 version_provider = "pep621"
 tag_format = "$version"
 version_files = [
     "process/competitive_mapping.nf",
-    ".github/workflows/docker.yaml",
+    ".github/workflows/manual_docker.yaml",
 ]
 
 [tool.black]
