@@ -45,7 +45,7 @@ version_provider = "pep621"
 tag_format = "$version"
 version_files = [
     "process/competitive_mapping.nf",
-    ".github/workflows/docker.yaml",
+    ".github/workflows/manual_docker.yaml",
 ]
 
 [tool.black]
