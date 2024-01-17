@@ -18,13 +18,13 @@ version = "0.7.0"
 process_mapping = "competitivemapping.process_mapping:cli_entry_point"
 
 [project.optional-dependencies]
-release = ["commitizen"]
 dev = [
     "pytest>=7.0",
     "pytest-cov",
     "pytest-mock",
     "black",
     "pre-commit",
+    "commitizen",
     "pylint",
     "mypy",
     "pandas-stubs",

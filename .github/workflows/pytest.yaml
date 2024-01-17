@@ -23,6 +23,9 @@ jobs:
         python-version: ["3.11"]
     steps:
       - uses: actions/checkout@v4
+        with:
+          token: "${{ secrets.PAT_TOKEN }}"
+          fetch-depth: 0
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -30,6 +33,10 @@ jobs:
       - name: Install dependencies
         run: |
           pip install .[dev]
+      - name: Validate commits
+        if: github.ref != 'refs/heads/main'
+        run: |
+          cz check --rev-range origin/main..
       - name: Test with pytest
         run: |
           pytest
