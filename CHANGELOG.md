@@ -1,3 +1,14 @@
+## 1.0.0 (2024-01-18)
+
+### Feat
+
+- support for ont reads through seq_platform parameter
+
+### Fix
+
+- add trap to process template
+- seq_platform now a string
+
 ## 0.7.0 (2024-01-16)
 
 ### Feat

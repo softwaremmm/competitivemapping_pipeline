@@ -12,7 +12,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
 ]
 requires-python = "~=3.11"
-version = "0.7.0"
+version = "1.0.0"
 
 [project.scripts]
 process_mapping = "competitivemapping.process_mapping:cli_entry_point"
