@@ -1,2 +1,3 @@
 process/competitive_mapping.nf
 main.nf
+process/templates/run_competitive_mapping.nf
