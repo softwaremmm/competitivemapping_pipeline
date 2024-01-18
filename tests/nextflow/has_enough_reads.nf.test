@@ -9,7 +9,7 @@ nextflow_process {
         when {
             process{
                 """
-                input[0] = file("tests/samples/json/enough_tb.json")
+                input[0] = file("$projectDir/tests/samples/json/enough_tb.json")
                 input[1] = 100000
                 """
             }
@@ -28,7 +28,7 @@ nextflow_process {
         when {
             process{
                 """
-                input[0] = file("tests/samples/json/not_enough_tb.json")
+                input[0] = file("$projectDir/tests/samples/json/not_enough_tb.json")
                 input[1] = 100000
                 """
             }
@@ -47,7 +47,7 @@ nextflow_process {
         when {
             process{
                 """
-                input[0] = file("tests/samples/json/no_mb_value.json")
+                input[0] = file("$projectDir/tests/samples/json/no_mb_value.json")
                 input[1] = 100000
                 """
             }
@@ -65,7 +65,7 @@ nextflow_process {
         when {
             process{
                 """
-                input[0] = file("tests/samples/json/no_genome_name_key.json")
+                input[0] = file("$projectDir/tests/samples/json/no_genome_name_key.json")
                 input[1] = 100000
                 """
             }

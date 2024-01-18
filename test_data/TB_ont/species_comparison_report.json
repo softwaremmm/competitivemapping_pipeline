@@ -1,0 +1,30 @@
+[
+    {
+        "genome_name":"M.tuberculosis",
+        "length":4411532.0,
+        "coverage":30.3107,
+        "numreads":1067.0,
+        "meandepth":0.369568
+    },
+    {
+        "genome_name":"M.shinjukuense",
+        "length":4504020.0,
+        "coverage":0.0155417,
+        "numreads":2.0,
+        "meandepth":0.000155417
+    },
+    {
+        "genome_name":"M.novocastrense",
+        "length":5624151.0,
+        "coverage":0.0126597,
+        "numreads":2.0,
+        "meandepth":0.000126597
+    },
+    {
+        "genome_name":"M.lacus",
+        "length":5092988.0,
+        "coverage":0.00669548,
+        "numreads":1.0,
+        "meandepth":0.0000669548
+    }
+]
