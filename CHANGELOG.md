@@ -1,3 +1,9 @@
+## 1.0.1 (2024-01-18)
+
+### Fix
+
+- include template in minimal files
+
 ## 1.0.0 (2024-01-18)
 
 ### Feat
