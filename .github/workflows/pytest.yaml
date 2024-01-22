@@ -34,7 +34,7 @@ jobs:
         run: |
           pip install .[dev]
       - name: Validate commits
-        if: github.ref != 'refs/heads/main'
+        if: ${{ github.ref_type == 'branch' && github.ref != 'refs/heads/main' }}
         run: |
           cz check --rev-range origin/main..
       - name: Test with pytest
