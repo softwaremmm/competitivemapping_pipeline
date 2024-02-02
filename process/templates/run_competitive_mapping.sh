@@ -51,5 +51,10 @@ then
     samtools fastq -@ $task.cpus -1 ${competitive_mapping_file_1} -2 ${competitive_mapping_file_2}  -0 /dev/null -s /dev/null merged.bam
 fi
 
+# Generate alignment summary csv
+process_aln_stats --bam ${sample_name}_sorted_alignments.bam --output aln_summary.csv \
+    --species_list ${species_list} --exclude_secondary
+
 # Generate competitive mapping json
-process_mapping --coverage ${cov} --species_list ${species_list} --output ${competitive_mapping_report}
+process_mapping --coverage ${cov} --species_list ${species_list} \
+    --aln_summary aln_summary.csv --output ${competitive_mapping_report}

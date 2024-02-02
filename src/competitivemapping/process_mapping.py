@@ -143,6 +143,10 @@ def cli_entry_point() -> None:
 
     aggregated = lookup_and_aggregate(coverage_table, species_table)
 
+    if args.aln_summary:
+        aln_summary = pd.read_csv(args.aln_summary)
+        aggregated = aggregated.merge(aln_summary, on="genome_name", how="left")
+
     aggregated.to_json(args.output, orient="records", indent=4)
 
     validate_output(Path(args.output))

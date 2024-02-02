@@ -1,4 +1,5 @@
 """CLI"""
+
 import argparse
 from pathlib import Path
 
@@ -24,6 +25,12 @@ class Arguments:  # pylint: disable=too-few-public-methods
             help="Path to species_list_<isodate>.csv file (reference data)",
         )
         parser.add_argument(
+            "--aln_summary",
+            dest="aln_summary",
+            help="Path to csv with alignment summary. Expected to have key column 'genome_name'",
+            required=False,
+        )
+        parser.add_argument(
             "--output",
             default="output.json",
             dest="output",
@@ -34,4 +41,5 @@ class Arguments:  # pylint: disable=too-few-public-methods
 
         self.coverage = Path(args.coverage)
         self.species_list = Path(args.species_list)
+        self.aln_summary = Path(args.aln_summary) if args.aln_summary else None
         self.output = Path(args.output)
