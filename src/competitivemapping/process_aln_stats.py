@@ -1,4 +1,4 @@
-"""Script to process a bam file and give summary of 
+"""Script to process a bam file and give summary of
 number of reads and alignmments for each reference"""
 
 import typing
@@ -29,7 +29,7 @@ def get_alignment_stats(
     exclude_supplementary=False,
     exclude_mq0=False,
 ) -> pd.DataFrame:
-    """Iterate through all alignmnet in the bam file and produce a summary by reference
+    """Iterate through all alignments in the bam file and produce a summary by reference
 
     Args:
         bam_file (_type_): bam file to process
@@ -66,7 +66,7 @@ def get_alignment_stats(
             if exclude_mq0 and read.mapping_quality <= 0:
                 continue
 
-            chrom_id = read.reference_id  # bam.get_reference_name(read.reference_id)
+            chrom_id = read.reference_id
             if chrom_id not in chrom_id_to_name:
                 chrom_id_to_name[chrom_id] = name_mapping[bam.get_reference_name(chrom_id)]
             chrom_name = chrom_id_to_name[chrom_id]
@@ -88,7 +88,25 @@ def get_alignment_stats(
                 assert read_info[query]["primary"] == "", f"Multiple Primary Reads! \n{query=}\n{read=}"
                 read_info[query]["primary"] = chrom_name
 
+        # _summarise_reads(read_info).to_csv("reads_summary.csv")
         return summarise_by_chrom(chroms, read_info)
+
+
+def _summarise_reads(read_info: dict[str, dict[str, typing.Any]]) -> pd.DataFrame:
+    """Summarise the alignment information by read"""
+    read_counts = {
+        query: {
+            "primary": read_dict["primary"],
+            "n_secondary": len(read_dict["secondary"]),
+            "n_supplementary": len(read_dict["supplementary"]),
+            "secondary": ",".join(read_dict["secondary"]),
+            "supplementary": ",".join(read_dict["supplementary"]),
+        }
+        for query, read_dict in read_info.items()
+    }
+    df = pd.DataFrame.from_dict(read_counts, orient="index")
+    df.reset_index(inplace=True, names="query")
+    return df
 
 
 def summarise_by_chrom(chroms: set[str], read_info: dict[str, dict[str, typing.Any]]) -> pd.DataFrame:
@@ -103,13 +121,12 @@ def summarise_by_chrom(chroms: set[str], read_info: dict[str, dict[str, typing.A
         }
         for chrom in chroms
     }
-    for query, read_dict in read_info.items():
+    for _, read_dict in read_info.items():
         primary = read_dict["primary"]
         secondary = read_dict["secondary"]
         supplementary = read_dict["supplementary"]
 
         if primary == "":
-            print(f"No primary read for {query}")
             for c in set(secondary) | set(supplementary):
                 chrom_info[c]["total_reads"] += 1
             for c in secondary + supplementary:
