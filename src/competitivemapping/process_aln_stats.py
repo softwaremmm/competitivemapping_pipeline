@@ -27,7 +27,6 @@ def get_alignment_stats(
     name_mapping,
     exclude_secondary=False,
     exclude_supplementary=False,
-    exclude_mq0=False,
 ) -> pd.DataFrame:
     """Iterate through all alignments in the bam file and produce a summary by reference
 
@@ -36,7 +35,6 @@ def get_alignment_stats(
         name_mapping (_type_): dict with mapping for reference code to human names
         exclude_secondary (bool, optional): exclude secondary alignments. Defaults to False.
         exclude_supplementary (bool, optional): exclude supplementary alignments. Defaults to False.
-        exclude_mq0 (bool, optional): exclude alignments with map quality 0. Defaults to False.
 
     Raises:
         ValueError: if a read is both secondary and supplementary
@@ -61,9 +59,6 @@ def get_alignment_stats(
                 continue
 
             if exclude_supplementary and read.is_supplementary:
-                continue
-
-            if exclude_mq0 and read.mapping_quality <= 0:
                 continue
 
             chrom_id = read.reference_id
@@ -92,6 +87,7 @@ def get_alignment_stats(
         return summarise_by_chrom(chroms, read_info)
 
 
+# Helpful debug function for seeing potential number of secondary reads
 def _summarise_reads(read_info: dict[str, dict[str, typing.Any]]) -> pd.DataFrame:
     """Summarise the alignment information by read"""
     read_counts = {
@@ -113,11 +109,10 @@ def summarise_by_chrom(chroms: set[str], read_info: dict[str, dict[str, typing.A
     """Summarise the alignment information by reference"""
     chrom_info = {
         chrom: {
-            "unique_alns": 0,  # read maps only once, and is to this chrom
-            "unique_reads": 0,  # read only maps to this chrom
-            "primary_alns": 0,
-            "total_reads": 0,
-            "total_alns": 0,
+            "total_reads": 0,  # Total number of reads which map (in any way) to chrom
+            "total_alns": 0,  # Total number of alignments, so will count supplementary separately
+            "exclusive_reads": 0,  # reads which only maps to this chrom
+            "primary_alns": 0,  # reads which map best to this chrom
         }
         for chrom in chroms
     }
@@ -137,10 +132,9 @@ def summarise_by_chrom(chroms: set[str], read_info: dict[str, dict[str, typing.A
 
         chrom_info[primary]["primary_alns"] += 1
         if len(rest) == 0:
-            chrom_info[primary]["unique_alns"] += 1
-            chrom_info[primary]["unique_reads"] += 1
+            chrom_info[primary]["exclusive_reads"] += 1
         elif rest == {primary}:
-            chrom_info[primary]["unique_reads"] += 1
+            chrom_info[primary]["exclusive_reads"] += 1
 
         for c in rest | {primary}:
             chrom_info[c]["total_reads"] += 1
@@ -161,7 +155,6 @@ def cli_entry_point():
     parser.add_argument("--output", help="Output file", required=True)
     parser.add_argument("--exclude_secondary", action="store_true", default=False)
     parser.add_argument("--exclude_supplementary", action="store_true", default=False)
-    parser.add_argument("--exclude_mq0", action="store_true", default=False)
     args = parser.parse_args()
 
     name_mapping = get_name_mapping(args.species_list)
@@ -170,7 +163,6 @@ def cli_entry_point():
         name_mapping,
         exclude_secondary=args.exclude_secondary,
         exclude_supplementary=args.exclude_supplementary,
-        exclude_mq0=args.exclude_mq0,
     )
     df.to_csv(args.output, index=False)
 
