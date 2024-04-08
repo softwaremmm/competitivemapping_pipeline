@@ -47,7 +47,7 @@ def get_alignment_stats(
         # This is a mapping from the chomosome id to the human readable name
         # This will also have the effect of combining contigs of multi-chromosome references
         chrom_id_to_name = {}
-        # read_info = {query: {"primary": "", "secondary": [], "supplementary": []}}
+        # structure of read_info = {query: {"primary": "", "secondary": [], "supplementary": []}}
         read_info: dict[str, dict[str, typing.Any]] = {}
         chroms = set()
 
@@ -83,7 +83,6 @@ def get_alignment_stats(
                 assert read_info[query]["primary"] == "", f"Multiple Primary Reads! \n{query=}\n{read=}"
                 read_info[query]["primary"] = chrom_name
 
-        # _summarise_reads(read_info).to_csv("reads_summary.csv")
         return summarise_by_chrom(chroms, read_info)
 
 

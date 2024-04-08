@@ -5,6 +5,10 @@ Competitive Mapping is an algorithm that compares the sample reads with the refe
 
 The pipeline for competitive mapping takes a pair of FASTQ files and outputs the positive filtering of the h37_rv reads (i.e. those reads that are judged to map to the *Mycobacterium tuberculosis* H37RV reference genome) along with unmapped reads, a report with the mapping rank (a list of species in the manifest to which reads have mapped `competitivemapping_report.json`) and an error report (the concatenated standard error output from the minimap and samtools tools `competitivemapping_error.json` - the contents are not in JSON format).
 
+## Overview
+Competitive mapping uses minimap2 to map reads against manifest (collection of mycobacteria genomes). Samtools coverage is used to get coverage stats against all references. The python script `process_mapping` produces a summary json from this and deals with multi-chromosome references.
+Optionally the script `process_aln_stats` can be run to produce more detailed summary of read alignments. The output can be provided as a parameter to `process_mapping` to be included in the summary json.
+
 ## Conventional Commits
 Use [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) when developing for this repo.
 You should install the pre-commit hooks to check your commit messages. This can be done using the tool `pre-commit` which is a dev dependency in the `pyproject.toml`.
