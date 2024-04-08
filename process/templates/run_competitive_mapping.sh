@@ -46,6 +46,7 @@ samtools merge -o merged.bam h37rv_sorted.bam unmapped_sorted.bam
 
 # Convert BAM output to FASTQ
 # Default excl-flag is 0x900 which is secondary (0x100) and supplementary (0x800)
+# So we need to exclude secondary alignments (0x100) only
 if [ $seq_platform == 'ont' ]
 then
     samtools fastq --excl-flags 0x100 -@ $task.cpus -0 ${competitive_mapping_file} merged.bam

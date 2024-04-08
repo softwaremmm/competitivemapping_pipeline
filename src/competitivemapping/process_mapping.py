@@ -147,8 +147,8 @@ def cli_entry_point() -> None:
         # Align summary has more detailed break down of number of reads/alns
         aln_summary = pd.read_csv(args.aln_summary)
         aggregated = aggregated.merge(aln_summary, on="genome_name", how="left")
-        # numreads superseeded by total_reads. Could remove in future
-        # aggregated["numreads"] = aggregated["total_reads"]
+        # numreads can now be given more precisely
+        aggregated["numreads"] = aggregated["primary_reads"] + aggregated["supplementary_reads"]
 
     aggregated.to_json(args.output, orient="records", indent=4)
 

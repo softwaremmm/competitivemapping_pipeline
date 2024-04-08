@@ -105,6 +105,7 @@ def _summarise_reads(read_info: dict[str, dict[str, typing.Any]]) -> pd.DataFram
     return df
 
 
+# pylint: disable-next=too-many-branches
 def summarise_by_chrom(chroms: set[str], read_info: dict[str, dict[str, typing.Any]]) -> pd.DataFrame:
     """Summarise the alignment information by reference"""
     chrom_info = {
@@ -112,7 +113,10 @@ def summarise_by_chrom(chroms: set[str], read_info: dict[str, dict[str, typing.A
             "total_reads": 0,  # Total number of reads which map (in any way) to chrom
             "total_alns": 0,  # Total number of alignments, so will count supplementary separately
             "exclusive_reads": 0,  # reads which only maps to this chrom
-            "primary_alns": 0,  # reads which map best to this chrom
+            "primary_reads": 0,  # reads which map best to this chrom
+            "secondary_reads": 0,  # reads which map to this chrom but not with primary
+            "supplementary_reads": 0,  # reads which have supplementary alignments but not primary
+            "supplementary_alns": 0,  # number of supplementary alignments
         }
         for chrom in chroms
     }
@@ -126,20 +130,30 @@ def summarise_by_chrom(chroms: set[str], read_info: dict[str, dict[str, typing.A
                 chrom_info[c]["total_reads"] += 1
             for c in secondary + supplementary:
                 chrom_info[c]["total_alns"] += 1
+            for c in set(secondary):
+                chrom_info[c]["secondary_reads"] += 1
+            for c in set(supplementary):
+                chrom_info[c]["supplementary_reads"] += 1
+            for c in supplementary:
+                chrom_info[c]["supplementary_alns"] += 1
             continue
 
         rest = set(secondary) | set(supplementary)
 
-        chrom_info[primary]["primary_alns"] += 1
-        if len(rest) == 0:
-            chrom_info[primary]["exclusive_reads"] += 1
-        elif rest == {primary}:
+        chrom_info[primary]["primary_reads"] += 1
+        if len(rest) == 0 or rest == {primary}:
             chrom_info[primary]["exclusive_reads"] += 1
 
         for c in rest | {primary}:
             chrom_info[c]["total_reads"] += 1
         for c in secondary + supplementary + [primary]:
             chrom_info[c]["total_alns"] += 1
+        for c in set(secondary) - {primary}:
+            chrom_info[c]["secondary_reads"] += 1
+        for c in set(supplementary) - {primary}:
+            chrom_info[c]["supplementary_reads"] += 1
+        for c in supplementary:
+            chrom_info[c]["supplementary_alns"] += 1
 
     df = pd.DataFrame.from_dict(chrom_info, orient="index")
     df.reset_index(inplace=True, names="genome_name")
