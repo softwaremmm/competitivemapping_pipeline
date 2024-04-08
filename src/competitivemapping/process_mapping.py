@@ -148,7 +148,7 @@ def cli_entry_point() -> None:
         aln_summary = pd.read_csv(args.aln_summary)
         aggregated = aggregated.merge(aln_summary, on="genome_name", how="left")
         # numreads superseeded by total_reads. Could remove in future
-        aggregated["numreads"] = aggregated["total_reads"]
+        # aggregated["numreads"] = aggregated["total_reads"]
 
     aggregated.to_json(args.output, orient="records", indent=4)
 
