@@ -156,7 +156,7 @@ def summarise_by_chrom(chroms: set[str], read_info: dict[str, dict[str, typing.A
 
     df = pd.DataFrame.from_dict(chrom_info, orient="index")
     df.reset_index(inplace=True, names="genome_name")
-    df.sort_values(by=["total_reads"], ascending=False, inplace=True)
+    df.sort_values(by=["total_reads", "genome_name"], ascending=False, inplace=True)
     return df
 
 
