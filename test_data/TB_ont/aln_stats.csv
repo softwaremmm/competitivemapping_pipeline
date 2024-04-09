@@ -2,11 +2,11 @@ genome_name,total_reads,total_alns,exclusive_reads,primary_reads,secondary_reads
 M.tuberculosis,998,1102,934,996,2,0,72
 M.novocastrense,54,55,0,2,52,0,0
 M.shinjukuense,7,7,0,0,6,1,1
-M.vicinigordonae,2,2,0,0,2,0,0
 M.lacus,2,2,0,0,2,0,0
-M.spongiae,1,1,0,0,0,1,1
-M.simulans,1,1,0,0,1,0,0
-M.palustre,1,1,0,0,1,0,0
-M.malmoense,1,1,0,0,1,0,0
-M.lepraemurium,1,1,0,0,1,0,0
+M.vicinigordonae,2,2,0,0,2,0,0
 M.celatum,1,1,0,0,1,0,0
+M.lepraemurium,1,1,0,0,1,0,0
+M.malmoense,1,1,0,0,1,0,0
+M.palustre,1,1,0,0,1,0,0
+M.simulans,1,1,0,0,1,0,0
+M.spongiae,1,1,0,0,0,1,1

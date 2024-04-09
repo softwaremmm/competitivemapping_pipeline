@@ -86,24 +86,6 @@ def get_alignment_stats(
         return summarise_by_chrom(chroms, read_info)
 
 
-# Helpful debug function for seeing potential number of secondary reads
-def _summarise_reads(read_info: dict[str, dict[str, typing.Any]]) -> pd.DataFrame:
-    """Summarise the alignment information by read"""
-    read_counts = {
-        query: {
-            "primary": read_dict["primary"],
-            "n_secondary": len(read_dict["secondary"]),
-            "n_supplementary": len(read_dict["supplementary"]),
-            "secondary": ",".join(read_dict["secondary"]),
-            "supplementary": ",".join(read_dict["supplementary"]),
-        }
-        for query, read_dict in read_info.items()
-    }
-    df = pd.DataFrame.from_dict(read_counts, orient="index")
-    df.reset_index(inplace=True, names="query")
-    return df
-
-
 # pylint: disable-next=too-many-branches
 def summarise_by_chrom(chroms: set[str], read_info: dict[str, dict[str, typing.Any]]) -> pd.DataFrame:
     """Summarise the alignment information by reference"""
@@ -156,7 +138,7 @@ def summarise_by_chrom(chroms: set[str], read_info: dict[str, dict[str, typing.A
 
     df = pd.DataFrame.from_dict(chrom_info, orient="index")
     df.reset_index(inplace=True, names="genome_name")
-    df.sort_values(by=["total_reads", "genome_name"], ascending=False, inplace=True)
+    df.sort_values(by=["total_reads", "genome_name"], ascending=[False, True], inplace=True)
     return df
 
 
@@ -182,3 +164,21 @@ def cli_entry_point():
 
 if __name__ == "__main__":
     cli_entry_point()
+
+
+def _summarise_reads(read_info: dict[str, dict[str, typing.Any]]) -> pd.DataFrame:
+    """DEBUG FUNCTION. NOT TESTED.
+    Summarise the alignment information by read"""
+    read_counts = {
+        query: {
+            "primary": read_dict["primary"],
+            "n_secondary": len(read_dict["secondary"]),
+            "n_supplementary": len(read_dict["supplementary"]),
+            "secondary": ",".join(read_dict["secondary"]),
+            "supplementary": ",".join(read_dict["supplementary"]),
+        }
+        for query, read_dict in read_info.items()
+    }
+    df = pd.DataFrame.from_dict(read_counts, orient="index")
+    df.reset_index(inplace=True, names="query")
+    return df
