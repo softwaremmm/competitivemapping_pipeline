@@ -1,3 +1,16 @@
+## 1.1.0 (2024-04-09)
+
+### Feat
+
+- adds more information about the alignments vs reads to the summary json
+
+### Fix
+
+- better read breakdown
+- do not update numreads
+- account for secondary reads in alignment summary
+- add read summary function
+
 ## 1.0.2 (2024-01-18)
 
 ### Fix
