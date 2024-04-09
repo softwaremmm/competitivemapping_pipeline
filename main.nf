@@ -41,8 +41,6 @@ workflow competitive_mapping {
         throw new Exception("seq platform invalid. Should be one of $seq_platforms!")
     }
 
-    // WARNING: Previous version used params for manifest and species_list, 
-    // instead of using input channels
     competitive_mapping_output = competitiveMapping(input_files, manifest, species_list, seq_platform)
     threshold = seq_platform == 'illumina' ? params.illumina_threshold : params.ont_threshold
     has_enough_reads(competitive_mapping_output.cm_report, threshold)

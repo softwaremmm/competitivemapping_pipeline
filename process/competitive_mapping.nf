@@ -1,10 +1,6 @@
-project_dir = projectDir
 
-process competitiveMapping{
-
-
+process competitiveMapping {
     container 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:1.0.2'
-
 
     cpus = 8
     memory = "32GB"
@@ -31,7 +27,7 @@ process competitiveMapping{
     competitive_mapping_file_2 = "reads_for_assembly_0_2.fastq.gz"
     competitive_mapping_report = "species_comparison_report.json"
     competitive_mapping_error = "species_comparison_error.json"
-    cov = "cov_${sample_name}.tsv"
+    cov = "coverage.tsv"
     h37rv_rname="AL123456.3"
 
     template "run_competitive_mapping.sh"
@@ -58,10 +54,7 @@ process competitiveMapping{
 }
 
 process has_enough_reads {
-
-
     container 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:1.0.2'
-
 
     cpus = 1
     memory = "128MB"
@@ -71,7 +64,6 @@ process has_enough_reads {
     pod label: "sample_id", value: "${params.sample_id}"
     pod label: "run_id", value: "${params.run_id}"
 
-
     input:
     path (json)
     val (threshold)
@@ -80,7 +72,6 @@ process has_enough_reads {
     stdout
 
     script:
-
     """
     if [ ${workflow.profile} == 'kubernetes' ]
     then
@@ -98,4 +89,3 @@ process has_enough_reads {
     fi
     """
 }
-

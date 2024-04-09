@@ -65,3 +65,19 @@ def expected_output() -> pd.DataFrame:
     with open("test_data/species_comparison_report.json", "r", encoding="utf-8") as file:
         output = json.load(file)
     return output
+
+@pytest.fixture
+def illumina_bam() -> str:
+    return "test_data/TB_10k/sorted_aln.bam"
+
+@pytest.fixture
+def illumina_aln_stats() -> str:
+    return "test_data/TB_10k/aln_stats.csv"
+
+@pytest.fixture
+def ont_bam() -> str:
+    return "test_data/TB_ont/sorted_aln.bam"
+
+@pytest.fixture
+def ont_aln_stats() -> str:
+    return "test_data/TB_ont/aln_stats.csv"
