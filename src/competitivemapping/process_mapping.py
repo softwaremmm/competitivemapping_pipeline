@@ -65,7 +65,7 @@ def aggregate_contigs(referenced_table: pd.DataFrame) -> pd.DataFrame:
 
     Returns:
         pd.DataFrame: genome_name,length,coverage,numreads,meandepth
-        Sorted in descending order of coverage. Without genomes that
+        Sorted in descending order of meandepth. Without genomes that
         have no reads.
     """
     aggregated = (
@@ -80,7 +80,7 @@ def aggregate_contigs(referenced_table: pd.DataFrame) -> pd.DataFrame:
                 }
             )
         )
-        .sort_values(by=["coverage"], ascending=False)
+        .sort_values(by=["meandepth"], ascending=False)
         .reset_index()
         .rename(columns={"reference": "genome_name"})
     )
