@@ -1,3 +1,9 @@
+## 1.1.1 (2024-05-08)
+
+### Fix
+
+- order competitive mapping output by meandepth
+
 ## 1.1.0 (2024-04-09)
 
 ### Feat
