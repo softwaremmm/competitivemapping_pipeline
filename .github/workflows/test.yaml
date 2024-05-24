@@ -32,8 +32,9 @@ jobs:
       
       - name: softlink reference data # This has already been downloaded to the runner
         run: |
-          ln -s ~/data . && \
-          tree data/relatedness/knowledge
+          mkdir data && \
+          ln -s /mnt/relatedness ./data/relatedness && \
+          tree data/relatedness
       
       - name: Login to OCR
         uses: docker/login-action@v2
