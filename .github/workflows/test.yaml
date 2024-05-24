@@ -1,0 +1,45 @@
+name: Test
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    name: test
+    runs-on: self-hosted # Uses https://github.com/GlobalPathogenAnalysisService/git_runners
+    steps:
+      - name: print debug data
+        run: |
+          whoami
+          pwd
+          echo java_cmd=$JAVA_CMD
+          printenv
+      - name: clean up # nf-test needs to sudo to remove, so will fail automatic cleanup
+        run: |
+          sudo rm -rf .nf-test || true
+
+      - uses: actions/checkout@v4
+        with:
+          token: "${{ secrets.PAT_TOKEN }}"
+          fetch-depth: 0
+      
+      - name: echo versions
+        run: |
+          nextflow -v
+          nf-test version
+      
+      - name: softlink reference data # This has already been downloaded to the runner
+        run: |
+          ln -s ~/data ./data
+      
+      - name: Login to OCR
+        uses: docker/login-action@v2
+        with:
+          registry: lhr.ocir.io
+          username: ${{ secrets.OCR_USERNAME }}
+          password: ${{ secrets.OCR_TOKEN }}
+
+      - name: Run nf-test
+        run: nf-test test tests/nextflow/*.test
