@@ -32,7 +32,7 @@ jobs:
       
       - name: softlink reference data # This has already been downloaded to the runner
         run: |
-          ln -s ~/data ./data && \
+          ln -s ~/data . && \
           tree data/relatedness/knowledge
       
       - name: Login to OCR
