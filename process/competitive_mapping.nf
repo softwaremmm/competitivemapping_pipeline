@@ -3,7 +3,9 @@ process competitiveMapping {
     container 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:1.1.1'
 
     cpus = 8
-    memory = "32GB"
+    memory = {
+        params.testing=="" ? "32GB" : "16GB"
+    }
 
     debug true
     pod label: "name", value: "competitive_mapping_pipeline:competitiveMapping"
