@@ -34,7 +34,7 @@ jobs:
         run: |
           mkdir data && \
           ln -s /mnt/dev-relatedness/knowledge/manifest ./data/manifest && \
-          tree data/relatedness
+          tree data/manifest
       
       - name: Login to OCR
         uses: docker/login-action@v2
