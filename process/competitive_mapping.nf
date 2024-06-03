@@ -1,6 +1,6 @@
 
 process competitiveMapping {
-    container 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:1.1.1'
+    container 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:1.1.2'
 
     cpus = 8
     memory = {
@@ -56,7 +56,7 @@ process competitiveMapping {
 }
 
 process has_enough_reads {
-    container 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:1.1.1'
+    container 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:1.1.2'
 
     cpus = 1
     memory = "128MB"
