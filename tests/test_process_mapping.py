@@ -1,6 +1,6 @@
 import json
 import pytest
-
+import filecmp
 from jsonschema import exceptions
 import pandas as pd
 
@@ -8,17 +8,23 @@ import competitivemapping.process_mapping as process_mapping
 
 
 def test_not_in_species(coverage_long, species_short):
-    not_in_coverage, not_in_species = process_mapping.unmatched_rnames(coverage_long, species_short)
+    not_in_coverage, not_in_species = process_mapping.unmatched_rnames(
+        coverage_long, species_short
+    )
     assert not_in_species.size > 0
 
 
 def test_not_in_coverage(coverage_short, species_long):
-    not_in_coverage, not_in_species = process_mapping.unmatched_rnames(coverage_short, species_long)
+    not_in_coverage, not_in_species = process_mapping.unmatched_rnames(
+        coverage_short, species_long
+    )
     assert not_in_coverage.size > 0
 
 
 def test_full_match(coverage_long, species_long):
-    not_in_coverage, not_in_species = process_mapping.unmatched_rnames(coverage_long, species_long)
+    not_in_coverage, not_in_species = process_mapping.unmatched_rnames(
+        coverage_long, species_long
+    )
     assert not_in_coverage.size == 0
     assert not_in_species.size == 0
 
@@ -33,11 +39,6 @@ def test_aggregate_contigs(expected_joined, expected_aggregated):
     pd.testing.assert_frame_equal(actual_aggregated, expected_aggregated)
 
 
-def test_lookup_and_aggregate(coverage_table, species_table, expected_aggregated):
-    actual_aggregated = process_mapping.determine_overall_coverage(coverage_table, species_table)
-    pd.testing.assert_frame_equal(actual_aggregated, expected_aggregated)
-
-
 def test_lookup_and_aggregate(coverage_table, species_short):
     with pytest.raises(ValueError):
         process_mapping.lookup_and_aggregate(coverage_table, species_short)
@@ -48,14 +49,20 @@ def test_validate_output(path_invalid_output):
         process_mapping.validate_output(path_invalid_output)
 
 
-def test_cli_entry_point(coverage_table_path, species_table_path, tmp_path, mocker, expected_output):
+def test_cli_entry_point(samples, species_table_path, tmp_path, mocker):
     tmp_file = str(tmp_path / "output.json")
-    args: list = [
+    args = [
         "process_mapping",
         "--coverage",
-        coverage_table_path,
+        samples["coverage"],
+        "--secondary_coverage",
+        samples["secondary_coverage"],
         "--species_list",
         species_table_path,
+        "--aln_summary",
+        samples["aln_stats"],
+        "--counts_summary",
+        samples["summary"],
         "--output",
         tmp_file,
     ]
@@ -67,7 +74,4 @@ def test_cli_entry_point(coverage_table_path, species_table_path, tmp_path, mock
 
     process_mapping.cli_entry_point()
 
-    with open(tmp_file, "r", encoding="utf-8") as file:
-        actual_output = json.load(file)
-
-    assert actual_output == expected_output
+    assert filecmp.cmp(tmp_file, samples["report"])

@@ -1,58 +1,72 @@
-[
-    {
-        "genome_name":"M.tuberculosis",
-        "length":4411532.0,
-        "coverage":30.33,
-        "numreads":996,
-        "meandepth":0.369744,
-        "total_reads":998,
-        "total_alns":1102,
-        "exclusive_reads":934,
-        "primary_reads":996,
-        "secondary_reads":2,
-        "supplementary_reads":0,
-        "supplementary_alns":72
+{
+    "total_read_counts": {
+        "mapped_reads": 998,
+        "unmapped_reads": 2
     },
-    {
-        "genome_name":"M.novocastrense",
-        "length":5624151.0,
-        "coverage":0.0126597,
-        "numreads":2,
-        "meandepth":0.000126597,
-        "total_reads":54,
-        "total_alns":55,
-        "exclusive_reads":0,
-        "primary_reads":2,
-        "secondary_reads":52,
-        "supplementary_reads":0,
-        "supplementary_alns":0
-    },
-    {
-        "genome_name":"M.spongiae",
-        "length":5581157.0,
-        "coverage":0.00584108,
-        "numreads":1,
-        "meandepth":0.0000584108,
-        "total_reads":1,
-        "total_alns":1,
-        "exclusive_reads":0,
-        "primary_reads":0,
-        "secondary_reads":0,
-        "supplementary_reads":1,
-        "supplementary_alns":1
-    },
-    {
-        "genome_name":"M.shinjukuense",
-        "length":4504020.0,
-        "coverage":0.00286411,
-        "numreads":1,
-        "meandepth":0.0000286411,
-        "total_reads":7,
-        "total_alns":7,
-        "exclusive_reads":0,
-        "primary_reads":0,
-        "secondary_reads":6,
-        "supplementary_reads":1,
-        "supplementary_alns":1
-    }
-]
+    "references": [
+        {
+            "genome_name": "M.tuberculosis",
+            "length": 4411532.0,
+            "coverage": 30.33,
+            "numreads": 996,
+            "meandepth": 0.369744,
+            "coverage_including_secondary": 30.9376,
+            "meandepth_including_secondary": 0.376994,
+            "total_reads": 998,
+            "total_alns": 1102,
+            "exclusive_reads": 934,
+            "primary_reads": 996,
+            "secondary_reads": 2,
+            "supplementary_reads": 0,
+            "supplementary_alns": 72
+        },
+        {
+            "genome_name": "M.novocastrense",
+            "length": 5624151.0,
+            "coverage": 0.0126597,
+            "numreads": 2,
+            "meandepth": 0.000126597,
+            "coverage_including_secondary": 1.26565,
+            "meandepth_including_secondary": 0.0132527,
+            "total_reads": 54,
+            "total_alns": 55,
+            "exclusive_reads": 0,
+            "primary_reads": 2,
+            "secondary_reads": 52,
+            "supplementary_reads": 0,
+            "supplementary_alns": 0
+        },
+        {
+            "genome_name": "M.spongiae",
+            "length": 5581157.0,
+            "coverage": 0.00584108,
+            "numreads": 1,
+            "meandepth": 5.84108e-05,
+            "coverage_including_secondary": 0.00584108,
+            "meandepth_including_secondary": 5.84108e-05,
+            "total_reads": 1,
+            "total_alns": 1,
+            "exclusive_reads": 0,
+            "primary_reads": 0,
+            "secondary_reads": 0,
+            "supplementary_reads": 1,
+            "supplementary_alns": 1
+        },
+        {
+            "genome_name": "M.shinjukuense",
+            "length": 4504020.0,
+            "coverage": 0.00286411,
+            "numreads": 1,
+            "meandepth": 2.86411e-05,
+            "coverage_including_secondary": 0.102597,
+            "meandepth_including_secondary": 0.00113832,
+            "total_reads": 7,
+            "total_alns": 7,
+            "exclusive_reads": 0,
+            "primary_reads": 0,
+            "secondary_reads": 6,
+            "supplementary_reads": 1,
+            "supplementary_alns": 1
+        }
+    ]
+}
