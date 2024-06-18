@@ -2,44 +2,110 @@
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "title": "Competitive Mapping",
     "description": "List of genomes and associated data from Competitive Mapping.",
-    "type": "array",
-    "items": {
-        "type": "object",
-        "properties": {
-            "genome_name": {
-                "type": "string",
-                "description": "The name of the reference genome"
+    "type": "object",
+    "properties": {
+        "total_read_counts": {
+            "type": "object",
+            "properties": {
+                "mapped_reads": {
+                    "type": "number",
+                    "description": "Total number of mapped reads"
+                },
+                "unmapped_reads": {
+                    "type": "number",
+                    "description": "Number of reads not mapped to any genome"
+                }
             },
-            "length": {
-                "type": "number",
-                "description": "Total length of genome, taken from reference data"
-            },
-            "coverage": {
-                "type": "number",
-                "description": "Genome coverage derived from `sum(contig coverage * contig length) / length`"
-            },
-            "numreads": {
-                "type": "number",
-                "description": "Number of reads mapped to the genome (sum of reads over contigs)"
-            },
-            "meandepth": {
-                "anyOf": [
-                    {
-                        "type": "number"
-                    },
-                    {
-                        "type": "null"
-                    }
-                ],
-                "description": "Depth derived from `sum(contig meandepth * contig length / length)`"
-            }
+            "required": [
+                "mapped_reads",
+                "unmapped_reads"
+            ]
         },
-        "required": [
-            "genome_name",
-            "length",
-            "coverage",
-            "numreads",
-            "meandepth"
-        ]
-    }
+        "references": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "genome_name": {
+                        "type": "string",
+                        "description": "The name of the reference genome"
+                    },
+                    "length": {
+                        "type": "number",
+                        "description": "Total length of genome, taken from reference data"
+                    },
+                    "coverage": {
+                        "type": "number",
+                        "description": "Genome coverage derived from `sum(contig coverage * contig length) / length`"
+                    },
+                    "numreads": {
+                        "type": "number",
+                        "description": "Number of reads mapped to the genome (sum of reads over contigs)"
+                    },
+                    "meandepth": {
+                        "anyOf": [
+                            {
+                                "type": "number"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "description": "Depth derived from `sum(contig meandepth * contig length / length)`"
+                    },
+                    "coverage_including_secondary": {
+                        "type": "number",
+                        "description": "Genome coverage including secondary alignments"
+                    },
+                    "meandepth_including_secondary": {
+                        "anyOf": [
+                            {
+                                "type": "number"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "description": "meandepth including secondary alignments"
+                    },
+                    "total_reads": {
+                        "type": "number",
+                        "description": "Total number of reads mapped to the genome"
+                    },
+                    "total_alns": {
+                        "type": "number",
+                        "description": "Total number of alignments to the genome"
+                    },
+                    "exclusive_reads": {
+                        "type": "number",
+                        "description": "Number of reads mapped exclusively to the genome"
+                    },
+                    "primary_reads": {
+                        "type": "number",
+                        "description": "Number of reads mapped as primary to the genome"
+                    },
+                    "secondary_reads": {
+                        "type": "number",
+                        "description": "Number of reads mapped as secondary, and not primary, to the genome"
+                    },
+                    "supplementary_reads": {
+                        "type": "number",
+                        "description": "Number of reads mapped as supplementary, and not primary, to the genome"
+                    },
+                    "supplementary_alns": {
+                        "type": "number",
+                        "description": "Number of supplementary alignments to the genome"
+                    }
+                },
+                "required": [
+                    "genome_name",
+                    "length",
+                    "coverage"
+                ]
+            }
+        }
+    },
+    "required": [
+        "references"
+    ]
 }

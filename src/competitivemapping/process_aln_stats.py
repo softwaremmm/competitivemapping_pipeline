@@ -1,6 +1,7 @@
 """Script to process a bam file and give summary of
 number of reads and alignmments for each reference"""
 
+import json
 import typing
 import argparse
 from pysam import AlignmentFile  # pylint: disable = no-name-in-module
@@ -27,7 +28,7 @@ def get_alignment_stats(
     name_mapping,
     exclude_secondary=False,
     exclude_supplementary=False,
-) -> pd.DataFrame:
+) -> tuple[dict, pd.DataFrame]:
     """Iterate through all alignments in the bam file and produce a summary by reference
 
     Args:
@@ -41,7 +42,7 @@ def get_alignment_stats(
         ValueError: if a read has multiple primary alignments
 
     Returns:
-        pd.DataFrame: table with summary of alignments by reference
+        tuple[dict, pd.DataFrame]: overall stats dict, table with summary of alignments by reference
     """
     with AlignmentFile(bam_file, "rb") as bam:  # ignore: no-member
         # This is a mapping from the chomosome id to the human readable name
@@ -51,8 +52,17 @@ def get_alignment_stats(
         read_info: dict[str, dict[str, typing.Any]] = {}
         chroms = set()
 
+        overall_stats = {
+            "mapped_reads": 0,
+            "unmapped_reads": 0,
+        }
+
         for read in bam:
-            if read.is_unmapped or read.is_qcfail or read.is_duplicate:
+            if read.is_unmapped:
+                overall_stats["unmapped_reads"] += 1
+                continue
+
+            if read.is_qcfail or read.is_duplicate:
                 continue
 
             if exclude_secondary and read.is_secondary:
@@ -83,7 +93,9 @@ def get_alignment_stats(
                 assert read_info[query]["primary"] == "", f"Multiple Primary Reads! \n{query=}\n{read=}"
                 read_info[query]["primary"] = chrom_name
 
-        return summarise_by_chrom(chroms, read_info)
+        overall_stats["mapped_reads"] = len(read_info)
+
+        return overall_stats, summarise_by_chrom(chroms, read_info)
 
 
 # pylint: disable-next=too-many-branches
@@ -148,18 +160,22 @@ def cli_entry_point():
     parser.add_argument("--bam", help="BAM file to process", required=True)
     parser.add_argument("--species_list", help="Reference names file", required=True)
     parser.add_argument("--output", help="Output file", required=True)
+    parser.add_argument("--output_summary", help="Output file for summary", required=True)
     parser.add_argument("--exclude_secondary", action="store_true", default=False)
     parser.add_argument("--exclude_supplementary", action="store_true", default=False)
     args = parser.parse_args()
 
     name_mapping = get_name_mapping(args.species_list)
-    df = get_alignment_stats(
+    overall_stats, df = get_alignment_stats(
         args.bam,
         name_mapping,
         exclude_secondary=args.exclude_secondary,
         exclude_supplementary=args.exclude_supplementary,
     )
     df.to_csv(args.output, index=False)
+
+    with open(args.output_summary, "w", encoding="utf-8") as f:
+        json.dump(overall_stats, f, indent=4)
 
 
 if __name__ == "__main__":

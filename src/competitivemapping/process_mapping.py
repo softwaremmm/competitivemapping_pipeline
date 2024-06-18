@@ -139,9 +139,19 @@ def cli_entry_point() -> None:
     args = competitivemapping.cli_args.Arguments(sys.argv[1:])
 
     coverage_table = pd.read_table(args.coverage)
+    secondary_coverage_table = pd.read_table(args.secondary_coverage)
     species_table = pd.read_csv(args.species_list)
 
     aggregated = lookup_and_aggregate(coverage_table, species_table)
+    secondary_aggregated = lookup_and_aggregate(secondary_coverage_table, species_table)
+    secondary_aggregated = secondary_aggregated.rename(
+        columns={
+            "coverage": "coverage_including_secondary",
+            "meandepth": "meandepth_including_secondary",
+        }
+    )[["genome_name", "coverage_including_secondary", "meandepth_including_secondary"]]
+
+    aggregated = aggregated.merge(secondary_aggregated, on="genome_name", how="left")
 
     if args.aln_summary:
         # Align summary has more detailed break down of number of reads/alns
@@ -150,6 +160,12 @@ def cli_entry_point() -> None:
         # numreads can now be given more precisely
         aggregated["numreads"] = aggregated["primary_reads"] + aggregated["supplementary_reads"]
 
-    aggregated.to_json(args.output, orient="records", indent=4)
+    output = {}
+    if args.counts_summary:
+        with open(args.counts_summary, "r", encoding="utf-8") as file:
+            output["total_read_counts"] = json.load(file)
+    output["references"] = aggregated.to_dict(orient="records")
+    with open(args.output, "w", encoding="utf-8") as file:
+        json.dump(output, file, indent=4)
 
     validate_output(Path(args.output))
