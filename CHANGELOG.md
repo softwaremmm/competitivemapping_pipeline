@@ -1,3 +1,9 @@
+## 1.2.0 (2024-06-27)
+
+### Feat
+
+- add overall summary and secondary coverage stats
+
 ## 1.1.2 (2024-06-03)
 
 ### Fix
