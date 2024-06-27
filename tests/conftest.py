@@ -62,22 +62,51 @@ def path_invalid_output() -> pd.DataFrame:
 
 @pytest.fixture
 def expected_output() -> pd.DataFrame:
-    with open("test_data/species_comparison_report.json", "r", encoding="utf-8") as file:
+    with open(
+        "test_data/species_comparison_report.json", "r", encoding="utf-8"
+    ) as file:
         output = json.load(file)
     return output
 
-@pytest.fixture
-def illumina_bam() -> str:
-    return "test_data/TB_10k/sorted_aln.bam"
 
-@pytest.fixture
-def illumina_aln_stats() -> str:
-    return "test_data/TB_10k/aln_stats.csv"
+TB_10K = {
+    "bam": "test_data/TB_10k/sorted_aln.bam",
+    "aln_stats": "test_data/TB_10k/aln_stats.csv",
+    "summary": "test_data/TB_10k/summary.json",
+    "coverage": "test_data/TB_10k/coverage.tsv",
+    "secondary_coverage": "test_data/TB_10k/coverage.secondary.tsv",
+    "report": "test_data/TB_10k/species_comparison_report.json",
+}
 
-@pytest.fixture
-def ont_bam() -> str:
-    return "test_data/TB_ont/sorted_aln.bam"
+TB_ONT = {
+    "bam": "test_data/TB_ont/sorted_aln.bam",
+    "aln_stats": "test_data/TB_ont/aln_stats.csv",
+    "summary": "test_data/TB_ont/summary.json",
+    "coverage": "test_data/TB_ont/coverage.tsv",
+    "secondary_coverage": "test_data/TB_ont/coverage.secondary.tsv",
+    "report": "test_data/TB_ont/species_comparison_report.json",
+}
 
-@pytest.fixture
-def ont_aln_stats() -> str:
-    return "test_data/TB_ont/aln_stats.csv"
+CHLORO_10k = {
+    "bam": "test_data/chloro_10k/sorted_aln.bam",
+    "aln_stats": "test_data/chloro_10k/aln_stats.csv",
+    "summary": "test_data/chloro_10k/summary.json",
+    "coverage": "test_data/chloro_10k/coverage.tsv",
+    "secondary_coverage": "test_data/chloro_10k/coverage.secondary.tsv",
+    "report": "test_data/chloro_10k/species_comparison_report.json",
+}
+
+@pytest.fixture(
+    params=[
+        TB_10K,
+        TB_ONT,
+        CHLORO_10k,
+    ],
+    ids=[
+        "illumina",
+        "ont",
+        "chloro",
+    ],
+)
+def samples(request) -> dict:
+    return request.param

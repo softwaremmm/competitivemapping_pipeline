@@ -1,10 +1,3 @@
-if [ ${workflow.profile} == 'kubernetes' ]
-then
-    echo "Running with kubernetes"
-    /bin/bash ${projectDir}/lib/s3fs_setup.sh $WORKSPACE
-    trap 'PROCESS_EXIT=\$?; /bin/bash $projectDir/lib/s3fs_teardown.sh; exit \$PROCESS_EXIT;' EXIT
-fi
-
 set +e
 
 touch ${competitive_mapping_error}
@@ -24,7 +17,8 @@ samtools sort -@ $task.cpus -o sorted_alignments.bam alignments.sam 2>>${competi
 
 # Generate a TSV file summarising coverage against each reference genome
 # can use --excl-flags 1540 to include secondary alignments
-samtools coverage sorted_alignments.bam > ${cov} 2>>${competitive_mapping_error}
+samtools coverage sorted_alignments.bam > coverage.tsv 2>>${competitive_mapping_error}
+samtools coverage --excl-flags 1540 sorted_alignments.bam > coverage.secondary.tsv 2>>${competitive_mapping_error}
 
 # Index alignments
 samtools index sorted_alignments.bam index.bai 2>>${competitive_mapping_error}
@@ -57,9 +51,9 @@ fi
 
 # Generate alignment summary csv
 process_aln_stats --bam sorted_alignments.bam --species_list ${species_list} \
-    --output aln_summary.csv \
+    --output aln_summary.csv --output_summary counts_summary.json \
     
 
 # Generate competitive mapping json
-process_mapping --coverage ${cov} --species_list ${species_list} \
-    --aln_summary aln_summary.csv --output ${competitive_mapping_report}
+process_mapping --coverage coverage.tsv --secondary_coverage coverage.secondary.tsv --species_list ${species_list} \
+    --aln_summary aln_summary.csv --counts_summary counts_summary.json --output ${competitive_mapping_report}

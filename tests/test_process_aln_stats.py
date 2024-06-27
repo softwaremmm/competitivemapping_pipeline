@@ -68,23 +68,22 @@ def test_summarise_by_chrom():
     df.reset_index(inplace=True, names="genome_name")
 
     result = process_aln_stats.summarise_by_chrom(chroms, read_info)
-    print(df.reset_index(drop=True))
-    print(result.reset_index(drop=True))
     assert result.reset_index(drop=True).equals(df.reset_index(drop=True))
 
 
-def test_illumina(
-    illumina_bam, illumina_aln_stats, species_table_path, tmp_path, mocker
-):
-    tmp_file = str(tmp_path / "aln.csv")
+def test_aln_stats(samples, species_table_path, tmp_path, mocker):
+    tmp_stats = str(tmp_path / "aln.csv")
+    tmp_summary = str(tmp_path / "summary.csv")
     args = [
         "process_aln_stats",
         "--bam",
-        illumina_bam,
+        samples["bam"],
         "--species_list",
         species_table_path,
         "--output",
-        tmp_file,
+        tmp_stats,
+        "--output_summary",
+        tmp_summary,
     ]
 
     mocker.patch(
@@ -94,41 +93,23 @@ def test_illumina(
 
     process_aln_stats.cli_entry_point()
 
-    assert filecmp.cmp(tmp_file, illumina_aln_stats)
+    assert filecmp.cmp(tmp_stats, samples["aln_stats"])
+    assert filecmp.cmp(tmp_summary, samples["summary"])
 
 
-def test_ont(ont_bam, ont_aln_stats, species_table_path, tmp_path, mocker):
-    tmp_file = str(tmp_path / "aln.csv")
+def test_no_secondary(samples, species_table_path, tmp_path, mocker):
+    tmp_stats = str(tmp_path / "aln.csv")
+    tmp_summary = str(tmp_path / "summary.csv")
     args = [
         "process_aln_stats",
         "--bam",
-        ont_bam,
+        samples["bam"],
         "--species_list",
         species_table_path,
         "--output",
-        tmp_file,
-    ]
-
-    mocker.patch(
-        "sys.argv",
-        args,
-    )
-
-    process_aln_stats.cli_entry_point()
-
-    assert filecmp.cmp(tmp_file, ont_aln_stats)
-
-
-def test_no_secondary(illumina_bam, species_table_path, tmp_path, mocker):
-    tmp_file = str(tmp_path / "aln.csv")
-    args = [
-        "process_aln_stats",
-        "--bam",
-        illumina_bam,
-        "--species_list",
-        species_table_path,
-        "--output",
-        tmp_file,
+        tmp_stats,
+        "--output_summary",
+        tmp_summary,
         "--exclude_secondary",
     ]
 
@@ -138,5 +119,6 @@ def test_no_secondary(illumina_bam, species_table_path, tmp_path, mocker):
     )
 
     process_aln_stats.cli_entry_point()
-    df = pd.read_csv(tmp_file)
+
+    df = pd.read_csv(tmp_stats)
     assert (df["secondary_reads"] == 0).all()

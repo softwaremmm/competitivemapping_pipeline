@@ -1,6 +1,8 @@
 
 process competitiveMapping {
-    container 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:1.1.2'
+    container = {
+        params.test_container=="" ? 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:1.1.2' : params.test_container
+    }
 
     cpus = 8
     memory = {
@@ -29,7 +31,6 @@ process competitiveMapping {
     competitive_mapping_file_2 = "reads_for_assembly_0_2.fastq.gz"
     competitive_mapping_report = "species_comparison_report.json"
     competitive_mapping_error = "species_comparison_error.json"
-    cov = "coverage.tsv"
     h37rv_rname="AL123456.3"
 
     template "run_competitive_mapping.sh"
@@ -75,13 +76,7 @@ process has_enough_reads {
 
     script:
     """
-    if [ ${workflow.profile} == 'kubernetes' ]
-    then
-        /bin/bash ${projectDir}/lib/s3fs_setup.sh $WORKSPACE
-        trap 'PROCESS_EXIT=\$?; /bin/bash ${projectDir}/lib/s3fs_teardown.sh; exit \$PROCESS_EXIT;' EXIT
-    fi
-
-    num_reads=\$(jq '.[] | select(.genome_name == "M.tuberculosis") | .numreads' ${json})
+    num_reads=\$(jq '.references[] | select(.genome_name == "M.tuberculosis") | .numreads' ${json})
 
     if  [ \$num_reads -ge ${threshold} ]
     then
