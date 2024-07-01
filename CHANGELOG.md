@@ -1,3 +1,9 @@
+## 1.2.1 (2024-07-01)
+
+### Fix
+
+- ensure empty secondary reads is valid
+
 ## 1.2.0 (2024-06-27)
 
 ### Feat
