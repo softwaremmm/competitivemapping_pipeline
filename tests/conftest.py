@@ -62,9 +62,7 @@ def path_invalid_output() -> pd.DataFrame:
 
 @pytest.fixture
 def expected_output() -> pd.DataFrame:
-    with open(
-        "test_data/species_comparison_report.json", "r", encoding="utf-8"
-    ) as file:
+    with open("test_data/species_comparison_report.json", "r", encoding="utf-8") as file:
         output = json.load(file)
     return output
 
@@ -76,6 +74,7 @@ TB_10K = {
     "coverage": "test_data/TB_10k/coverage.tsv",
     "secondary_coverage": "test_data/TB_10k/coverage.secondary.tsv",
     "report": "test_data/TB_10k/species_comparison_report.json",
+    "report_no_secondary": "test_data/TB_10k/species_comparison_report_no_secondary.json",
 }
 
 TB_ONT = {
@@ -85,6 +84,7 @@ TB_ONT = {
     "coverage": "test_data/TB_ont/coverage.tsv",
     "secondary_coverage": "test_data/TB_ont/coverage.secondary.tsv",
     "report": "test_data/TB_ont/species_comparison_report.json",
+    "report_no_secondary": "test_data/TB_ont/species_comparison_report_no_secondary.json",
 }
 
 CHLORO_10k = {
@@ -94,7 +94,9 @@ CHLORO_10k = {
     "coverage": "test_data/chloro_10k/coverage.tsv",
     "secondary_coverage": "test_data/chloro_10k/coverage.secondary.tsv",
     "report": "test_data/chloro_10k/species_comparison_report.json",
+    "report_no_secondary": "test_data/chloro_10k/species_comparison_report_no_secondary.json",
 }
+
 
 @pytest.fixture(
     params=[

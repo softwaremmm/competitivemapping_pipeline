@@ -139,19 +139,23 @@ def cli_entry_point() -> None:
     args = competitivemapping.cli_args.Arguments(sys.argv[1:])
 
     coverage_table = pd.read_table(args.coverage)
-    secondary_coverage_table = pd.read_table(args.secondary_coverage)
     species_table = pd.read_csv(args.species_list)
 
     aggregated = lookup_and_aggregate(coverage_table, species_table)
-    secondary_aggregated = lookup_and_aggregate(secondary_coverage_table, species_table)
-    secondary_aggregated = secondary_aggregated.rename(
-        columns={
-            "coverage": "coverage_including_secondary",
-            "meandepth": "meandepth_including_secondary",
-        }
-    )[["genome_name", "coverage_including_secondary", "meandepth_including_secondary"]]
+    try:
+        secondary_coverage_table = pd.read_table(args.secondary_coverage)
+        secondary_aggregated = lookup_and_aggregate(secondary_coverage_table, species_table)
+        secondary_aggregated = secondary_aggregated.rename(
+            columns={
+                "coverage": "coverage_including_secondary",
+                "meandepth": "meandepth_including_secondary",
+            }
+        )[["genome_name", "coverage_including_secondary", "meandepth_including_secondary"]]
 
-    aggregated = aggregated.merge(secondary_aggregated, on="genome_name", how="left")
+        aggregated = aggregated.merge(secondary_aggregated, on="genome_name", how="left")
+    except pd.errors.EmptyDataError:
+        # This should be fine, as it just means there is no secondary coverage file
+        logging.info("No data found within secondary coverage file")
 
     if args.aln_summary:
         # Align summary has more detailed break down of number of reads/alns

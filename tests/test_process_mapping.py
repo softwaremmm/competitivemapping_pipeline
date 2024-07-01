@@ -8,23 +8,17 @@ import competitivemapping.process_mapping as process_mapping
 
 
 def test_not_in_species(coverage_long, species_short):
-    not_in_coverage, not_in_species = process_mapping.unmatched_rnames(
-        coverage_long, species_short
-    )
+    not_in_coverage, not_in_species = process_mapping.unmatched_rnames(coverage_long, species_short)
     assert not_in_species.size > 0
 
 
 def test_not_in_coverage(coverage_short, species_long):
-    not_in_coverage, not_in_species = process_mapping.unmatched_rnames(
-        coverage_short, species_long
-    )
+    not_in_coverage, not_in_species = process_mapping.unmatched_rnames(coverage_short, species_long)
     assert not_in_coverage.size > 0
 
 
 def test_full_match(coverage_long, species_long):
-    not_in_coverage, not_in_species = process_mapping.unmatched_rnames(
-        coverage_long, species_long
-    )
+    not_in_coverage, not_in_species = process_mapping.unmatched_rnames(coverage_long, species_long)
     assert not_in_coverage.size == 0
     assert not_in_species.size == 0
 
@@ -75,3 +69,35 @@ def test_cli_entry_point(samples, species_table_path, tmp_path, mocker):
     process_mapping.cli_entry_point()
 
     assert filecmp.cmp(tmp_file, samples["report"])
+
+
+def test_cli_entry_point_empty_seconday_coverage(samples, species_table_path, tmp_path, mocker):
+    tmp_file = str(tmp_path / "output.json")
+    args = [
+        "process_mapping",
+        "--coverage",
+        samples["coverage"],
+        "--secondary_coverage",
+        "test_data/empty-secondary-coverage.tsv",
+        "--species_list",
+        species_table_path,
+        "--aln_summary",
+        samples["aln_stats"],
+        "--counts_summary",
+        samples["summary"],
+        "--output",
+        tmp_file,
+    ]
+
+    mocker.patch(
+        "sys.argv",
+        args,
+    )
+
+    process_mapping.cli_entry_point()
+
+    # Not passing secondary reads should give a different (valid) output
+    assert not filecmp.cmp(tmp_file, samples["report"])
+
+    # Regression that it should match the output without secondary reads
+    assert filecmp.cmp(tmp_file, samples["report_no_secondary"])
