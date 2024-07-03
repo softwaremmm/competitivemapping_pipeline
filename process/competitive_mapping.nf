@@ -6,7 +6,7 @@ process competitiveMapping {
 
     cpus = 8
     memory = {
-        params.testing=="" ? "32GB" : "16GB"
+        params.testing=="" ? "48GB" : "16GB"
     }
 
     debug true

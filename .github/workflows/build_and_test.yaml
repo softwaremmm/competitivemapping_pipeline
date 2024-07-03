@@ -33,7 +33,7 @@ jobs:
       - name: softlink reference data # This has already been downloaded to the runner
         run: |
           mkdir data && \
-          ln -s /mnt/dev-relatedness/knowledge/manifest ./data/manifest && \
+          ln -s /mnt/dev-knowledge/manifest ./data/manifest && \
           tree data/manifest
       
       - name: Login to OCR
