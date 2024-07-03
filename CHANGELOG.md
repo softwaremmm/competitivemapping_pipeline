@@ -1,3 +1,11 @@
+## 1.2.2 (2024-07-03)
+
+### Fix
+
+- test using knowledge bucket
+- leave test mem at 16
+- try higher memory
+
 ## 1.2.1 (2024-07-01)
 
 ### Fix
