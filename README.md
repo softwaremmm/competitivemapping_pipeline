@@ -139,3 +139,6 @@ Tests are written in `pytest`. New code should be covered by tests.
 If you want to use the Competitive Mapping Pipeline as subworkflow in your pipeline, use the competitive_mapping named workflow.
 
 
+## Manifest remarks
+There is a reference (AP018410.1 - M.pseudoshottsii) which is in the manifest species list, but not in the manifest itself.
+This will be flagged with a warning when running the code.
