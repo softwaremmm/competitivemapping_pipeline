@@ -15,10 +15,13 @@ fi
 # Sort competitive mapping output
 samtools sort -@ $task.cpus -o sorted_alignments.bam alignments.sam 2>>${competitive_mapping_error}
 
+# Try using sam file for coverage. Might avoid segmentation fault
+samtools view -h -o sorted_alignments.sam sorted_alignments.bam 2>>${competitive_mapping_error}
+
 # Generate a TSV file summarising coverage against each reference genome
 # can use --excl-flags 1540 to include secondary alignments
-samtools coverage sorted_alignments.bam -o coverage.tsv 2>>${competitive_mapping_error}
-samtools coverage --excl-flags 1540 sorted_alignments.bam -o coverage.secondary.tsv 2>>${competitive_mapping_error}
+samtools coverage --excl-flags 1540 sorted_alignments.sam -o coverage.secondary.tsv 2>>${competitive_mapping_error}
+samtools coverage sorted_alignments.sam -o coverage.tsv 2>>${competitive_mapping_error}
 
 # Index alignments
 samtools index sorted_alignments.bam index.bai 2>>${competitive_mapping_error}
