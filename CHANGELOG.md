@@ -1,3 +1,9 @@
+## 1.2.4 (2024-07-08)
+
+### Fix
+
+- try using sam file for coverage
+
 ## 1.2.3 (2024-07-04)
 
 ### Fix
