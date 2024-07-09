@@ -25,7 +25,7 @@ nextflow_process {
             with(process.out.cm_report) {
                 assert size() == 1
                 assert get(0).contains("species_comparison_report.json")
-                assert path(get(0)).json == path("$projectDir/test_data/TB_10k/species_comparison_report.json").json
+                assert path(get(0)).json == path("$projectDir/test_data/TB_10k/species_comparison_report_no_secondary.json").json
             }
 
             with(process.out.cm_error) {
@@ -62,7 +62,7 @@ nextflow_process {
             with(process.out.cm_report) {
                 assert size() == 1
                 assert get(0).contains("species_comparison_report.json")
-                assert path(get(0)).json == path("$projectDir/test_data/chloro_10k/species_comparison_report.json").json
+                assert path(get(0)).json == path("$projectDir/test_data/chloro_10k/species_comparison_report_no_secondary.json").json
             }
 
             with(process.out.cm_error) {
@@ -99,7 +99,7 @@ nextflow_process {
             with(process.out.cm_report) {
                 assert size() == 1
                 assert get(0).contains("species_comparison_report.json")
-                assert path(get(0)).json == path("$projectDir/test_data/TB_ont/species_comparison_report.json").json
+                assert path(get(0)).json == path("$projectDir/test_data/TB_ont/species_comparison_report_no_secondary.json").json
             }
 
             with(process.out.cm_error) {
