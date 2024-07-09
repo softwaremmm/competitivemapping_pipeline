@@ -23,6 +23,7 @@ class Arguments:  # pylint: disable=too-few-public-methods
             "--secondary_coverage",
             dest="secondary_coverage",
             help="Path to file created using the samtools coverage command with secondary reads included",
+            required=False,
         )
         parser.add_argument(
             "--species_list",
@@ -51,7 +52,7 @@ class Arguments:  # pylint: disable=too-few-public-methods
         args = parser.parse_args(argv)
 
         self.coverage = Path(args.coverage)
-        self.secondary_coverage = Path(args.secondary_coverage)
+        self.secondary_coverage = Path(args.secondary_coverage) if args.secondary_coverage else None
         self.species_list = Path(args.species_list)
         self.aln_summary = Path(args.aln_summary) if args.aln_summary else None
         self.counts_summary = Path(args.counts_summary) if args.counts_summary else None

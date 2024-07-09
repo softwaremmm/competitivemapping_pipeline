@@ -101,3 +101,32 @@ def test_cli_entry_point_empty_seconday_coverage(samples, species_table_path, tm
 
     # Regression that it should match the output without secondary reads
     assert filecmp.cmp(tmp_file, samples["report_no_secondary"])
+
+def test_cli_entry_point_no_seconday_coverage(samples, species_table_path, tmp_path, mocker):
+    tmp_file = str(tmp_path / "output.json")
+    args = [
+        "process_mapping",
+        "--coverage",
+        samples["coverage"],
+        "--species_list",
+        species_table_path,
+        "--aln_summary",
+        samples["aln_stats"],
+        "--counts_summary",
+        samples["summary"],
+        "--output",
+        tmp_file,
+    ]
+
+    mocker.patch(
+        "sys.argv",
+        args,
+    )
+
+    process_mapping.cli_entry_point()
+
+    # Not passing secondary reads should give a different (valid) output
+    assert not filecmp.cmp(tmp_file, samples["report"])
+
+    # Regression that it should match the output without secondary reads
+    assert filecmp.cmp(tmp_file, samples["report_no_secondary"])
