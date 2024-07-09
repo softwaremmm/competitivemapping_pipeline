@@ -1,3 +1,9 @@
+## 1.2.5 (2024-07-09)
+
+### Fix
+
+- make secondary cov optional and remove from pipeline
+
 ## 1.2.4 (2024-07-08)
 
 ### Fix
