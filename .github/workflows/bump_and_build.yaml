@@ -5,6 +5,11 @@ on:
     branches:
       - main
 
+env:
+  REGISTRY: lhr.ocir.io
+  IMAGE_NAME: lrbvkel2wjot/gpas/competitivemapping_pipeline
+  IMAGE_NAME_GPAS_LTD: lr3yhdniv6gu/competitivemapping_pipeline
+
 jobs:
   bump-version:
     if: ${{ ! startsWith(github.event.head_commit.message, 'bump:') }}
@@ -27,16 +32,16 @@ jobs:
         run: |
           echo "$REVISION"
 
-      - name: Set full image registry tag
-        run: |
-          echo "FULL_IMAGE_TAG=lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:$REVISION" >> $GITHUB_ENV
-
       - name: Login to OCR
         uses: docker/login-action@v2
         with:
-          registry: lhr.ocir.io
+          registry: ${{ env.REGISTRY}}
           username: ${{ secrets.OCR_USERNAME }}
           password: ${{ secrets.OCR_TOKEN }}
+
+      - name: Set full image registry tag
+        run: |
+          echo "FULL_IMAGE_TAG=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$REVISION" >> $GITHUB_ENV
 
       - name: Build and push
         id: build_and_push
@@ -47,7 +52,28 @@ jobs:
           file: Dockerfile
           tags: |
             ${{ env.FULL_IMAGE_TAG }}
-          no-cache: true
+
+      - name: Login to gpasltd OCIR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.OCR_CONTAINER_USERNAME_GPASLTD }}
+          password: ${{ secrets.OCR_CONTAINER_TOKEN_GPASLTD }}
+
+      - name: Set full image registry tag
+        run: |
+          echo "FULL_IMAGE_TAG=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_GPAS_LTD }}:$REVISION" >> $GITHUB_ENV
+
+      - name: Build and push
+        id: build_and_push_gpas_ltd
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          file: Dockerfile
+          tags: |
+            ${{ env.FULL_IMAGE_TAG }}
+
       - name: Docker digest
         run: echo ${{ steps.build_and_push.outputs.digest }}
 
@@ -58,4 +84,3 @@ jobs:
           tag_name: ${{ env.REVISION }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    
