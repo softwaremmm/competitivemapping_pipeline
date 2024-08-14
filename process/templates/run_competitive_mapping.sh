@@ -4,6 +4,7 @@ touch ${competitive_mapping_error}
 
 # Perform competitive mapping
 # note that sr preset excludes secondary by default, so would need to override to keep secondary alignments
+# -N 1000 is used to increase the maximum number of secondary alignments. The threshold of 1000 is arbitrary.
 if [ $seq_platform == 'ont' ]
 then
     minimap2 -ax map-ont -t $task.cpus --secondary yes -N 1000 ${manifest} ${fqs} > alignments.sam 2>>${competitive_mapping_error}
