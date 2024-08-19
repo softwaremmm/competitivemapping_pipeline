@@ -14,9 +14,6 @@ RUN conda install minimap2~=2.26
 # Install samtools
 RUN conda install samtools~=1.17
 
-# Install csvkit
-RUN conda install csvkit~=1.1.1
-
 # Install jq
 RUN conda install jq=1.6
 
