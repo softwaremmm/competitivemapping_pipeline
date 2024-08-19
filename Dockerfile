@@ -20,8 +20,6 @@ RUN conda install csvkit~=1.1.1
 # Install jq
 RUN conda install jq=1.6
 
-RUN conda install s3fs-fuse
-
 # Install Python code for processing output of minimap and samtools
 COPY ./src /app/src
 COPY ./pyproject.toml /app/pyproject.toml
