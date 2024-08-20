@@ -78,6 +78,6 @@ process has_enough_reads {
 
     script:
     """
-    check_read_count --json ${json} --threshold ${threshold}
+    check_read_count --json_file_path ${json} --read_threshold ${threshold}
     """
 }
