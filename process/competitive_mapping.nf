@@ -76,13 +76,6 @@ process has_enough_reads {
 
     script:
     """
-    num_reads=\$(jq '.references[] | select(.genome_name == "M.tuberculosis") | .numreads' ${json})
-
-    if  [ \$num_reads -ge ${threshold} ]
-    then
-        echo "true" | tr -d '\n'
-    else
-        echo "false" | tr -d '\n'
-    fi
+    check_read_count --json ${json} --threshold ${threshold}
     """
 }
