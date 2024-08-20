@@ -28,7 +28,7 @@ def count_reads(json_file_path: str, genome_name: str = "M.tuberculosis") -> int
     num_reads = None
     for reference in data.get("references", []):
         if reference.get("genome_name") == genome_name:
-            num_reads = reference.get("numreads", None)
+            num_reads = int(reference.get("numreads", None))
             break
 
     if not isinstance(num_reads, int):
@@ -66,6 +66,8 @@ def cli_entry_point():
     )
     parser.add_argument("--read_threshold", help="Threshold number of reads", required=True)
     args = parser.parse_args()
+
+    logger.info(f"Checking if number of reads are above threshold of {args.read_threshold} in {args.json_file_path}")
 
     # Using print statement as Nextflow expects output on stdout, without a newline
     print(check_threshold(count_reads(args.json_file_path), args.read_threshold), end="")

@@ -62,7 +62,9 @@ def path_invalid_output() -> pd.DataFrame:
 
 @pytest.fixture
 def expected_output() -> pd.DataFrame:
-    with open("test_data/species_comparison_report.json", "r", encoding="utf-8") as file:
+    with open(
+        "test_data/species_comparison_report.json", "r", encoding="utf-8"
+    ) as file:
         output = json.load(file)
     return output
 
@@ -112,3 +114,26 @@ CHLORO_10k = {
 )
 def samples(request) -> dict:
     return request.param
+
+
+# Fixtures for the test cases in test_check_read_count.py
+
+
+@pytest.fixture
+def enough_tb() -> Path:
+    return Path("tests/samples/json/enough_tb.json")
+
+
+@pytest.fixture
+def not_enough_tb() -> Path:
+    return Path("tests/samples/json/not_enough_tb.json")
+
+
+@pytest.fixture
+def no_genome_name_key() -> Path:
+    return Path("tests/samples/json/no_genome_name_key.json")
+
+
+@pytest.fixture
+def no_mb_value() -> Path:
+    return Path("tests/samples/json/no_mb_value.json")
