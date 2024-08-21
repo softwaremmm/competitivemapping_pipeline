@@ -1,6 +1,7 @@
 # pylint: disable=W1203
 
 """Check if the number of reads for a genome is above a threshold."""
+
 import argparse
 import json
 import logging
@@ -56,6 +57,20 @@ def check_threshold(num_reads: int, threshold: int) -> bool:
     return above
 
 
+def bool_to_lowercase_string(value: bool) -> str:
+    """Convert a boolean value to a lowercase string.
+
+    Args:
+        value (bool): A boolean value.
+
+    Returns:
+        str: Lowercase string representation of the boolean value.
+    """
+    if value is True:
+        return "true"
+    return "false"
+
+
 def cli_entry_point():
     """Main function for the script"""
     parser = argparse.ArgumentParser(description="Check if number of reads are above threshold")
@@ -70,7 +85,13 @@ def cli_entry_point():
     logger.info(f"Checking if number of reads are above threshold of {args.read_threshold} in {args.json_file_path}")
 
     # Using print statement as Nextflow expects output on stdout, without a newline
-    print(check_threshold(count_reads(args.json_file_path), args.read_threshold), end="")
+    # Nextflow expects the output to be in lowercase
+    # Nextflow expects failures to be reported as "false"
+    enough = False
+    try:
+        enough = check_threshold(count_reads(args.json_file_path), int(args.read_threshold))
+    finally:
+        print(bool_to_lowercase_string(enough), end="")
 
 
 if __name__ == "__main__":
