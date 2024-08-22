@@ -33,7 +33,8 @@ def count_reads(json_file_path: str, genome_name: str = "M.tuberculosis") -> int
             break
 
     if not isinstance(num_reads, int):
-        raise ValueError(f"Number of reads for {genome_name} not found in JSON file")
+        logger.info(f"Number of reads for {genome_name} not found in JSON file")
+        return None
 
     logger.info(f"Number of reads for {genome_name}: {num_reads}")
     return num_reads
@@ -84,14 +85,17 @@ def cli_entry_point():
 
     logger.info(f"Checking if number of reads are above threshold of {args.read_threshold} in {args.json_file_path}")
 
-    # Using print statement as Nextflow expects output on stdout, without a newline
+    # Using print statements as Nextflow expects output on stdout, without a newline
     # Nextflow expects the output to be in lowercase
-    # Nextflow expects failures to be reported as "false"
-    enough = False
-    try:
-        enough = check_threshold(count_reads(args.json_file_path), int(args.read_threshold))
-    finally:
-        print(bool_to_lowercase_string(enough), end="")
+    n_reads = count_reads(args.json_file_path)
+    if n_reads is None:
+        # Nextflow expects failures to be reported as "false"
+        print("false", end="")
+        return
+    print(
+        bool_to_lowercase_string(check_threshold(n_reads, int(args.read_threshold))),
+        end="",
+    )
 
 
 if __name__ == "__main__":
