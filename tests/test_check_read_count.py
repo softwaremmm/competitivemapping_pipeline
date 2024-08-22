@@ -13,10 +13,8 @@ def test_check_not_enough_tb(not_enough_tb):
 
 
 def test_check_no_mb_value(no_mb_value):
-    with pytest.raises(ValueError):
-        check_read_count.count_reads(no_mb_value)
+    assert check_read_count.count_reads(no_mb_value) is None
 
 
 def test_check_no_genome_name_key(no_genome_name_key):
-    with pytest.raises(ValueError):
-        check_read_count.count_reads(no_genome_name_key)
+    assert check_read_count.count_reads(no_genome_name_key) is None
