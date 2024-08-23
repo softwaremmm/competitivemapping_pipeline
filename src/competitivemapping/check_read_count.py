@@ -11,16 +11,18 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 
-def count_reads(json_file_path: str, genome_name: str = "M.tuberculosis") -> int | None:
-    """Count the number of reads for the genome_name "M.tuberculosis" in the JSON file.
+def check_threshold(json_file_path: str, threshold: int, genome_name: str = "M.tuberculosis") -> str:
+    """Check if the number of reads is above a certain threshold.
 
     Args:
         json_file_path (str): Path to the JSON file.
+        threshold (int): Threshold value.
         genome_name (str): Name of the genome. Default is "M.tuberculosis".
 
     Returns:
-        int: Number of reads for the genome_name
+        str: "true" if the number of reads is above the threshold, "false" otherwise.
     """
+
     # Read and parse the JSON file
     with open(json_file_path, "r", encoding="utf-8") as file:
         data = json.load(file)
@@ -34,41 +36,14 @@ def count_reads(json_file_path: str, genome_name: str = "M.tuberculosis") -> int
 
     if not isinstance(num_reads, int):
         logger.info(f"Number of reads for {genome_name} not found in JSON file")
-        return None
+        return "false"
 
     logger.info(f"Number of reads for {genome_name}: {num_reads}")
-    return num_reads
 
-
-def check_threshold(num_reads: int, threshold: int) -> bool:
-    """Check if the number of reads is above a certain threshold.
-
-    Args:
-        num_reads (int): Number of reads.
-        threshold (int): Threshold value.
-
-    Returns:
-        bool: True if the number of reads is above the threshold, False otherwise.
-    """
-
-    above = num_reads > threshold
-
-    logger.info(f"Number of reads above the threshold ({num_reads} > {threshold}) {above}")
-
-    return above
-
-
-def bool_to_lowercase_string(value: bool) -> str:
-    """Convert a boolean value to a lowercase string.
-
-    Args:
-        value (bool): A boolean value.
-
-    Returns:
-        str: Lowercase string representation of the boolean value.
-    """
-    if value is True:
+    if num_reads > threshold:
+        logger.info(f"Number of reads above the threshold ({num_reads} > {threshold})")
         return "true"
+
     return "false"
 
 
@@ -87,13 +62,11 @@ def cli_entry_point():
 
     # Using print statements as Nextflow expects output on stdout, without a newline
     # Nextflow expects the output to be in lowercase
-    n_reads = count_reads(args.json_file_path)
-    if n_reads is None:
-        # Nextflow expects failures to be reported as "false"
-        print("false", end="")
-        return
     print(
-        bool_to_lowercase_string(check_threshold(n_reads, int(args.read_threshold))),
+        check_threshold(
+            args.json_file_path,
+            int(args.read_threshold),
+        ),
         end="",
     )
 
