@@ -14,13 +14,7 @@ RUN conda install minimap2~=2.26
 # Install samtools
 RUN conda install samtools~=1.17
 
-# Install jq
-RUN conda install jq=1.6
-
 # Install Python code for processing output of minimap and samtools
 COPY ./src /app/src
 COPY ./pyproject.toml /app/pyproject.toml
 RUN pip install .
-
-# Run jq (In practice this command will be overriden by NextFlow)
-CMD ["jq"]
