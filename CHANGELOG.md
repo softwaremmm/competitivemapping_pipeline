@@ -1,3 +1,17 @@
+## 1.3.1 (2024-08-23)
+
+### Fix
+
+- Don't throw errors for missing values
+- Return false on read threshold error
+- check_read_count CLI params
+
+### Refactor
+
+- More concise Python
+- Drop jq from Docker
+- Check read count using Python, not jq
+
 ## 1.3.0 (2024-07-15)
 
 ### Feat
