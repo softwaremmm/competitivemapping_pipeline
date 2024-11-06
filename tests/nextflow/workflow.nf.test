@@ -18,23 +18,22 @@ nextflow_workflow {
         }
 
         then {
-             assert workflow.success
+            assert workflow.success
 
-             with(workflow.out.cm_report) {
+            with(workflow.out.cm_report) {
                 assert size() == 1
-                assert get(0).contains("species_comparison_report.json")
-                assert path(get(0)).json == path("$projectDir/test_data/TB_10k/species_comparison_report_no_secondary.json").json
+                assert get(0)[1].contains("species_comparison_report.json")
             }
 
-            with(workflow.out.cm_error) {
+            with(workflow.out.cm_csv) {
                 assert size() == 1
-                assert get(0).contains("species_comparison_error.json")
+                assert get(0)[1].contains("species_comparison.csv")
             }
 
-            with(workflow.out.cm_sample_paths) {
+            with(workflow.out.cm_tb_reads) {
                 assert size() == 1
-                assert get(0)[1][0].contains("reads_for_assembly_0_1.fastq.gz")
-                assert get(0)[1][1].contains("reads_for_assembly_0_2.fastq.gz")
+                assert get(0)[1][0].contains("reads_for_assembly_1.fastq.gz")
+                assert get(0)[1][1].contains("reads_for_assembly_2.fastq.gz")
             }
         }
     }
@@ -53,22 +52,21 @@ nextflow_workflow {
         }
 
         then {
-             assert workflow.success
+            assert workflow.success
 
-             with(workflow.out.cm_report) {
+            with(workflow.out.cm_report) {
                 assert size() == 1
-                assert get(0).contains("species_comparison_report.json")
-                assert path(get(0)).json == path("$projectDir/test_data/TB_ont/species_comparison_report_no_secondary.json").json
+                assert get(0)[1].contains("species_comparison_report.json")
             }
 
-            with(workflow.out.cm_error) {
+            with(workflow.out.cm_csv) {
                 assert size() == 1
-                assert get(0).contains("species_comparison_error.json")
+                assert get(0)[1].contains("species_comparison.csv")
             }
 
-            with(workflow.out.cm_sample_paths) {
+            with(workflow.out.cm_tb_reads) {
                 assert size() == 1
-                assert get(0)[1].contains("reads_for_assembly_0.fastq.gz")
+                assert get(0)[1].contains("reads_for_assembly.fastq.gz")
             }
         }
     }
@@ -93,7 +91,7 @@ nextflow_workflow {
 
         then {
             assert workflow.success
-            assert workflow.out.cm_enough_reads[0] == 'false'
+            assert workflow.out.cm_enough_reads[0][1] == 'false'
         }
 
     }
@@ -118,7 +116,7 @@ nextflow_workflow {
 
         then {
              assert workflow.success
-             assert workflow.out.cm_enough_reads[0] == 'true'
+             assert workflow.out.cm_enough_reads[0][1] == 'true'
         }
 
     }

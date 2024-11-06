@@ -21,38 +21,37 @@ process competitiveMapping {
     val(seq_platform)
 
     output:
-    tuple val(sample_name), path("reads_for_assembly*fastq.gz"), emit: cm_sample
-    path("species_comparison_report.json"), emit: cm_report
-    path("species_comparison_error.json"), emit: cm_error
+    tuple val(sample_name), path("reads_for_assembly*fastq.gz"), emit: cm_tb_reads
+    tuple val(sample_name), path(competitive_mapping_report), emit: cm_report
+    tuple val(sample_name), path(competitive_mapping_csv), emit: cm_csv
 
     script:
-    competitive_mapping_file = "reads_for_assembly_0.fastq.gz"
-    competitive_mapping_file_1 = "reads_for_assembly_0_1.fastq.gz"
-    competitive_mapping_file_2 = "reads_for_assembly_0_2.fastq.gz"
+    tb_reads = "reads_for_assembly.fastq.gz"
+    tb_reads_1 = "reads_for_assembly_1.fastq.gz"
+    tb_reads_2 = "reads_for_assembly_2.fastq.gz"
     competitive_mapping_report = "species_comparison_report.json"
-    competitive_mapping_error = "species_comparison_error.json"
-    h37rv_rname="AL123456.3"
-
-    template "run_competitive_mapping.sh"
-
-    stub:
-    competitive_mapping_file = "reads_for_assembly_0.fastq.gz"
-    competitive_mapping_file_1 = "reads_for_assembly_0_1.fastq.gz"
-    competitive_mapping_file_2 = "reads_for_assembly_0_2.fastq.gz"
-    competitive_mapping_report = "species_comparison_report.json"
-    competitive_mapping_error = "species_comparison_error.json"
-
+    competitive_mapping_csv = "species_comparison.csv"
+    h37rv_ref="M.tuberculosis"
     """
-    if [ $seq_platform == 'ont' ]
+    mkdir outputs
+    competitive_mapping manifest --seq_platform ${seq_platform} \
+        --reads ${fqs} \
+        --ref_for_fastq ${h37rv_ref} \
+        --manifest ${manifest} \
+        --contigs ${species_list} \
+        --output_root "out."
+    
+    mv out.species_comparison.json ${competitive_mapping_report}
+    mv out.species_comparison.csv ${competitive_mapping_csv}
+
+    if [ ${seq_platform} == 'ont' ]
     then
-        touch ${competitive_mapping_file}
-    elif [ $seq_platform == 'illumina' ]
+        mv out.reads.fastq.gz ${tb_reads}
+    elif [ ${seq_platform} == 'illumina' ]
     then
-        touch ${competitive_mapping_file_1}
-        touch ${competitive_mapping_file_2}
+        mv out.reads_1.fastq.gz ${tb_reads_1}
+        mv out.reads_2.fastq.gz ${tb_reads_2}
     fi
-    touch ${competitive_mapping_report}
-    touch ${competitive_mapping_error}
     """
 }
 
@@ -70,11 +69,11 @@ process has_enough_reads {
     pod label: "run_id", value: "${params.run_id}"
 
     input:
-    path (json)
+    tuple val(sample_name), path (json)
     val (threshold)
 
     output:
-    stdout
+    tuple val(sample_name), stdout
 
     script:
     """
