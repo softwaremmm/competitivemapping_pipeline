@@ -1,0 +1,40 @@
+{
+    "total_read_counts": {
+        "mapped_reads": 19970,
+        "unmapped_reads": 30
+    },
+    "references": [
+        {
+            "genome_name": "gtdb_genomes_reps_r220/database/GCF/025/821/625/GCF_025821625.1_genomic.fna.gz",
+            "length": 6688400,
+            "coverage": 33.82,
+            "numreads": 19968,
+            "meandepth": 0.4326,
+            "coverage_including_secondary": 34.31,
+            "meandepth_including_secondary": 0.4428,
+            "total_reads": 19968,
+            "total_alns": 20627,
+            "exclusive_reads": 19957,
+            "primary_reads": 19968,
+            "secondary_reads": 0,
+            "supplementary_reads": 0,
+            "supplementary_alns": 30
+        },
+        {
+            "genome_name": "gtdb_genomes_reps_r220/database/GCF/000/195/955/GCF_000195955.2_genomic.fna.gz",
+            "length": 4411532,
+            "coverage": 0.00442,
+            "numreads": 2,
+            "meandepth": 6.846e-05,
+            "coverage_including_secondary": 0.03452,
+            "meandepth_including_secondary": 0.0003858,
+            "total_reads": 13,
+            "total_alns": 13,
+            "exclusive_reads": 2,
+            "primary_reads": 2,
+            "secondary_reads": 11,
+            "supplementary_reads": 0,
+            "supplementary_alns": 0
+        }
+    ]
+}

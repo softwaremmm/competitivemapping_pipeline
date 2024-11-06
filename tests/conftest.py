@@ -44,6 +44,7 @@ def species_table_path() -> str:
 def species_table(species_table_path) -> pd.DataFrame:
     return pd.read_csv(species_table_path)
 
+
 @pytest.fixture
 def manifest() -> str:
     return "data/manifest/manifest_20231001"
@@ -84,6 +85,8 @@ TB_10K = {
     "coverage_summary": "test_data/TB_10k/coverage_summary.json",
     "coverage_summary_no_secondary": "test_data/TB_10k/coverage_summary.no_secondary.json",
     "species_comparison": "test_data/TB_10k/species_comparison_report.json",
+    "sylph_report": "test_data/TB_10k/sylph.tsv",
+    "sylph_species_comparison": "test_data/TB_10k/sylph_species_comparison.json",
 }
 
 TB_ONT = {
@@ -97,11 +100,16 @@ TB_ONT = {
     "coverage_summary": "test_data/TB_ont/coverage_summary.json",
     "coverage_summary_no_secondary": "test_data/TB_ont/coverage_summary.no_secondary.json",
     "species_comparison": "test_data/TB_ont/species_comparison_report.json",
+    "sylph_report": "test_data/TB_ont/sylph.tsv",
+    "sylph_species_comparison": "test_data/TB_ont/sylph_species_comparison.json",
 }
 
 CHLORO_10k = {
     "sample": "chloro_10k",
-    "reads": ["test_data/chloro_10k/chloro_1.fastq.gz", "test_data/chloro_10k/chloro_2.fastq.gz"],
+    "reads": [
+        "test_data/chloro_10k/chloro_1.fastq.gz",
+        "test_data/chloro_10k/chloro_2.fastq.gz",
+    ],
     "bam": "test_data/chloro_10k/sorted_aln.bam",
     "aln_stats": "test_data/chloro_10k/aln_stats.csv",
     "summary": "test_data/chloro_10k/summary.json",
@@ -110,6 +118,8 @@ CHLORO_10k = {
     "coverage_summary": "test_data/chloro_10k/coverage_summary.json",
     "coverage_summary_no_secondary": "test_data/chloro_10k/coverage_summary.no_secondary.json",
     "species_comparison": "test_data/chloro_10k/species_comparison_report.json",
+    "sylph_report": "test_data/chloro_10k/sylph.tsv",
+    "sylph_species_comparison": "test_data/chloro_10k/sylph_species_comparison.json",
 }
 
 
@@ -151,6 +161,12 @@ def no_genome_name_key() -> Path:
 def no_mb_value() -> Path:
     return Path("tests/samples/json/no_mb_value.json")
 
+
 @pytest.fixture
 def test_outputs_dir() -> Path:
     return Path("tests/test_outputs/")
+
+
+@pytest.fixture
+def GTDB_db() -> str:
+    return "data/GTDB"

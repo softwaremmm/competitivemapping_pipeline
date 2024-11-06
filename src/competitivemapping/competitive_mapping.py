@@ -127,6 +127,8 @@ def output_fastqs(
         check=True,
         stdout=subprocess.PIPE,
     )
+    # In future could add flag -P to always include read pairs
+    # But note that this fails to fetch the pair for supplementary alignments
     subprocess.run(
         f"samtools view {aln_bam} -u {' '.join(rnames)} | samtools sort -@ {cpus} -o {sorted_ref_bam}",
         shell=True,
@@ -137,6 +139,11 @@ def output_fastqs(
     # Convert BAM output to FASTQ
     # Default excl-flag is 0x900 which is secondary (0x100) and supplementary (0x800)
     # So we need to exclude secondary alignments (0x100) only
+    # Note that singletons will be discarded;
+    # this is where only one of the read pair is in the bam or passes the flags
+
+    # So for paired reads, only output if both are unmapped, or both map
+    # (maybe with supplementary) to the reference
     command = f"samtools fastq --excl-flags 0x100 -@ {cpus} "
     if seq_platform == "ont":
         command += f"-0 {output_root}reads.fastq.gz {sorted_ref_bam}"
