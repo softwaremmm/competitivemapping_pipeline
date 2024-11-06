@@ -70,7 +70,7 @@ M.fluoranthenivorans,654,685,2,24,630,0,0
 M.peregrinum,652,680,9,36,615,1,1
 M.alvei,648,692,15,47,599,2,2
 M.goodii,643,674,5,23,619,1,1
-M.fortuitum_fortuitum,639,672,1,23,613,3,3
+M.fortuitum,639,672,1,23,613,3,3
 M.parascrofulaceum,624,635,7,23,599,2,2
 M.aichiense,618,641,8,34,581,3,3
 M.tokaiense,614,635,6,43,569,2,2
@@ -81,7 +81,7 @@ M.alkanivorans,572,621,12,56,515,1,1
 M.llatzerense,571,576,6,23,545,3,3
 M.mucogenicum,564,588,1,19,539,6,6
 M.fallax,563,638,4,23,539,1,1
-M.avium_hominissuis,560,587,2,18,539,3,3
+M.avium,560,587,2,18,539,3,3
 M.rhodesiae,550,562,5,27,520,3,3
 M.alsense,537,541,7,35,501,1,1
 M.sphagni,535,545,5,15,520,0,0
@@ -145,7 +145,7 @@ M.angelicum,311,327,3,6,305,0,0
 M.fragae,311,314,1,6,303,2,2
 M.asiaticum,310,314,4,12,296,2,2
 M.kubicae,310,337,3,8,300,2,2
-M.chelonae_gwanakae,305,305,0,1,304,0,0
+M.chelonae,305,305,0,1,304,0,0
 M.intermedium,304,310,5,9,294,1,1
 M.nonchromogenicus,304,317,0,3,301,0,0
 M.icosiumassiliensis,294,375,2,12,281,1,1

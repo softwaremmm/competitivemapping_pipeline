@@ -1,8 +1,8 @@
 import json
 from pathlib import Path
-import pytest
 
 import pandas as pd
+import pytest
 
 
 @pytest.fixture
@@ -37,12 +37,16 @@ def coverage_table(coverage_table_path) -> pd.DataFrame:
 
 @pytest.fixture
 def species_table_path() -> str:
-    return "test_data/species_list_manifest_20231001.csv"
+    return "test_data/species_list_manifest_20240710.csv"
 
 
 @pytest.fixture
 def species_table(species_table_path) -> pd.DataFrame:
     return pd.read_csv(species_table_path)
+
+@pytest.fixture
+def manifest() -> str:
+    return "data/manifest/manifest_20231001"
 
 
 @pytest.fixture
@@ -56,7 +60,7 @@ def expected_aggregated() -> pd.DataFrame:
 
 
 @pytest.fixture
-def path_invalid_output() -> pd.DataFrame:
+def path_invalid_output() -> Path:
     return Path("test_data/species_comparison_report_invalid.json")
 
 
@@ -70,33 +74,42 @@ def expected_output() -> pd.DataFrame:
 
 
 TB_10K = {
+    "sample": "tb_10k",
+    "reads": ["test_data/TB_10k/TB_1.fastq.gz", "test_data/TB_10k/TB_2.fastq.gz"],
     "bam": "test_data/TB_10k/sorted_aln.bam",
     "aln_stats": "test_data/TB_10k/aln_stats.csv",
     "summary": "test_data/TB_10k/summary.json",
     "coverage": "test_data/TB_10k/coverage.tsv",
     "secondary_coverage": "test_data/TB_10k/coverage.secondary.tsv",
-    "report": "test_data/TB_10k/species_comparison_report.json",
-    "report_no_secondary": "test_data/TB_10k/species_comparison_report_no_secondary.json",
+    "coverage_summary": "test_data/TB_10k/coverage_summary.json",
+    "coverage_summary_no_secondary": "test_data/TB_10k/coverage_summary.no_secondary.json",
+    "species_comparison": "test_data/TB_10k/species_comparison_report.json",
 }
 
 TB_ONT = {
+    "sample": "tb_ont",
+    "reads": ["test_data/TB_ont/ont_lineage4_10.fastq.gz"],
     "bam": "test_data/TB_ont/sorted_aln.bam",
     "aln_stats": "test_data/TB_ont/aln_stats.csv",
     "summary": "test_data/TB_ont/summary.json",
     "coverage": "test_data/TB_ont/coverage.tsv",
     "secondary_coverage": "test_data/TB_ont/coverage.secondary.tsv",
-    "report": "test_data/TB_ont/species_comparison_report.json",
-    "report_no_secondary": "test_data/TB_ont/species_comparison_report_no_secondary.json",
+    "coverage_summary": "test_data/TB_ont/coverage_summary.json",
+    "coverage_summary_no_secondary": "test_data/TB_ont/coverage_summary.no_secondary.json",
+    "species_comparison": "test_data/TB_ont/species_comparison_report.json",
 }
 
 CHLORO_10k = {
+    "sample": "chloro_10k",
+    "reads": ["test_data/chloro_10k/chloro_1.fastq.gz", "test_data/chloro_10k/chloro_2.fastq.gz"],
     "bam": "test_data/chloro_10k/sorted_aln.bam",
     "aln_stats": "test_data/chloro_10k/aln_stats.csv",
     "summary": "test_data/chloro_10k/summary.json",
     "coverage": "test_data/chloro_10k/coverage.tsv",
     "secondary_coverage": "test_data/chloro_10k/coverage.secondary.tsv",
-    "report": "test_data/chloro_10k/species_comparison_report.json",
-    "report_no_secondary": "test_data/chloro_10k/species_comparison_report_no_secondary.json",
+    "coverage_summary": "test_data/chloro_10k/coverage_summary.json",
+    "coverage_summary_no_secondary": "test_data/chloro_10k/coverage_summary.no_secondary.json",
+    "species_comparison": "test_data/chloro_10k/species_comparison_report.json",
 }
 
 
@@ -137,3 +150,7 @@ def no_genome_name_key() -> Path:
 @pytest.fixture
 def no_mb_value() -> Path:
     return Path("tests/samples/json/no_mb_value.json")
+
+@pytest.fixture
+def test_outputs_dir() -> Path:
+    return Path("tests/test_outputs/")

@@ -1,6 +1,6 @@
 import pandas as pd
 import pytest
-import filecmp
+from test_utils import check_file
 
 import competitivemapping.process_aln_stats as process_aln_stats
 
@@ -71,6 +71,7 @@ def test_summarise_by_chrom():
     assert result.reset_index(drop=True).equals(df.reset_index(drop=True))
 
 
+
 def test_aln_stats(samples, species_table_path, tmp_path, mocker):
     tmp_stats = str(tmp_path / "aln.csv")
     tmp_summary = str(tmp_path / "summary.csv")
@@ -92,9 +93,8 @@ def test_aln_stats(samples, species_table_path, tmp_path, mocker):
     )
 
     process_aln_stats.cli_entry_point()
-
-    assert filecmp.cmp(tmp_stats, samples["aln_stats"])
-    assert filecmp.cmp(tmp_summary, samples["summary"])
+    check_file(samples["aln_stats"], tmp_stats)
+    check_file(samples["summary"], tmp_summary)
 
 
 def test_no_secondary(samples, species_table_path, tmp_path, mocker):

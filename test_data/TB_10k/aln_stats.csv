@@ -31,7 +31,7 @@ M.paraseoulense,64,64,0,0,64,0,0
 M.parmense,64,70,0,0,64,0,0
 M.szulgai,64,64,0,0,64,0,0
 M.triplex,64,64,0,0,64,0,0
-M.avium_hominissuis,62,62,0,0,62,0,0
+M.avium,62,62,0,0,62,0,0
 M.spongiae,62,74,0,0,62,0,0
 M.asiaticum,60,60,0,0,60,0,0
 M.genavense,60,60,0,0,60,0,0
@@ -99,7 +99,7 @@ M.alkanivorans,18,30,0,0,18,0,0
 M.anyangense,18,26,0,0,18,0,0
 M.aquaticum,18,29,0,0,18,0,0
 M.cosmeticum,18,26,0,0,18,0,0
-M.fortuitum_fortuitum,18,24,0,0,18,0,0
+M.fortuitum,18,24,0,0,18,0,0
 M.gallinarum,18,28,0,0,18,0,0
 M.heraklionensis,18,26,0,0,18,0,0
 M.houstonense,18,18,0,0,18,0,0
@@ -168,7 +168,7 @@ M.stellerae,12,12,0,0,12,0,0
 M.stephanolepidis,12,12,0,0,12,0,0
 M.tusciae,12,12,0,0,12,0,0
 M.wolinskyi,12,12,0,0,12,0,0
-M.chelonae_gwanakae,10,10,0,0,10,0,0
+M.chelonae,10,10,0,0,10,0,0
 M.flavescens,10,18,0,0,10,0,0
 M.franklinii,10,10,0,0,10,0,0
 M.frederiksbergense,10,10,0,0,10,0,0

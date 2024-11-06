@@ -9,7 +9,7 @@ import pandas as pd
 from pysam import AlignmentFile  # pylint: disable = no-name-in-module
 
 
-def get_name_mapping(names_file: str) -> dict:
+def get_name_mapping(names_file: str) -> dict[str, str]:
     """Produce dictionary of reference code to their human names
 
     Args:
@@ -18,7 +18,6 @@ def get_name_mapping(names_file: str) -> dict:
     Returns:
         dict: dict with mapping for reference code to human names
     """
-
     df = pd.read_csv(names_file).set_index("rname")
     name_mapping = df["reference"].to_dict()
     return name_mapping
