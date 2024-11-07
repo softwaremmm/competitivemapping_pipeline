@@ -36,7 +36,6 @@ jobs:
           ln -s /mnt/dev-knowledge/manifest ./data/manifest && \
           tree data/manifest
           ln -s /mnt/dev-knowledge/sylph ./data/GTDB
-          ls -l data/GTDB
       
       - name: Login to OCR
         uses: docker/login-action@v2
@@ -47,7 +46,7 @@ jobs:
       
       - name: Build docker container
         run: |
-          docker build -t comp_mapping_test .
+          docker build -t comp_mapping_test . --build-arg TESTING=true
       - name: Inspect
         run: |
           docker image inspect comp_mapping_test
@@ -57,7 +56,8 @@ jobs:
         run: |
           docker run -v ${{ github.workspace }}/tests:/app/tests \
             -v ${{ github.workspace }}/test_data:/app/test_data \
-            -v ${{ github.workspace }}/data:/app/data \
+            -v /mnt/dev-knowledge/manifest:/app/data/manifest \
+            -v /mnt/dev-knowledge/sylph:/app/data/GTDB \
             comp_mapping_test pytest /app/tests
 
       - name: Run nf-test
