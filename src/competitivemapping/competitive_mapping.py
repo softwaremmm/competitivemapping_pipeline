@@ -5,6 +5,7 @@
 import argparse
 import gzip
 import json
+import logging
 import os
 import subprocess
 
@@ -160,6 +161,38 @@ def output_fastqs(
     subprocess.run(command, shell=True, check=True, stdout=subprocess.PIPE)
 
 
+def produce_empty_outputs(output_root: str):
+    """Create empty output files"""
+    report = {
+        "total_read_counts": {
+            "mapped_reads": 0,
+            "unmapped_reads": 0,
+        },
+        "references": [],
+    }
+    with open(f"{output_root}species_comparison.json", "w", encoding="utf-8") as file:
+        json.dump(report, file, indent=4)
+
+    with open(f"{output_root}species_comparison.csv", "w", encoding="utf-8") as file:
+        col_names = [
+            "genome_name",
+            "length",
+            "coverage",
+            "numreads",
+            "meandepth",
+            "coverage_including_secondary",
+            "meandepth_including_secondary",
+            "total_reads",
+            "total_alns",
+            "exclusive_reads",
+            "primary_reads",
+            "secondary_reads",
+            "supplementary_reads",
+            "supplementary_alns",
+        ]
+        file.write(",".join(col_names) + "\n")
+
+
 def run_competitive_mapping(
     manifest: str,
     contigs: pd.DataFrame,
@@ -223,6 +256,13 @@ def run_dynamic_competitive_mapping(
     output_root: str,
 ):
     """Create manifest then competitive mapping"""
+
+    # check if sylph_report is empty
+    if os.stat(sylph_report).st_size == 0 or pd.read_csv(sylph_report).empty:
+        logging.warning("Sylph report is empty")
+        produce_empty_outputs(output_root)
+        return
+
     manifest, contigs = make_manifest(sylph_report, genomes, output_root)
     if db_metadata:
         metadata = pd.read_csv(db_metadata, sep="\t", names=["assembly", "species"])
