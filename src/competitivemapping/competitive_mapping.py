@@ -15,7 +15,9 @@ from competitivemapping.process_aln_stats import get_alignment_stats
 from competitivemapping.process_coverage import process_coverage
 
 
-def make_manifest(report_path: str, genomes_path: str, output_root: str) -> tuple[str, pd.DataFrame]:
+def make_manifest(
+    report_path: str, genomes_path: str, output_root: str
+) -> tuple[str, pd.DataFrame]:
     """Produce a multifasta manifest and contig df from a sylph report and genomes folder"""
     manifest_file = f"{output_root}manifest.fasta.gz"
     df = pd.read_csv(report_path, sep="\t")
@@ -42,8 +44,9 @@ def make_manifest(report_path: str, genomes_path: str, output_root: str) -> tupl
                 )
     contigs_df = pd.DataFrame(contigs)
     # calculate total length per reference
-    contigs_df["totallength"] = contigs_df.groupby("reference")["length"].transform("sum")
-    print(contigs_df)
+    contigs_df["totallength"] = contigs_df.groupby("reference")["length"].transform(
+        "sum"
+    )
 
     return manifest_file, contigs_df
 
@@ -54,12 +57,12 @@ def map_reads(manifest, reads, seq_platform: str, cpus: int, output_root: str) -
     raw_aln_file = f"{output_root}alignment_raw.sam"
     aln_bam = f"{output_root}alignment.bam"
 
+    command = f"minimap2 -t {cpus} --secondary yes -N 1000"
     if seq_platform == "ont":
-        command = (
-            f"minimap2 -ax map-ont -t {cpus} --secondary yes -N 1000 {manifest} {' '.join(reads)} > {raw_aln_file}"
-        )
+        command += " -ax map-ont"
     else:
-        command = f"minimap2 -ax sr -t {cpus} --secondary yes -N 1000 {manifest} {' '.join(reads)} > {raw_aln_file}"
+        command += " -ax sr"
+    command += f" {manifest} {' '.join(reads)} > {raw_aln_file}"
     subprocess.run(command, shell=True, check=True, stdout=subprocess.PIPE)
 
     subprocess.run(
@@ -80,7 +83,9 @@ def get_aln_stats(aln_bam: str, contigs_df: pd.DataFrame) -> tuple[dict, pd.Data
     return overall_stats, aln_stats_df
 
 
-def get_coverage_stats(aln_bam: str, contigs_df: pd.DataFrame, output_root: str) -> pd.DataFrame:
+def get_coverage_stats(
+    aln_bam: str, contigs_df: pd.DataFrame, output_root: str
+) -> pd.DataFrame:
     """Get coverage stats using samtools coverage"""
 
     primary_coverage = f"{output_root}coverage_primary.tsv"
@@ -172,6 +177,7 @@ def run_competitive_mapping(
     overall_stats, aln_stats = get_aln_stats(aln_bam, contigs)
 
     df = pd.merge(coverage_df, aln_stats, on="genome_name")
+
     # Can update numreads to actually reflect reads
     # As samtools coverage actually counts alignments
     df["numreads"] = df["primary_reads"] + df["supplementary_reads"]
@@ -211,13 +217,37 @@ def run_dynamic_competitive_mapping(
     genomes: str,
     reads: list[str],
     ref_for_fastq: str | None,
+    db_metadata: str | None,
     seq_platform: str,
     cpus: int,
     output_root: str,
 ):
     """Create manifest then competitive mapping"""
     manifest, contigs = make_manifest(sylph_report, genomes, output_root)
-    run_competitive_mapping(manifest, contigs, reads, ref_for_fastq, seq_platform, cpus, output_root)
+    if db_metadata:
+        metadata = pd.read_csv(db_metadata, sep="\t", names=["assembly", "species"])
+        metadata["species"] = (
+            metadata["species"].str.split(";").str[-1].str.replace("s__", "")
+        )
+        species_lookup = metadata.set_index("assembly")["species"].to_dict()
+
+        contigs["assembly"] = (
+            contigs["reference"].str.split("/").str[-1].str.split("_genomic").str[0]
+        )
+        contigs["species"] = contigs["assembly"].map(species_lookup)
+        contigs["reference"] = contigs["species"] + " (" + contigs["assembly"] + ")"
+
+        if ref_for_fastq is not None and ref_for_fastq in species_lookup:
+            ref_for_fastq = (
+                species_lookup.get(ref_for_fastq, "Unknown")
+                + " ("
+                + ref_for_fastq
+                + ")"
+            )
+
+    run_competitive_mapping(
+        manifest, contigs, reads, ref_for_fastq, seq_platform, cpus, output_root
+    )
 
 
 def cli_entry_point():
@@ -225,11 +255,19 @@ def cli_entry_point():
     parser = argparse.ArgumentParser(description="Process sylph report and genomes.")
 
     common_parser = argparse.ArgumentParser(add_help=False)
-    common_parser.add_argument("--reads", required=True, help="Path to the reads", nargs="+")
-    common_parser.add_argument("--seq_platform", help="Sequencing platform", default="illumina")
+    common_parser.add_argument(
+        "--reads", required=True, help="Path to the reads", nargs="+"
+    )
+    common_parser.add_argument(
+        "--seq_platform", help="Sequencing platform", default="illumina"
+    )
     common_parser.add_argument("--cpus", help="Number of CPUs to use", default=4)
-    common_parser.add_argument("--ref_for_fastq", help="Reference to extract reads for", default=None)
-    common_parser.add_argument("--output_root", required=True, help="Path to the output files")
+    common_parser.add_argument(
+        "--ref_for_fastq", help="Reference to extract reads for", default=None
+    )
+    common_parser.add_argument(
+        "--output_root", required=True, help="Path to the output files"
+    )
 
     # add subcommand "with_manifest" to run_dynamic_competitive_mapping
     subparsers = parser.add_subparsers(dest="subcommand", required=True)
@@ -238,16 +276,27 @@ def cli_entry_point():
         parents=[common_parser],
         help="Run competitive mapping with set manifest and contigs list",
     )
-    manifest_parser.add_argument("--manifest", required=True, help="Path to the manifest file")
-    manifest_parser.add_argument("--contigs", required=True, help="Path to the contigs file")
+    manifest_parser.add_argument(
+        "--manifest", required=True, help="Path to the manifest file"
+    )
+    manifest_parser.add_argument(
+        "--contigs", required=True, help="Path to the contigs file"
+    )
 
     sylph_parser = subparsers.add_parser(
         "sylph",
         parents=[common_parser],
         help="Run competitive mapping dynamically based on sylph report",
     )
-    sylph_parser.add_argument("--sylph_report", required=True, help="Path to the sylph report TSV file")
+    sylph_parser.add_argument(
+        "--sylph_report", required=True, help="Path to the sylph report TSV file"
+    )
     sylph_parser.add_argument("--genomes", required=True, help="Path to the genomes")
+    sylph_parser.add_argument(
+        "--db_metadata",
+        required=False,
+        help="Path to the db metadata with assembly to species mapping",
+    )
 
     args = parser.parse_args()
 
@@ -267,6 +316,7 @@ def cli_entry_point():
             args.genomes,
             args.reads,
             args.ref_for_fastq,
+            args.db_metadata,
             args.seq_platform,
             args.cpus,
             args.output_root,

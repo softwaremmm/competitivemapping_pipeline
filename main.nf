@@ -57,6 +57,7 @@ workflow dynamic_competitive_mapping {
     take:
         input_files
         gtdb_genomes_dir
+        assembly_metadata
         seq_platform
 
     main:
@@ -71,7 +72,7 @@ workflow dynamic_competitive_mapping {
         throw new Exception("seq platform invalid. Should be one of $seq_platforms!")
     }
 
-    competitive_mapping_output = dynamicCompetitiveMapping(input_files, gtdb_genomes_dir, seq_platform)
+    competitive_mapping_output = dynamicCompetitiveMapping(input_files, gtdb_genomes_dir, assembly_metadata, seq_platform)
 
     emit:
         cm_report = competitive_mapping_output.cm_report

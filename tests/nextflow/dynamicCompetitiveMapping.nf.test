@@ -11,7 +11,8 @@ nextflow_process {
                 """
                 input[0] = ['sample_test', [file("$projectDir/test_data/TB_10k/TB_1.fastq.gz"), file("$projectDir/test_data/TB_10k/TB_2.fastq.gz")], file("$projectDir/test_data/TB_10k/sylph.tsv")]
                 input[1] = file("$projectDir/data/sylph")
-                input[2] = 'illumina'
+                input[2] = file("$projectDir/data/sylph/gtdb_r220_metadata.tsv")
+                input[3] = 'illumina'
                 """
             }
         }
@@ -41,7 +42,8 @@ nextflow_process {
                 """
                 input[0] = ['sample_test', file("$projectDir/test_data/TB_ont/ont_lineage4_10.fastq.gz"), file("$projectDir/test_data/TB_ont/sylph.tsv")]
                 input[1] = file("$projectDir/data/sylph")
-                input[2] = 'ont'
+                input[2] = file("$projectDir/data/sylph/gtdb_r220_metadata.tsv")
+                input[3] = 'ont'
                 """
             }
         }

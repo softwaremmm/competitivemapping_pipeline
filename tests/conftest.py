@@ -170,3 +170,8 @@ def test_outputs_dir() -> Path:
 @pytest.fixture
 def sylph_db() -> str:
     return "data/sylph"
+
+
+@pytest.fixture
+def sylph_metadata() -> str:
+    return "data/sylph/gtdb_r220_metadata.tsv"

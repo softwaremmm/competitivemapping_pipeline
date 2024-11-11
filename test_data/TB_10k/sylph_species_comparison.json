@@ -5,7 +5,7 @@
     },
     "references": [
         {
-            "genome_name": "gtdb_genomes_reps_r220/database/GCF/000/195/955/GCF_000195955.2_genomic.fna.gz",
+            "genome_name": "Mycobacterium tuberculosis (GCF_000195955.2)",
             "length": 4411532,
             "coverage": 28.5,
             "numreads": 19858,
