@@ -5,10 +5,11 @@
     },
     "references": [
         {
-            "genome_name": "Mycobacterium tuberculosis (GCF_000195955.2)",
+            "species": "Mycobacterium tuberculosis",
+            "genome_name": "GCF_000195955.2",
             "length": 4411532,
-            "coverage": 28.5,
             "numreads": 19858,
+            "coverage": 28.5,
             "meandepth": 0.6768,
             "coverage_including_secondary": 29.1,
             "meandepth_including_secondary": 0.7311,
@@ -20,5 +21,20 @@
             "supplementary_reads": 0,
             "supplementary_alns": 48
         }
-    ]
+    ],
+    "definitions": {
+        "length": "Length of all contigs in reference",
+        "numreads": "Number of reads which map well to this reference (primary + supplementary)",
+        "coverage": "Percentage of reference covered by reads (not including secondary alignments)",
+        "meandepth": "Mean depth of coverage of reference (not including secondary alignments)",
+        "coverage_including_secondary": "Percentage of reference covered by reads (including secondary alignments)",
+        "meandepth_including_secondary": "Mean depth of coverage of reference (including secondary alignments)",
+        "total_reads": "Total number of reads which map (in any way) to chrom",
+        "total_alns": "Total number of alignments, so will count supplementary separately",
+        "exclusive_reads": "reads which only maps to this chrom",
+        "primary_reads": "reads which map best to this chrom",
+        "secondary_reads": "reads which map to this chrom but not with primary",
+        "supplementary_reads": "reads which have supplementary alignments but not primary",
+        "supplementary_alns": "number of supplementary alignments"
+    }
 }

@@ -7,8 +7,8 @@
         {
             "genome_name": "M.tuberculosis",
             "length": 4411532,
-            "coverage": 28.26,
             "numreads": 19477,
+            "coverage": 28.26,
             "meandepth": 0.6637,
             "coverage_including_secondary": 29.1,
             "meandepth_including_secondary": 0.7311,
@@ -23,8 +23,8 @@
         {
             "genome_name": "M.novocastrense",
             "length": 5624151,
-            "coverage": 0.5489,
             "numreads": 311,
+            "coverage": 0.5489,
             "meandepth": 0.008323,
             "coverage_including_secondary": 1.534,
             "meandepth_including_secondary": 0.0371,
@@ -39,8 +39,8 @@
         {
             "genome_name": "M.angelicum",
             "length": 6662911,
-            "coverage": 0.07824,
             "numreads": 48,
+            "coverage": 0.07824,
             "meandepth": 0.001087,
             "coverage_including_secondary": 0.2796,
             "meandepth_including_secondary": 0.006933,
@@ -55,8 +55,8 @@
         {
             "genome_name": "M.shinjukuense",
             "length": 4504020,
-            "coverage": 0.03457,
             "numreads": 20,
+            "coverage": 0.03457,
             "meandepth": 0.000615,
             "coverage_including_secondary": 0.6508,
             "meandepth_including_secondary": 0.01438,
@@ -71,8 +71,8 @@
         {
             "genome_name": "M.lacus",
             "length": 5092988,
-            "coverage": 0.002788,
             "numreads": 4,
+            "coverage": 0.002788,
             "meandepth": 5.576e-05,
             "coverage_including_secondary": 0.2394,
             "meandepth_including_secondary": 0.005055,
@@ -87,8 +87,8 @@
         {
             "genome_name": "M.persicum",
             "length": 6347217,
-            "coverage": 0.002379,
             "numreads": 2,
+            "coverage": 0.002379,
             "meandepth": 4.758e-05,
             "coverage_including_secondary": 0.1141,
             "meandepth_including_secondary": 0.002502,
@@ -103,8 +103,8 @@
         {
             "genome_name": "M.doricum",
             "length": 4029398,
-            "coverage": 0.003747,
             "numreads": 1,
+            "coverage": 0.003747,
             "meandepth": 3.747e-05,
             "coverage_including_secondary": 0.03445,
             "meandepth_including_secondary": 0.0006889,
@@ -119,8 +119,8 @@
         {
             "genome_name": "M.haemophilum",
             "length": 4235765,
-            "coverage": 0.001653,
             "numreads": 2,
+            "coverage": 0.001653,
             "meandepth": 3.305e-05,
             "coverage_including_secondary": 0.1289,
             "meandepth_including_secondary": 0.002833,
@@ -135,8 +135,8 @@
         {
             "genome_name": "M.paraintracellulare",
             "length": 5332910,
-            "coverage": 0.002831,
             "numreads": 1,
+            "coverage": 0.002831,
             "meandepth": 2.831e-05,
             "coverage_including_secondary": 0.07142,
             "meandepth_including_secondary": 0.001491,
@@ -151,8 +151,8 @@
         {
             "genome_name": "M.simulans",
             "length": 6192024,
-            "coverage": 0.00134,
             "numreads": 2,
+            "coverage": 0.00134,
             "meandepth": 2.681e-05,
             "coverage_including_secondary": 0.1287,
             "meandepth_including_secondary": 0.00492,
@@ -167,8 +167,8 @@
         {
             "genome_name": "M.confluentis",
             "length": 5876557,
-            "coverage": 0.00257,
             "numreads": 1,
+            "coverage": 0.00257,
             "meandepth": 2.57e-05,
             "coverage_including_secondary": 0.02906,
             "meandepth_including_secondary": 0.0006092,
@@ -183,8 +183,8 @@
         {
             "genome_name": "M.bacteremicum",
             "length": 5952041,
-            "coverage": 0.002537,
             "numreads": 1,
+            "coverage": 0.002537,
             "meandepth": 2.537e-05,
             "coverage_including_secondary": 0.02201,
             "meandepth_including_secondary": 0.0004906,
@@ -199,8 +199,8 @@
         {
             "genome_name": "M.neworleansense",
             "length": 6287317,
-            "coverage": 0.002402,
             "numreads": 1,
+            "coverage": 0.002402,
             "meandepth": 2.402e-05,
             "coverage_including_secondary": 0.02795,
             "meandepth_including_secondary": 0.0005923,
@@ -215,8 +215,8 @@
         {
             "genome_name": "M.intermedium",
             "length": 6817968,
-            "coverage": 0.0007334,
             "numreads": 2,
+            "coverage": 0.0007334,
             "meandepth": 1.467e-05,
             "coverage_including_secondary": 0.05057,
             "meandepth_including_secondary": 0.001591,
@@ -231,8 +231,8 @@
         {
             "genome_name": "M.tokaiense",
             "length": 6328149,
-            "coverage": 0.0006479,
             "numreads": 2,
+            "coverage": 0.0006479,
             "meandepth": 1.296e-05,
             "coverage_including_secondary": 0.02287,
             "meandepth_including_secondary": 0.0004573,
@@ -247,8 +247,8 @@
         {
             "genome_name": "M.elephantis",
             "length": 5223216,
-            "coverage": 0.0006318,
             "numreads": 2,
+            "coverage": 0.0006318,
             "meandepth": 1.264e-05,
             "coverage_including_secondary": 0.03075,
             "meandepth_including_secondary": 0.001535,
@@ -263,8 +263,8 @@
         {
             "genome_name": "M.vinylchloridicum",
             "length": 7196491,
-            "coverage": 0.0005697,
             "numreads": 2,
+            "coverage": 0.0005697,
             "meandepth": 1.139e-05,
             "coverage_including_secondary": 0.01877,
             "meandepth_including_secondary": 0.0003755,
@@ -279,8 +279,8 @@
         {
             "genome_name": "M.helveticum",
             "length": 5769598,
-            "coverage": 0.00052,
             "numreads": 2,
+            "coverage": 0.00052,
             "meandepth": 1.04e-05,
             "coverage_including_secondary": 0.1008,
             "meandepth_including_secondary": 0.006109,
@@ -295,8 +295,8 @@
         {
             "genome_name": "M.marinum",
             "length": 6336293,
-            "coverage": 0.0004735,
             "numreads": 2,
+            "coverage": 0.0004735,
             "meandepth": 9.469e-06,
             "coverage_including_secondary": 0.08185,
             "meandepth_including_secondary": 0.001757,
@@ -308,5 +308,20 @@
             "supplementary_reads": 0,
             "supplementary_alns": 0
         }
-    ]
+    ],
+    "definitions": {
+        "length": "Length of all contigs in reference",
+        "numreads": "Number of reads which map well to this reference (primary + supplementary)",
+        "coverage": "Percentage of reference covered by reads (not including secondary alignments)",
+        "meandepth": "Mean depth of coverage of reference (not including secondary alignments)",
+        "coverage_including_secondary": "Percentage of reference covered by reads (including secondary alignments)",
+        "meandepth_including_secondary": "Mean depth of coverage of reference (including secondary alignments)",
+        "total_reads": "Total number of reads which map (in any way) to chrom",
+        "total_alns": "Total number of alignments, so will count supplementary separately",
+        "exclusive_reads": "reads which only maps to this chrom",
+        "primary_reads": "reads which map best to this chrom",
+        "secondary_reads": "reads which map to this chrom but not with primary",
+        "supplementary_reads": "reads which have supplementary alignments but not primary",
+        "supplementary_alns": "number of supplementary alignments"
+    }
 }
