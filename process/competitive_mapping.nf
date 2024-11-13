@@ -4,10 +4,8 @@ process competitiveMapping {
         params.test_container_cm=="" ? 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:1.3.1' : params.test_container_cm
     }
 
-    cpus = 8
-    memory = {
-        params.testing=="" ? "48GB" : "16GB"
-    }
+    cpus = 6
+    memory { 8.GB + (4.GB * task.attempt) }
 
     debug true
     pod label: "name", value: "competitive_mapping_pipeline:competitiveMapping"
@@ -61,8 +59,8 @@ process dynamicCompetitiveMapping {
         params.test_container_cm=="" ? 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:1.3.1' : params.test_container_cm
     }
 
-    cpus 8
-    memory { 8.GB * task.attempt}
+    cpus 4
+    memory { 4.GB + (4.GB * task.attempt) }
 
     pod label: "name", value: "competitive_mapping_pipeline:dynamicCompetitiveMapping"
     pod label: "sample_id", value: "${params.sample_id}"
