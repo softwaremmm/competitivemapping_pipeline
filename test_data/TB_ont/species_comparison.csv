@@ -1,0 +1,5 @@
+genome_name,length,numreads,coverage,meandepth,coverage_including_secondary,meandepth_including_secondary,total_reads,total_alns,exclusive_reads,primary_reads,secondary_reads,supplementary_reads,supplementary_alns
+M.tuberculosis,4411532,996,30.33,0.3697,30.94,0.377,998,1102,934,996,2,0,72
+M.novocastrense,5624151,2,0.01266,0.0001266,1.266,0.01325,54,55,0,2,52,0,0
+M.spongiae,5581157,1,0.005841,5.841e-05,0.005841,5.841e-05,1,1,0,0,0,1,1
+M.shinjukuense,4504020,1,0.002864,2.864e-05,0.1026,0.001138,7,7,0,0,6,1,1
