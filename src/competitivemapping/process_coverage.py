@@ -18,7 +18,9 @@ logging.basicConfig(
 )
 
 
-def unmatched_rnames(coverage_table: pd.DataFrame, species_table: pd.DataFrame) -> tuple[pd.Series, pd.Series]:
+def unmatched_rnames(
+    coverage_table: pd.DataFrame, species_table: pd.DataFrame
+) -> tuple[pd.Series, pd.Series]:
     """Check if any rnames do not have a reference (species name)
 
     Args:
@@ -31,7 +33,9 @@ def unmatched_rnames(coverage_table: pd.DataFrame, species_table: pd.DataFrame) 
         in the species table
     """
 
-    all_rnames = coverage_table.merge(species_table, left_on="#rname", right_on="rname", how="outer")
+    all_rnames = coverage_table.merge(
+        species_table, left_on="#rname", right_on="rname", how="outer"
+    )
 
     not_in_coverage = all_rnames[all_rnames["#rname"].isna()]["rname"]
     not_in_species = all_rnames[all_rnames["rname"].isna()]["#rname"]
@@ -39,7 +43,9 @@ def unmatched_rnames(coverage_table: pd.DataFrame, species_table: pd.DataFrame) 
     return not_in_coverage, not_in_species
 
 
-def join_references(coverage_table: pd.DataFrame, species_table: pd.DataFrame) -> pd.DataFrame:
+def join_references(
+    coverage_table: pd.DataFrame, species_table: pd.DataFrame
+) -> pd.DataFrame:
     """Look up references from rnames.
 
     Args:
@@ -49,7 +55,9 @@ def join_references(coverage_table: pd.DataFrame, species_table: pd.DataFrame) -
     Returns:
         pd.DataFrame: As `coverage_table`, but with an extra column for reference
     """
-    return coverage_table.merge(species_table, left_on="#rname", right_on="rname", how="left")
+    return coverage_table.merge(
+        species_table, left_on="#rname", right_on="rname", how="left"
+    )
 
 
 def aggregate_contigs(referenced_table: pd.DataFrame) -> pd.DataFrame:
@@ -73,9 +81,12 @@ def aggregate_contigs(referenced_table: pd.DataFrame) -> pd.DataFrame:
             lambda contig: pd.Series(
                 {
                     "length": contig.totallength.iloc[0],
-                    "coverage": (contig.coverage * contig.endpos).sum() / contig.totallength.iloc[0],
+                    "coverage": (contig.coverage * contig.endpos).sum()
+                    / contig.totallength.iloc[0],
                     "numreads": contig.numreads.sum(),
-                    "meandepth": (contig.meandepth * contig.endpos / contig.totallength.iloc[0]).sum(),
+                    "meandepth": (
+                        contig.meandepth * contig.endpos / contig.totallength.iloc[0]
+                    ).sum(),
                 }
             ),
             include_groups=False,
@@ -91,7 +102,9 @@ def aggregate_contigs(referenced_table: pd.DataFrame) -> pd.DataFrame:
     return aggregated[aggregated["coverage"] > 0]
 
 
-def lookup_and_aggregate(coverage_table: pd.DataFrame, species_table: pd.DataFrame) -> pd.DataFrame:
+def lookup_and_aggregate(
+    coverage_table: pd.DataFrame, species_table: pd.DataFrame
+) -> pd.DataFrame:
     """Determines the aggregated values from `samtools coverage` output where the manifest contains
     contigs.
 
@@ -110,9 +123,13 @@ def lookup_and_aggregate(coverage_table: pd.DataFrame, species_table: pd.DataFra
     not_in_coverage, not_in_species = unmatched_rnames(coverage_table, species_table)
 
     if not_in_species.size > 0:
-        raise ValueError(f"Some #rnames could not be found in species list: {not_in_species.to_string()}")
+        raise ValueError(
+            f"Some #rnames could not be found in species list: {not_in_species.to_string()}"
+        )
     if not_in_coverage.size > 0:
-        logging.info(f"Species contains rnames not in manifest: {not_in_coverage.to_string()}")
+        logging.info(
+            f"Species contains rnames not in manifest: {not_in_coverage.to_string()}"
+        )
 
     joined = join_references(coverage_table, species_table)
 
@@ -128,7 +145,11 @@ def validate_output(file_to_validate: Path):
     with open(file_to_validate, "r", encoding="utf-8") as file:
         output = json.load(file)
 
-    schema_path = files("competitivemapping").joinpath("competitivemapping.schema.json").read_text()
+    schema_path = (
+        files("competitivemapping")
+        .joinpath("competitivemapping.schema.json")
+        .read_text()
+    )
 
     schema = json.loads(schema_path)
 
@@ -140,7 +161,17 @@ def process_coverage(
     secondary_coverage: str | Path | None,
     contigs: pd.DataFrame,
 ) -> pd.DataFrame:
-    """Main function for producing summary Dataframe of coverage stats"""
+    """Main function for producing summary Dataframe of coverage stats
+
+    Args:
+        coverage_file (str | Path): File with samtools coverage output
+        secondary_coverage (str | Path | None): File with samtools coverage output
+            with secondary reads included
+        contigs (pd.DataFrame): Dataframe with contigs (rnames) and references
+
+    Returns:
+        pd.DataFrame: summary of coverage metrics for each reference
+    """
     coverage_table = pd.read_table(coverage_file)
 
     aggregated = lookup_and_aggregate(coverage_table, contigs)
@@ -148,7 +179,9 @@ def process_coverage(
     if secondary_coverage:
         try:
             secondary_coverage_table = pd.read_table(secondary_coverage)
-            secondary_aggregated = lookup_and_aggregate(secondary_coverage_table, contigs)
+            secondary_aggregated = lookup_and_aggregate(
+                secondary_coverage_table, contigs
+            )
             secondary_aggregated = secondary_aggregated.rename(
                 columns={
                     "coverage": "coverage_including_secondary",
@@ -162,7 +195,9 @@ def process_coverage(
                 ]
             ]
 
-            aggregated = aggregated.merge(secondary_aggregated, on="genome_name", how="left")
+            aggregated = aggregated.merge(
+                secondary_aggregated, on="genome_name", how="left"
+            )
         except pd.errors.EmptyDataError:
             # This should be fine, as it just means there is no secondary coverage file
             logging.info("No data found within secondary coverage file")
@@ -198,7 +233,9 @@ class Arguments:  # pylint: disable=too-few-public-methods
         Args:
             argv (list): A list of command line arguments, usually `sys.argv[1:]`.
         """
-        parser = argparse.ArgumentParser(description="Process competitive mapping output to create a JSON file")
+        parser = argparse.ArgumentParser(
+            description="Process competitive mapping output to create a JSON file"
+        )
         parser.add_argument(
             "--coverage",
             dest="coverage",
@@ -225,6 +262,8 @@ class Arguments:  # pylint: disable=too-few-public-methods
         args = parser.parse_args(argv)
 
         self.coverage = Path(args.coverage)
-        self.secondary_coverage = Path(args.secondary_coverage) if args.secondary_coverage else None
+        self.secondary_coverage = (
+            Path(args.secondary_coverage) if args.secondary_coverage else None
+        )
         self.species_list = Path(args.species_list)
         self.output = Path(args.output)
