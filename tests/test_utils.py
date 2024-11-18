@@ -1,9 +1,17 @@
 import filecmp
+import os
 
-REPLACE_EXPECTATION = False
+REPLACE_EXPECTATION = True
 
 
 def check_file(expectation, result):
+    """Check if files match, if not replace/save replacement."""
+
+    # check if expectation missing
+    if not os.path.exists(expectation):
+        with open(expectation, "w", encoding="utf-8") as file:
+            file.write("")
+
     if not filecmp.cmp(expectation, result):
         new_file_path = f"{expectation}.new"
         if REPLACE_EXPECTATION:

@@ -60,7 +60,7 @@ def test_cli_entry_point_manifest(
 
 
 def test_cli_entry_point_sylph(
-    samples, sylph_db, sylph_metadata, test_outputs_dir, mocker
+    samples, sylph_rep_paths, sylph_metadata, test_outputs_dir, mocker
 ):
     output_root = os.path.join(test_outputs_dir, "cm_sylph", samples["sample"] + ".")
     os.makedirs(os.path.join(test_outputs_dir, "cm_sylph"), exist_ok=True)
@@ -78,14 +78,14 @@ def test_cli_entry_point_sylph(
         "GCF_000195955.2",  # M.tuberculosis
         "--sylph_report",
         samples["sylph_report"],
-        "--genomes",
-        sylph_db,
-        "--db_metadata",
+        "--genome_paths",
+        sylph_rep_paths,
+        "--metadata_files",
         sylph_metadata,
         "--output_root",
         output_root,
         "--cpus",
-        "4",
+        "10",
     ]
 
     mocker.patch(
@@ -114,7 +114,9 @@ def test_cli_entry_point_sylph(
             check_length(output_root + "reads.fastq.gz", 1044)
 
 
-def test_empty_sylph(empty_sylph, sylph_db, sylph_metadata, test_outputs_dir, mocker):
+def test_empty_sylph(
+    empty_sylph, sylph_rep_paths, sylph_metadata, test_outputs_dir, mocker
+):
     output_root = os.path.join(
         test_outputs_dir, "cm_sylph", empty_sylph["sample"] + "."
     )
@@ -133,9 +135,9 @@ def test_empty_sylph(empty_sylph, sylph_db, sylph_metadata, test_outputs_dir, mo
         "GCF_000195955.2",  # M.tuberculosis
         "--sylph_report",
         empty_sylph["sylph_report"],
-        "--genomes",
-        sylph_db,
-        "--db_metadata",
+        "--genome_paths",
+        sylph_rep_paths,
+        "--metadata_files",
         sylph_metadata,
         "--output_root",
         output_root,
@@ -155,4 +157,49 @@ def test_empty_sylph(empty_sylph, sylph_db, sylph_metadata, test_outputs_dir, mo
     )
     check_file(
         empty_sylph["sylph_csv_comparison"], output_root + "species_comparison.csv"
+    )
+
+
+def test_cli_entry_point_sylph_all_genera(
+    samples, sylph_rep_paths, sylph_metadata, test_outputs_dir, mocker
+):
+    output_root = os.path.join(
+        test_outputs_dir, "cm_sylph_all_genera", samples["sample"] + "."
+    )
+    os.makedirs(os.path.join(test_outputs_dir, "cm_sylph_all_genera"), exist_ok=True)
+
+    seq_platform = "ont" if len(samples["reads"]) == 1 else "illumina"
+
+    args = [
+        "competitive_mapping",
+        "sylph",
+        "--reads",
+        " ".join(samples["reads"]),
+        "--seq_platform",
+        seq_platform,
+        "--ref_for_fastq",
+        "GCF_000195955.2",  # M.tuberculosis
+        "--sylph_report",
+        samples["sylph_report"],
+        "--genome_paths",
+        sylph_rep_paths,
+        "--metadata_files",
+        sylph_metadata,
+        "--output_root",
+        output_root,
+        "--cpus",
+        "10",
+        "--include_whole_genus",
+    ]
+
+    mocker.patch(
+        "sys.argv",
+        args,
+    )
+
+    competitive_mapping.cli_entry_point()
+
+    check_file(
+        samples["sylph_species_comparison_all_genera"],
+        output_root + "species_comparison.json",
     )

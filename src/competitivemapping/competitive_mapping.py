@@ -7,15 +7,19 @@ import argparse
 import gzip
 import json
 import logging
+import multiprocessing
 import os
 import subprocess
 import typing
+from concurrent.futures import ProcessPoolExecutor
 
 import pandas as pd
 from Bio import SeqIO
 
 from competitivemapping.process_aln_stats import get_alignment_stats
 from competitivemapping.process_coverage import process_coverage
+
+multiprocessing.set_start_method("spawn", force=True)
 
 FINAL_COLUMNS = [
     "genome_name",
@@ -51,48 +55,123 @@ COLUMN_EXPLANATIONS = {
 }
 
 
+def read_contigs(args: tuple[str, str]) -> list[dict[str, str]]:
+    """Read contigs from a gzipped fasta file"""
+    accession, filepath = args
+    contigs = []
+    with gzip.open(filepath, "rt") as handle:
+        for record in SeqIO.parse(handle, "fasta"):
+            contigs.append(
+                {
+                    "reference": accession,
+                    "rname": record.id,
+                    "length": len(record.seq),
+                }
+            )
+    return contigs
+
+
 def make_manifest(
-    report_path: str, genomes_path: str, output_root: str
+    report_path: str,
+    metadata_files: list[str],
+    genome_path_files: list[str],
+    include_whole_genus: bool,
+    output_root: str,
+    cpus: int,
 ) -> tuple[str, pd.DataFrame]:
     """Produce a multifasta manifest and contig df from a sylph report and genomes folder
 
     Args:
         report_path (str): Path to the sylph report
-        genomes_path (str): Path to the folder containing the genomes fasta files
+        metadata_files (list[str]): path to the db metadata files, with taxonomy info
+        genome_path_files (list[str]): path to the mapping files to look up genome fasta location
+        include_whole_genus (bool): Whether to include all genomes from genera found
         output_root (str): Path to the output root
+        cpus (int): number of cores to use
 
     Returns:
         tuple[str, pd.DataFrame]: Path to the manifest file and a dataframe of contigs
     """
     manifest_file = f"{output_root}manifest.fasta.gz"
-    df = pd.read_csv(report_path, sep="\t")
+    sylph_df = pd.read_csv(report_path, sep="\t")
+    sylph_df["accession"] = (
+        sylph_df["Genome_file"]
+        .str.split("/")
+        .str[-1]
+        .str.replace("_genomic.fna.gz", "")
+    )
+    accessions = sylph_df["accession"].tolist()
 
-    genomes_files = df["Genome_file"].unique().tolist()
+    def read_path_file(file):
+        """Read file and make paths absolute.
+        Assumes that the paths are relative to the file location"""
+        file_dir = os.path.dirname(file)
+        df = pd.read_csv(file, sep="\t", header=None, names=["filename", "path"])
+        df["path"] = df["path"].apply(lambda x: os.path.join(file_dir, x))
+        df["path"] = df["path"] + "/" + df["filename"]
+        return df
+
+    genome_paths = pd.concat(read_path_file(f) for f in genome_path_files)
+    genome_paths["accession"] = genome_paths["filename"].str.replace(
+        "_genomic.fna.gz", ""
+    )
+
+    metadata_df = pd.concat(
+        [
+            pd.read_csv(f, sep="\t", header=None, names=["accession", "taxonomy"])
+            for f in metadata_files
+        ]
+    )
+
+    # Can restrict to only representative genomes (those with a genome path)
+    metadata_df = metadata_df[
+        metadata_df["accession"].isin(genome_paths["accession"])
+    ].copy()
+
+    def select_taxa_level(taxonomy: str, key: str) -> str:
+        parts = taxonomy.split(";")
+        for taxa in parts:
+            if taxa.startswith(key):
+                return taxa
+        return ""
+
+    if include_whole_genus:
+        # Extend accessions to include all genomes from the genera found
+        metadata_df["genus"] = metadata_df["taxonomy"].apply(
+            lambda x: select_taxa_level(x, "g__")
+        )
+
+        found_genera = metadata_df[metadata_df["accession"].isin(accessions)][
+            "genus"
+        ].unique()
+        accessions = metadata_df[metadata_df["genus"].isin(found_genera)][
+            "accession"
+        ].tolist()
+
+    # Now look up the genome paths
+    df = genome_paths[genome_paths["accession"].isin(accessions)]
 
     # Cat all genomes into a single file
     with open(manifest_file, "wb") as outfile:
-        for f in genomes_files:
-            with open(os.path.join(genomes_path, f), "rb") as infile:
+        for filepath in df["path"]:
+            with open(filepath, "rb") as infile:
                 outfile.write(infile.read())
 
-    # Get IDs of genomes
-    contigs = []
-    for genome in genomes_files:
-        with gzip.open(os.path.join(genomes_path, genome), "rt") as handle:
-            for record in SeqIO.parse(handle, "fasta"):
-                contigs.append(
-                    {
-                        "reference": genome,
-                        "rname": record.id,
-                        "length": len(record.seq),
-                    }
-                )
-    contigs_df = pd.DataFrame(contigs)
-    # calculate total length per reference
+    # Read contigs in parallel
+    with ProcessPoolExecutor(max_workers=cpus) as executor:
+        results = list(executor.map(read_contigs, zip(df["accession"], df["path"])))
+
+    contigs_df = pd.DataFrame([contig for result in results for contig in result])
     contigs_df["totallength"] = contigs_df.groupby("reference")["length"].transform(
         "sum"
     )
 
+    # add species information from metadata
+    metadata_df["species"] = metadata_df["taxonomy"].apply(
+        lambda x: select_taxa_level(x, "s__").replace("s__", "")
+    )
+    species_lookup = metadata_df.set_index("accession")["species"].to_dict()
+    contigs_df["species"] = contigs_df["reference"].map(species_lookup)
     return manifest_file, contigs_df
 
 
@@ -344,10 +423,11 @@ def run_competitive_mapping(
 
 def run_dynamic_competitive_mapping(
     sylph_report: str,
-    genomes: str,
+    metadata_files: list[str],
+    genome_paths: list[str],
+    include_whole_genus: bool,
     reads: list[str],
     ref_for_fastq: str | None,
-    db_metadata: str | None,
     seq_platform: str,
     cpus: int,
     output_root: str,
@@ -356,10 +436,11 @@ def run_dynamic_competitive_mapping(
 
     Args:
         sylph_report (str): path to the sylph report
-        genomes (str): path to the genomes directory
+        metadata_files (list[str]): path to the db metadata files, with taxonomy info
+        genome_paths (list[str]): path to the mapping files to look up genome fasta location
+        include_whole_genus (bool): whether to include all genomes from genera found
         reads (list[str]): list of paths to the read fastqs
         ref_for_fastq (str | None): reference to extract reads for
-        db_metadata (str | None): path to the sylph db metadata, with taxonomy info
         seq_platform (str): sequencing platform
         cpus (int): number of cores to use
         output_root (str): path to the output root
@@ -371,20 +452,14 @@ def run_dynamic_competitive_mapping(
         produce_empty_outputs(output_root)
         return
 
-    manifest, contigs = make_manifest(sylph_report, genomes, output_root)
-    if db_metadata:
-        metadata = pd.read_csv(
-            db_metadata, sep="\t", header=None, names=["assembly", "taxonomy"]
-        )
-        metadata["species"] = (
-            metadata["taxonomy"].str.split(";").str[-1].str.replace("s__", "")
-        )
-        species_lookup = metadata.set_index("assembly")["species"].to_dict()
-
-        contigs["reference"] = (
-            contigs["reference"].str.split("/").str[-1].str.split("_genomic").str[0]
-        )
-        contigs["species"] = contigs["reference"].map(species_lookup)
+    manifest, contigs = make_manifest(
+        sylph_report,
+        metadata_files,
+        genome_paths,
+        include_whole_genus,
+        output_root,
+        cpus,
+    )
 
     run_competitive_mapping(
         manifest, contigs, reads, ref_for_fastq, seq_platform, cpus, output_root
@@ -402,7 +477,9 @@ def cli_entry_point():
     common_parser.add_argument(
         "--seq_platform", help="Sequencing platform", default="illumina"
     )
-    common_parser.add_argument("--cpus", help="Number of CPUs to use", default=4)
+    common_parser.add_argument(
+        "--cpus", help="Number of CPUs to use", default=4, type=int
+    )
     common_parser.add_argument(
         "--ref_for_fastq", help="Reference to extract reads for", default=None
     )
@@ -432,11 +509,23 @@ def cli_entry_point():
     sylph_parser.add_argument(
         "--sylph_report", required=True, help="Path to the sylph report TSV file"
     )
-    sylph_parser.add_argument("--genomes", required=True, help="Path to the genomes")
     sylph_parser.add_argument(
-        "--db_metadata",
-        required=False,
-        help="Path to the db metadata with assembly to species mapping",
+        "--metadata_files",
+        required=True,
+        help="Path to the metadata files with assembly to taxonomy mapping",
+        nargs="+",
+    )
+    sylph_parser.add_argument(
+        "--genome_paths",
+        required=True,
+        help="Path to the files mapping assemly to the path to assembly fastas."
+        + " This is normally the genome_paths.tsv file from the GTDB database",
+        nargs="+",
+    )
+    sylph_parser.add_argument(
+        "--include_whole_genus",
+        help="Include all genomes from genera found in the sylph report",
+        action="store_true",
     )
 
     args = parser.parse_args()
@@ -454,10 +543,11 @@ def cli_entry_point():
     elif args.subcommand == "sylph":
         run_dynamic_competitive_mapping(
             args.sylph_report,
-            args.genomes,
+            args.metadata_files,
+            args.genome_paths,
+            args.include_whole_genus,
             args.reads,
             args.ref_for_fastq,
-            args.db_metadata,
             args.seq_platform,
             args.cpus,
             args.output_root,
