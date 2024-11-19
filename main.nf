@@ -12,6 +12,7 @@ params.seq_platform = ''
 
 params.illumina_threshold = 100000
 params.ont_threshold = 1000
+params.use_whole_genera_in_dynamic_cm = true
 
 include { competitiveMapping } from './process/competitive_mapping.nf'
 include { dynamicCompetitiveMapping } from './process/competitive_mapping.nf'
@@ -56,7 +57,7 @@ workflow competitive_mapping {
 workflow dynamic_competitive_mapping {
     take:
         input_files
-        gtdb_genomes_dir
+        gtdb_genomes_path
         assembly_metadata
         seq_platform
 
@@ -72,7 +73,9 @@ workflow dynamic_competitive_mapping {
         throw new Exception("seq platform invalid. Should be one of $seq_platforms!")
     }
 
-    competitive_mapping_output = dynamicCompetitiveMapping(input_files, gtdb_genomes_dir, assembly_metadata, seq_platform)
+    competitive_mapping_output = dynamicCompetitiveMapping(
+        input_files, gtdb_genomes_path, assembly_metadata, seq_platform, params.use_whole_genera_in_dynamic_cm
+    )
 
     emit:
         cm_report = competitive_mapping_output.cm_report

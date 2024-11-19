@@ -60,7 +60,7 @@ process dynamicCompetitiveMapping {
     }
 
     cpus 4
-    memory { 8.GB * task.attempt }
+    memory { 8.GB + (12.GB * task.attempt) }
 
     pod label: "name", value: "competitive_mapping_pipeline:dynamicCompetitiveMapping"
     pod label: "sample_id", value: "${params.sample_id}"
@@ -68,9 +68,10 @@ process dynamicCompetitiveMapping {
 
     input:
     tuple val(sample_name), path(fqs), path(sylph_report)
-    path (gtdb_genomes)
+    path (gtdb_genomes_dir)
     path (assembly_metadata) // Used to go from assembly to species
     val(seq_platform)
+    val(include_whole_genus)
 
     output:
     tuple val(sample_name), path(competitive_mapping_report), emit: cm_report
@@ -80,14 +81,16 @@ process dynamicCompetitiveMapping {
     competitive_mapping_report = "species_comparison_report.json"
     competitive_mapping_csv = "species_comparison.csv"
     h37rv_ref="M.tuberculosis"
+    whole_genera_arg = include_whole_genus ? "--include_whole_genus" : ""
     """
     mkdir outputs
     competitive_mapping sylph --seq_platform ${seq_platform} \
         --reads ${fqs} \
         --sylph_report ${sylph_report} \
-        --genomes ${gtdb_genomes} \
-        --db_metadata ${assembly_metadata} \
+        --genome_dirs ${gtdb_genomes_dir} \
+        --metadata_files ${assembly_metadata} \
         --cpus ${task.cpus} \
+        ${whole_genera_arg} \
         --output_root "out."
 
     mv out.species_comparison.json ${competitive_mapping_report}

@@ -10,9 +10,10 @@ nextflow_process {
             process{
                 """
                 input[0] = ['sample_test', [file("$projectDir/test_data/TB_10k/TB_1.fastq.gz"), file("$projectDir/test_data/TB_10k/TB_2.fastq.gz")], file("$projectDir/test_data/TB_10k/sylph.tsv")]
-                input[1] = file("$projectDir/data/sylph")
+                input[1] = file("$projectDir/data/sylph/gtdb_genomes_reps_r220")
                 input[2] = file("$projectDir/data/sylph/gtdb_r220_metadata.tsv")
                 input[3] = 'illumina'
+                input[4] = true
                 """
             }
         }
@@ -25,7 +26,7 @@ nextflow_process {
             with(process.out.cm_report) {
                 assert size() == 1
                 assert get(0)[1].contains("species_comparison_report.json")
-                assert path(get(0)[1]).json == path("$projectDir/test_data/TB_10k/sylph_species_comparison.json").json
+                assert path(get(0)[1]).json == path("$projectDir/test_data/TB_10k/sylph_species_comparison_all_genera.json").json
             }
 
             with(process.out.cm_csv) {
@@ -41,9 +42,10 @@ nextflow_process {
             process{
                 """
                 input[0] = ['sample_test', file("$projectDir/test_data/TB_ont/ont_lineage4_10.fastq.gz"), file("$projectDir/test_data/TB_ont/sylph.tsv")]
-                input[1] = file("$projectDir/data/sylph")
+                input[1] = file("$projectDir/data/sylph/gtdb_genomes_reps_r220")
                 input[2] = file("$projectDir/data/sylph/gtdb_r220_metadata.tsv")
                 input[3] = 'ont'
+                input[4] = true
                 """
             }
         }
@@ -56,7 +58,7 @@ nextflow_process {
             with(process.out.cm_report) {
                 assert size() == 1
                 assert get(0)[1].contains("species_comparison_report.json")
-                assert path(get(0)[1]).json == path("$projectDir/test_data/TB_ont/sylph_species_comparison.json").json
+                assert path(get(0)[1]).json == path("$projectDir/test_data/TB_ont/sylph_species_comparison_all_genera.json").json
             }
 
             with(process.out.cm_csv) {
