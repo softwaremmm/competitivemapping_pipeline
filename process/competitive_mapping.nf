@@ -6,7 +6,7 @@ process competitiveMapping {
 
     cpus = 4
     memory = {
-        params.testing=="" ? "12GB" * task.attempt : "16GB"
+        params.testing=="" ? {12.GB + (36.GB * (task.attempts - 1))} : "16GB"
     }
 
     debug true
