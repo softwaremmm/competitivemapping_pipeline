@@ -1,7 +1,7 @@
 import filecmp
 import os
 
-REPLACE_EXPECTATION = True
+REPLACE_EXPECTATION = False
 
 
 def check_file(expectation, result):

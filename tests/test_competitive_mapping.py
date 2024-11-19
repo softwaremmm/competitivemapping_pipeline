@@ -78,7 +78,7 @@ def test_cli_entry_point_sylph(
         "GCF_000195955.2",  # M.tuberculosis
         "--sylph_report",
         samples["sylph_report"],
-        "--genome_paths",
+        "--genome_dirs",
         sylph_rep_paths,
         "--metadata_files",
         sylph_metadata,
@@ -135,7 +135,7 @@ def test_empty_sylph(
         "GCF_000195955.2",  # M.tuberculosis
         "--sylph_report",
         empty_sylph["sylph_report"],
-        "--genome_paths",
+        "--genome_dirs",
         sylph_rep_paths,
         "--metadata_files",
         sylph_metadata,
@@ -181,7 +181,7 @@ def test_cli_entry_point_sylph_all_genera(
         "GCF_000195955.2",  # M.tuberculosis
         "--sylph_report",
         samples["sylph_report"],
-        "--genome_paths",
+        "--genome_dirs",
         sylph_rep_paths,
         "--metadata_files",
         sylph_metadata,

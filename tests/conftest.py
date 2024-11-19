@@ -194,7 +194,7 @@ def test_outputs_dir() -> Path:
 
 @pytest.fixture
 def sylph_rep_paths() -> str:
-    return "data/sylph/gtdb_genomes_reps_r220/genome_paths.tsv"
+    return "data/sylph/gtdb_genomes_reps_r220"
 
 
 @pytest.fixture

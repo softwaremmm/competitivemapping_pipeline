@@ -74,7 +74,7 @@ def read_contigs(args: tuple[str, str]) -> list[dict[str, str]]:
 def make_manifest(
     report_path: str,
     metadata_files: list[str],
-    genome_path_files: list[str],
+    genome_dirs: list[str],
     include_whole_genus: bool,
     output_root: str,
     cpus: int,
@@ -84,7 +84,7 @@ def make_manifest(
     Args:
         report_path (str): Path to the sylph report
         metadata_files (list[str]): path to the db metadata files, with taxonomy info
-        genome_path_files (list[str]): path to the mapping files to look up genome fasta location
+        genome_dirs (list[str]): path to the directories with the genome fastas
         include_whole_genus (bool): Whether to include all genomes from genera found
         output_root (str): Path to the output root
         cpus (int): number of cores to use
@@ -102,16 +102,20 @@ def make_manifest(
     )
     accessions = sylph_df["accession"].tolist()
 
-    def read_path_file(file):
-        """Read file and make paths absolute.
-        Assumes that the paths are relative to the file location"""
-        file_dir = os.path.dirname(file)
-        df = pd.read_csv(file, sep="\t", header=None, names=["filename", "path"])
-        df["path"] = df["path"].apply(lambda x: os.path.join(file_dir, x))
+    def get_genome_paths(dir_path):
+        """Produce df of genome paths for given directory.
+        Assumes a genomes_paths.tsv file which species relative paths to genomes"""
+        df = pd.read_csv(
+            dir_path + "/genome_paths.tsv",
+            sep="\t",
+            header=None,
+            names=["filename", "path"],
+        )
+        df["path"] = df["path"].apply(lambda x: os.path.join(dir_path, x))
         df["path"] = df["path"] + "/" + df["filename"]
         return df
 
-    genome_paths = pd.concat(read_path_file(f) for f in genome_path_files)
+    genome_paths = pd.concat(get_genome_paths(g_dir) for g_dir in genome_dirs)
     genome_paths["accession"] = genome_paths["filename"].str.replace(
         "_genomic.fna.gz", ""
     )
@@ -424,7 +428,7 @@ def run_competitive_mapping(
 def run_dynamic_competitive_mapping(
     sylph_report: str,
     metadata_files: list[str],
-    genome_paths: list[str],
+    genome_dirs: list[str],
     include_whole_genus: bool,
     reads: list[str],
     ref_for_fastq: str | None,
@@ -437,7 +441,7 @@ def run_dynamic_competitive_mapping(
     Args:
         sylph_report (str): path to the sylph report
         metadata_files (list[str]): path to the db metadata files, with taxonomy info
-        genome_paths (list[str]): path to the mapping files to look up genome fasta location
+        genome_dirs (list[str]): path to the directories with the genome fastas
         include_whole_genus (bool): whether to include all genomes from genera found
         reads (list[str]): list of paths to the read fastqs
         ref_for_fastq (str | None): reference to extract reads for
@@ -455,7 +459,7 @@ def run_dynamic_competitive_mapping(
     manifest, contigs = make_manifest(
         sylph_report,
         metadata_files,
-        genome_paths,
+        genome_dirs,
         include_whole_genus,
         output_root,
         cpus,
@@ -516,10 +520,10 @@ def cli_entry_point():
         nargs="+",
     )
     sylph_parser.add_argument(
-        "--genome_paths",
+        "--genome_dirs",
         required=True,
-        help="Path to the files mapping assemly to the path to assembly fastas."
-        + " This is normally the genome_paths.tsv file from the GTDB database",
+        help="Path to the directories containing the genome files."
+        + " Must contain a genome_paths.tsv file like in gtdb_genomes_reps",
         nargs="+",
     )
     sylph_parser.add_argument(
@@ -544,7 +548,7 @@ def cli_entry_point():
         run_dynamic_competitive_mapping(
             args.sylph_report,
             args.metadata_files,
-            args.genome_paths,
+            args.genome_dirs,
             args.include_whole_genus,
             args.reads,
             args.ref_for_fastq,
