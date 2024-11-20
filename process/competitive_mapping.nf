@@ -39,6 +39,7 @@ process competitiveMapping {
         --ref_for_fastq ${h37rv_ref} \
         --manifest ${manifest} \
         --contigs ${species_list} \
+        --cpus ${task.cpus} \
         --output_root "out."
     
     mv out.species_comparison.json ${competitive_mapping_report}
@@ -86,6 +87,7 @@ process dynamicCompetitiveMapping {
         --reads ${fqs} \
         --sylph_report ${sylph_report} \
         --genomes ${gtdb_genomes} \
+        --cpus ${task.cpus} \
         --output_root "out."
     
     mv out.species_comparison.json ${competitive_mapping_report}

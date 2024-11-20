@@ -77,7 +77,8 @@ def aggregate_contigs(referenced_table: pd.DataFrame) -> pd.DataFrame:
                     "numreads": contig.numreads.sum(),
                     "meandepth": (contig.meandepth * contig.endpos / contig.totallength.iloc[0]).sum(),
                 }
-            )
+            ),
+            include_groups=False,
         )
         .sort_values(by=["meandepth"], ascending=False)
         .reset_index()

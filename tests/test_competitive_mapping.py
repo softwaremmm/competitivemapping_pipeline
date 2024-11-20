@@ -30,6 +30,8 @@ def test_cli_entry_point_manifest(
         species_table_path,
         "--output_root",
         output_root,
+        "--cpus",
+        "4",
     ]
 
     mocker.patch(
@@ -76,6 +78,8 @@ def test_cli_entry_point_sylph(samples, GTDB_db, test_outputs_dir, mocker):
         GTDB_db,
         "--output_root",
         output_root,
+        "--cpus",
+        "4",
     ]
 
     mocker.patch(

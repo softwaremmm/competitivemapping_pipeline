@@ -14,6 +14,7 @@ params.illumina_threshold = 100000
 params.ont_threshold = 1000
 
 include { competitiveMapping } from './process/competitive_mapping.nf'
+include { dynamicCompetitiveMapping } from './process/competitive_mapping.nf'
 include { has_enough_reads } from './process/competitive_mapping.nf'
 
 //Constants
@@ -50,6 +51,31 @@ workflow competitive_mapping {
         cm_report = competitive_mapping_output.cm_report
         cm_csv = competitive_mapping_output.cm_csv
         cm_enough_reads =  has_enough_reads.out
+}
+
+workflow dynamic_competitive_mapping {
+    take:
+        input_files
+        gtdb_genomes_dir
+        seq_platform
+
+    main:
+
+    // seq_platform should be a String, not a channel
+    if (seq_platform.getClass() != java.lang.String) {
+        throw new Exception("seq_platform should be a string, not a ${seq_platform.getClass()}")
+    }
+
+    // Should be supported by this workflow
+    if (! (seq_platform in seq_platforms)) {
+        throw new Exception("seq platform invalid. Should be one of $seq_platforms!")
+    }
+
+    competitive_mapping_output = dynamicCompetitiveMapping(input_files, gtdb_genomes_dir, seq_platform)
+
+    emit:
+        cm_report = competitive_mapping_output.cm_report
+        cm_csv = competitive_mapping_output.cm_csv
 }
 
 workflow {
