@@ -1,13 +1,16 @@
 fail_fast: false
 
 repos:
-  - hooks:
-      - id: black
-        exclude: ^tests/
-    repo: https://github.com/psf/black
-    rev: 23.7.0
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    # Ruff version.
+    rev: v0.1.6
+    hooks:
+      - id: ruff-format
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
 
-  - hooks:
+  - repo: local
+    hooks:
       - id: pylint
         exclude: ^tests/
         name: pylint
@@ -15,17 +18,28 @@ repos:
         language: system
         types: [python]
         require_serial: true
-    repo: local
 
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v0.902
     hooks:
       - id: mypy
         exclude: ^tests/
-  
+
   - repo: https://github.com/commitizen-tools/commitizen
     rev: v3.13.0
     hooks:
       - id: commitizen
         stages:
           - commit-msg
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - exclude: mkdocs.yml
+        id: check-yaml
+      - id: check-json
+      - id: detect-private-key
+      - id: check-merge-conflict
+      - id: check-docstring-first
+    rev: v3.2.0
