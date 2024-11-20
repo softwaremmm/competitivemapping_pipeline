@@ -1,0 +1,63 @@
+nextflow_workflow {
+
+    name "Test Dynamic Workflow"
+    script "main.nf"
+    workflow "dynamic_competitive_mapping"
+
+    test("Illumina - Should succeed producing a competitive mapping json") {
+        tag 'illumina'
+        when {
+            workflow {
+                """
+                input[0] = ['sample_test', [file("$projectDir/test_data/TB_10k/TB_1.fastq.gz"), file("$projectDir/test_data/TB_10k/TB_2.fastq.gz")], file("$projectDir/test_data/TB_10k/sylph.tsv")]
+                input[1] = file("$projectDir/data/sylph")
+                input[2] = file("$projectDir/data/sylph/gtdb_r220_metadata.tsv")
+                input[3] = 'illumina'
+                """
+            }
+        }
+
+        then {
+            assert workflow.success
+
+            with(workflow.out.cm_report) {
+                assert size() == 1
+                assert get(0)[1].contains("species_comparison_report.json")
+            }
+
+            with(workflow.out.cm_csv) {
+                assert size() == 1
+                assert get(0)[1].contains("species_comparison.csv")
+            }
+        }
+    }
+
+    test("ONT - Should succeed producing a competitive mapping json") {
+        tag 'ont'
+        when {
+            workflow {
+                """
+                input[0] = ['sample_test', file("$projectDir/test_data/TB_ont/ont_lineage4_10.fastq.gz"), file("$projectDir/test_data/TB_ont/sylph.tsv")]
+                input[1] = file("$projectDir/data/sylph")
+                input[2] = file("$projectDir/data/sylph/gtdb_r220_metadata.tsv")
+                input[3] = 'ont'
+                """
+            }
+        }
+
+        then {
+            assert workflow.success
+
+            with(workflow.out.cm_report) {
+                assert size() == 1
+                assert get(0)[1].contains("species_comparison_report.json")
+            }
+
+            with(workflow.out.cm_csv) {
+                assert size() == 1
+                assert get(0)[1].contains("species_comparison.csv")
+            }
+        }
+    }
+
+}

@@ -1,0 +1,69 @@
+nextflow_process {
+
+    name "Test Process dynamicCompetitiveMapping"
+    script "process/competitive_mapping.nf"
+    process "dynamicCompetitiveMapping"
+
+    test("Illumina - Process should succeed when sample files and genomes are provided") {
+        tag "illumina"
+        when {
+            process{
+                """
+                input[0] = ['sample_test', [file("$projectDir/test_data/TB_10k/TB_1.fastq.gz"), file("$projectDir/test_data/TB_10k/TB_2.fastq.gz")], file("$projectDir/test_data/TB_10k/sylph.tsv")]
+                input[1] = file("$projectDir/data/sylph")
+                input[2] = file("$projectDir/data/sylph/gtdb_r220_metadata.tsv")
+                input[3] = 'illumina'
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert process.exitStatus == 0
+
+
+            with(process.out.cm_report) {
+                assert size() == 1
+                assert get(0)[1].contains("species_comparison_report.json")
+                assert path(get(0)[1]).json == path("$projectDir/test_data/TB_10k/sylph_species_comparison.json").json
+            }
+
+            with(process.out.cm_csv) {
+                assert size() == 1
+                assert get(0)[1].contains("species_comparison.csv")
+            }
+        }
+    }
+
+    test("ONT - Process should succeed when sample files and genomes are provided") {
+        tag "ont"
+        when {
+            process{
+                """
+                input[0] = ['sample_test', file("$projectDir/test_data/TB_ont/ont_lineage4_10.fastq.gz"), file("$projectDir/test_data/TB_ont/sylph.tsv")]
+                input[1] = file("$projectDir/data/sylph")
+                input[2] = file("$projectDir/data/sylph/gtdb_r220_metadata.tsv")
+                input[3] = 'ont'
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert process.exitStatus == 0
+
+
+            with(process.out.cm_report) {
+                assert size() == 1
+                assert get(0)[1].contains("species_comparison_report.json")
+                assert path(get(0)[1]).json == path("$projectDir/test_data/TB_ont/sylph_species_comparison.json").json
+            }
+
+            with(process.out.cm_csv) {
+                assert size() == 1
+                assert get(0)[1].contains("species_comparison.csv")
+            }
+        }
+    }
+
+}

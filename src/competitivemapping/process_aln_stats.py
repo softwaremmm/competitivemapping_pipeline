@@ -1,14 +1,15 @@
 """Script to process a bam file and give summary of
 number of reads and alignmments for each reference"""
 
+import argparse
 import json
 import typing
-import argparse
-from pysam import AlignmentFile  # pylint: disable = no-name-in-module
+
 import pandas as pd
+from pysam import AlignmentFile  # pylint: disable = no-name-in-module
 
 
-def get_name_mapping(names_file: str) -> dict:
+def get_name_mapping(names_file: str) -> dict[str, str]:
     """Produce dictionary of reference code to their human names
 
     Args:
@@ -17,23 +18,22 @@ def get_name_mapping(names_file: str) -> dict:
     Returns:
         dict: dict with mapping for reference code to human names
     """
-
     df = pd.read_csv(names_file).set_index("rname")
     name_mapping = df["reference"].to_dict()
     return name_mapping
 
 
 def get_alignment_stats(
-    bam_file,
-    name_mapping,
+    bam_file: str,
+    name_mapping: dict[str, str],
     exclude_secondary=False,
     exclude_supplementary=False,
 ) -> tuple[dict, pd.DataFrame]:
     """Iterate through all alignments in the bam file and produce a summary by reference
 
     Args:
-        bam_file (_type_): bam file to process
-        name_mapping (_type_): dict with mapping for reference code to human names
+        bam_file (str): bam file to process
+        name_mapping (dict[str, str]): dict with mapping for reference code to human names
         exclude_secondary (bool, optional): exclude secondary alignments. Defaults to False.
         exclude_supplementary (bool, optional): exclude supplementary alignments. Defaults to False.
 

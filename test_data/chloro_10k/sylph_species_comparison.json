@@ -1,0 +1,57 @@
+{
+    "total_read_counts": {
+        "mapped_reads": 19970,
+        "unmapped_reads": 30
+    },
+    "references": [
+        {
+            "species": "Mycobacterium pyrenivorans",
+            "genome_name": "GCF_025821625.1",
+            "length": 6688400,
+            "numreads": 19968,
+            "coverage": 33.82,
+            "meandepth": 0.4326,
+            "coverage_including_secondary": 34.31,
+            "meandepth_including_secondary": 0.4428,
+            "total_reads": 19968,
+            "total_alns": 20627,
+            "exclusive_reads": 19957,
+            "primary_reads": 19968,
+            "secondary_reads": 0,
+            "supplementary_reads": 0,
+            "supplementary_alns": 30
+        },
+        {
+            "species": "Mycobacterium tuberculosis",
+            "genome_name": "GCF_000195955.2",
+            "length": 4411532,
+            "numreads": 2,
+            "coverage": 0.00442,
+            "meandepth": 6.846e-05,
+            "coverage_including_secondary": 0.03452,
+            "meandepth_including_secondary": 0.0003858,
+            "total_reads": 13,
+            "total_alns": 13,
+            "exclusive_reads": 2,
+            "primary_reads": 2,
+            "secondary_reads": 11,
+            "supplementary_reads": 0,
+            "supplementary_alns": 0
+        }
+    ],
+    "definitions": {
+        "length": "Length of all contigs in reference",
+        "numreads": "Number of reads which map well to this reference (primary + supplementary)",
+        "coverage": "Percentage of reference covered by reads (not including secondary alignments)",
+        "meandepth": "Mean depth of coverage of reference (not including secondary alignments)",
+        "coverage_including_secondary": "Percentage of reference covered by reads (including secondary alignments)",
+        "meandepth_including_secondary": "Mean depth of coverage of reference (including secondary alignments)",
+        "total_reads": "Total number of reads which map (in any way) to chrom",
+        "total_alns": "Total number of alignments, so will count supplementary separately",
+        "exclusive_reads": "reads which only maps to this chrom",
+        "primary_reads": "reads which map best to this chrom",
+        "secondary_reads": "reads which map to this chrom but not with primary",
+        "supplementary_reads": "reads which have supplementary alignments but not primary",
+        "supplementary_alns": "number of supplementary alignments"
+    }
+}
