@@ -89,8 +89,6 @@ def make_manifest(
 
 def map_reads(manifest, reads, seq_platform: str, cpus: int, output_root: str) -> str:
     """Run minimap2 to map reads to a manifest, and sort to bam file"""
-
-    raw_aln_file = f"{output_root}alignment_raw.sam"
     aln_bam = f"{output_root}alignment.bam"
 
     command = f"minimap2 -t {cpus} --secondary yes -N 1000"
@@ -98,11 +96,12 @@ def map_reads(manifest, reads, seq_platform: str, cpus: int, output_root: str) -
         command += " -ax map-ont"
     else:
         command += " -ax sr"
-    command += f" {manifest} {' '.join(reads)} > {raw_aln_file}"
-    subprocess.run(command, shell=True, check=True, stdout=subprocess.PIPE)
+    command += f" {manifest} {' '.join(reads)}"
+
+    command += f"| samtools sort -@ {cpus} -o {aln_bam}"
 
     subprocess.run(
-        f"samtools sort -@ {cpus} -o {aln_bam} {raw_aln_file}",
+        command,
         shell=True,
         check=True,
         stdout=subprocess.PIPE,
