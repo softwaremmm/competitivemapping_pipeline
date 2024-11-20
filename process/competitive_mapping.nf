@@ -4,9 +4,9 @@ process competitiveMapping {
         params.test_container=="" ? 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:1.3.1' : params.test_container
     }
 
-    cpus = 8
+    cpus = 4
     memory = {
-        params.testing=="" ? "48GB" : "16GB"
+        params.testing=="" ? {12.GB + (36.GB * (task.attempts - 1))} : "16GB"
     }
 
     debug true
