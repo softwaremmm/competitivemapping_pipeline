@@ -1,0 +1,24 @@
+{
+    "total_read_counts": {
+        "mapped_reads": 19858,
+        "unmapped_reads": 142
+    },
+    "references": [
+        {
+            "genome_name": "gtdb_genomes_reps_r220/database/GCF/000/195/955/GCF_000195955.2_genomic.fna.gz",
+            "length": 4411532,
+            "coverage": 28.5,
+            "numreads": 19858,
+            "meandepth": 0.6768,
+            "coverage_including_secondary": 29.1,
+            "meandepth_including_secondary": 0.7311,
+            "total_reads": 19858,
+            "total_alns": 21781,
+            "exclusive_reads": 19858,
+            "primary_reads": 19858,
+            "secondary_reads": 0,
+            "supplementary_reads": 0,
+            "supplementary_alns": 48
+        }
+    ]
+}
