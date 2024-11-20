@@ -55,6 +55,44 @@ process competitiveMapping {
     """
 }
 
+process dynamicCompetitiveMapping {
+    container = {
+        params.test_container=="" ? 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:1.3.1' : params.test_container
+    }
+
+    cpus 8
+    memory { 8.GB * task.attempt}
+
+    pod label: "name", value: "competitive_mapping_pipeline:dynamicCompetitiveMapping"
+    pod label: "sample_id", value: "${params.sample_id}"
+    pod label: "run_id", value: "${params.run_id}"
+
+    input:
+    tuple val(sample_name), path(fqs), path(sylph_report)
+    path (gtdb_genomes)
+    val(seq_platform)
+
+    output:
+    tuple val(sample_name), path(competitive_mapping_report), emit: cm_report
+    tuple val(sample_name), path(competitive_mapping_csv), emit: cm_csv
+
+    script:
+    competitive_mapping_report = "species_comparison_report.json"
+    competitive_mapping_csv = "species_comparison.csv"
+    h37rv_ref="M.tuberculosis"
+    """
+    mkdir outputs
+    competitive_mapping sylph --seq_platform ${seq_platform} \
+        --reads ${fqs} \
+        --sylph_report ${sylph_report} \
+        --genomes ${gtdb_genomes} \
+        --output_root "out."
+    
+    mv out.species_comparison.json ${competitive_mapping_report}
+    mv out.species_comparison.csv ${competitive_mapping_csv}
+    """
+}
+
 process has_enough_reads {
     container = {
         params.test_container=="" ? 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:1.3.1' : params.test_container
