@@ -168,5 +168,5 @@ def test_outputs_dir() -> Path:
 
 
 @pytest.fixture
-def GTDB_db() -> str:
-    return "data/GTDB"
+def sylph_db() -> str:
+    return "data/sylph"

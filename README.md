@@ -21,7 +21,7 @@ Competitive mapping uses minimap2 to map reads against manifest (collection of m
 ### Needed data
 * manifest should be at path: `$projectDir/data/manifest/manifest_20231001`
 * species list is provided at `$projectDir/test_data/species_list_manifest_20240710.csv`
-* (for sylph approach) should have GTDB representative genomes at path: `$projectDir/data/GTDB/gtdb_genomes_reps_r220`. Can be found [here](https://data.ace.uq.edu.au/public/gtdb/data/releases/release220/220.0/genomic_files_reps/)
+* (for sylph approach) should have GTDB representative genomes at path: `$projectDir/data/sylph/gtdb_genomes_reps_r220`. Can be found [here](https://data.ace.uq.edu.au/public/gtdb/data/releases/release220/220.0/genomic_files_reps/)
 
 These can all be found in the (dev) knowledge bucket.
 

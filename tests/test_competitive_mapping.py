@@ -57,7 +57,7 @@ def test_cli_entry_point_manifest(
             check_length(output_root + "reads.fastq.gz", 1042)
 
 
-def test_cli_entry_point_sylph(samples, GTDB_db, test_outputs_dir, mocker):
+def test_cli_entry_point_sylph(samples, sylph_db, test_outputs_dir, mocker):
     output_root = os.path.join(test_outputs_dir, "cm_sylph", samples["sample"] + ".")
     os.makedirs(os.path.join(test_outputs_dir, "cm_sylph"), exist_ok=True)
 
@@ -75,7 +75,7 @@ def test_cli_entry_point_sylph(samples, GTDB_db, test_outputs_dir, mocker):
         "--sylph_report",
         samples["sylph_report"],
         "--genomes",
-        GTDB_db,
+        sylph_db,
         "--output_root",
         output_root,
         "--cpus",

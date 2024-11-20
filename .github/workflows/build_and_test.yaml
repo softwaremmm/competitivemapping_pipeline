@@ -35,7 +35,7 @@ jobs:
           mkdir data && \
           ln -s /mnt/portal-sp3dev-knowledge/manifest ./data/manifest && \
           tree data/manifest
-          ln -s /mnt/dev-knowledge/sylph ./data/GTDB
+          ln -s /mnt/dev-knowledge/sylph ./data/sylph
       
       - name: Login to OCR
         uses: docker/login-action@v2
@@ -57,7 +57,7 @@ jobs:
           docker run -v ${{ github.workspace }}/tests:/app/tests \
             -v ${{ github.workspace }}/test_data:/app/test_data \
             -v /mnt/dev-knowledge/manifest:/app/data/manifest \
-            -v /mnt/dev-knowledge/sylph:/app/data/GTDB \
+            -v /mnt/dev-knowledge/sylph:/app/data/sylph \
             test_container_cm pytest /app/tests
 
       - name: Run nf-test
