@@ -122,6 +122,22 @@ CHLORO_10k = {
     "sylph_species_comparison": "test_data/chloro_10k/sylph_species_comparison.json",
 }
 
+EMPTY_SYLPH = {
+    "sample": "empty",
+    "reads": [
+        "test_data/chloro_10k/chloro_1.fastq.gz",
+        "test_data/chloro_10k/chloro_2.fastq.gz",
+    ],
+    "sylph_report": "test_data/empty_sylph/sylph.tsv",
+    "sylph_species_comparison": "test_data/empty_sylph/sylph_species_comparison.json",
+    "sylph_csv_comparison": "test_data/empty_sylph/sylph_species_comparison.csv",
+}
+
+
+@pytest.fixture()
+def empty_sylph():
+    return EMPTY_SYLPH
+
 
 @pytest.fixture(
     params=[
