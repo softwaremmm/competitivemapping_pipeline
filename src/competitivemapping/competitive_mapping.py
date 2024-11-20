@@ -295,7 +295,7 @@ def run_dynamic_competitive_mapping(
     """Create manifest then competitive mapping"""
 
     # check if sylph_report is empty
-    if os.stat(sylph_report).st_size == 0 or pd.read_csv(sylph_report).empty:
+    if os.stat(sylph_report).st_size == 0 or pd.read_csv(sylph_report, sep="\t").empty:
         logging.warning("Sylph report is empty")
         produce_empty_outputs(output_root)
         return
