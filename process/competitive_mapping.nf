@@ -62,7 +62,7 @@ process dynamicCompetitiveMapping {
     }
 
     cpus 4
-    memory { 4.GB + (4.GB * task.attempt) }
+    memory { 8.GB * task.attempt }
 
     pod label: "name", value: "competitive_mapping_pipeline:dynamicCompetitiveMapping"
     pod label: "sample_id", value: "${params.sample_id}"
