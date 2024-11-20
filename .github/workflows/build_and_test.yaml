@@ -35,6 +35,7 @@ jobs:
           mkdir data && \
           ln -s /mnt/portal-sp3dev-knowledge/manifest ./data/manifest && \
           tree data/manifest
+          ln -s /mnt/dev-knowledge/sylph/GTDB ./data/GTDB
       
       - name: Login to OCR
         uses: docker/login-action@v2
