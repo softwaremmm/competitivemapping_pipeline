@@ -41,7 +41,9 @@ def test_cli_entry_point_manifest(
     competitive_mapping.cli_entry_point()
 
     check_file(samples["species_comparison"], output_root + "species_comparison.json")
-    check_file(samples["sylph_csv_comparison"], output_root + "species_comparison.csv")
+    check_file(
+        samples["species_comparison_csv"], output_root + "species_comparison.csv"
+    )
 
     def check_length(path, length):
         assert len(list(SeqIO.parse(gzopen(path, "rt"), format="fastq"))) == length
