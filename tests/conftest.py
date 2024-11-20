@@ -87,6 +87,7 @@ TB_10K = {
     "species_comparison": "test_data/TB_10k/species_comparison_report.json",
     "sylph_report": "test_data/TB_10k/sylph.tsv",
     "sylph_species_comparison": "test_data/TB_10k/sylph_species_comparison.json",
+    "sylph_csv_comparison": "test_data/TB_10k/sylph_species_comparison.csv",
 }
 
 TB_ONT = {
@@ -102,6 +103,7 @@ TB_ONT = {
     "species_comparison": "test_data/TB_ont/species_comparison_report.json",
     "sylph_report": "test_data/TB_ont/sylph.tsv",
     "sylph_species_comparison": "test_data/TB_ont/sylph_species_comparison.json",
+    "sylph_csv_comparison": "test_data/TB_ont/sylph_species_comparison.csv",
 }
 
 CHLORO_10k = {
@@ -120,6 +122,7 @@ CHLORO_10k = {
     "species_comparison": "test_data/chloro_10k/species_comparison_report.json",
     "sylph_report": "test_data/chloro_10k/sylph.tsv",
     "sylph_species_comparison": "test_data/chloro_10k/sylph_species_comparison.json",
+    "sylph_csv_comparison": "test_data/chloro_10k/sylph_species_comparison.csv",
 }
 
 EMPTY_SYLPH = {

@@ -1,5 +1,6 @@
 # pylint: disable=too-many-arguments
 # pylint: disable=too-many-positional-arguments
+# pylint: disable=too-many-locals
 """Run Competitive Mapping and aggregate the results"""
 
 import argparse
@@ -14,6 +15,39 @@ from Bio import SeqIO
 
 from competitivemapping.process_aln_stats import get_alignment_stats
 from competitivemapping.process_coverage import process_coverage
+
+FINAL_COLUMNS = [
+    "genome_name",
+    "length",
+    "numreads",
+    "coverage",
+    "meandepth",
+    "coverage_including_secondary",
+    "meandepth_including_secondary",
+    "total_reads",
+    "total_alns",
+    "exclusive_reads",
+    "primary_reads",
+    "secondary_reads",
+    "supplementary_reads",
+    "supplementary_alns",
+]
+
+COLUMN_EXPLANATIONS = {
+    "length": "Length of all contigs in reference",
+    "numreads": "Number of reads which map well to this reference (primary + supplementary)",
+    "coverage": "Percentage of reference covered by reads (not including secondary alignments)",
+    "meandepth": "Mean depth of coverage of reference (not including secondary alignments)",
+    "coverage_including_secondary": "Percentage of reference covered by reads (including secondary alignments)",
+    "meandepth_including_secondary": "Mean depth of coverage of reference (including secondary alignments)",
+    "total_reads": "Total number of reads which map (in any way) to chrom",
+    "total_alns": "Total number of alignments, so will count supplementary separately",
+    "exclusive_reads": "reads which only maps to this chrom",
+    "primary_reads": "reads which map best to this chrom",
+    "secondary_reads": "reads which map to this chrom but not with primary",
+    "supplementary_reads": "reads which have supplementary alignments but not primary",
+    "supplementary_alns": "number of supplementary alignments",
+}
 
 
 def make_manifest(
@@ -169,28 +203,13 @@ def produce_empty_outputs(output_root: str):
             "unmapped_reads": 0,
         },
         "references": [],
+        "definitions": COLUMN_EXPLANATIONS,
     }
     with open(f"{output_root}species_comparison.json", "w", encoding="utf-8") as file:
         json.dump(report, file, indent=4)
 
     with open(f"{output_root}species_comparison.csv", "w", encoding="utf-8") as file:
-        col_names = [
-            "genome_name",
-            "length",
-            "coverage",
-            "numreads",
-            "meandepth",
-            "coverage_including_secondary",
-            "meandepth_including_secondary",
-            "total_reads",
-            "total_alns",
-            "exclusive_reads",
-            "primary_reads",
-            "secondary_reads",
-            "supplementary_reads",
-            "supplementary_alns",
-        ]
-        file.write(",".join(col_names) + "\n")
+        file.write(",".join(FINAL_COLUMNS) + "\n")
 
 
 def run_competitive_mapping(
@@ -208,7 +227,6 @@ def run_competitive_mapping(
     coverage_df = get_coverage_stats(aln_bam, contigs, output_root)
 
     overall_stats, aln_stats = get_aln_stats(aln_bam, contigs)
-
     df = pd.merge(coverage_df, aln_stats, on="genome_name")
 
     # Can update numreads to actually reflect reads
@@ -224,11 +242,20 @@ def run_competitive_mapping(
         if col in df.columns:
             df[col] = df[col].apply(lambda x: float(f"{x:.4g}"))
 
+    df = df[FINAL_COLUMNS].copy()
+    # incorporate species information if available
+    if "species" in contigs.columns:
+        species_lookup = contigs.set_index("reference")["species"].to_dict()
+        print(species_lookup)
+        df["species"] = df["genome_name"].map(species_lookup)
+        df = df[["species"] + FINAL_COLUMNS]
+
     df.to_csv(f"{output_root}species_comparison.csv", index=False)
 
     output = {
         "total_read_counts": overall_stats,
         "references": df.to_dict(orient="records"),
+        "definitions": COLUMN_EXPLANATIONS,
     }
     with open(f"{output_root}species_comparison.json", "w", encoding="utf-8") as file:
         json.dump(output, file, indent=4)
@@ -265,25 +292,18 @@ def run_dynamic_competitive_mapping(
 
     manifest, contigs = make_manifest(sylph_report, genomes, output_root)
     if db_metadata:
-        metadata = pd.read_csv(db_metadata, sep="\t", names=["assembly", "species"])
+        metadata = pd.read_csv(
+            db_metadata, sep="\t", header=None, names=["assembly", "taxonomy"]
+        )
         metadata["species"] = (
-            metadata["species"].str.split(";").str[-1].str.replace("s__", "")
+            metadata["taxonomy"].str.split(";").str[-1].str.replace("s__", "")
         )
         species_lookup = metadata.set_index("assembly")["species"].to_dict()
 
-        contigs["assembly"] = (
+        contigs["reference"] = (
             contigs["reference"].str.split("/").str[-1].str.split("_genomic").str[0]
         )
-        contigs["species"] = contigs["assembly"].map(species_lookup)
-        contigs["reference"] = contigs["species"] + " (" + contigs["assembly"] + ")"
-
-        if ref_for_fastq is not None and ref_for_fastq in species_lookup:
-            ref_for_fastq = (
-                species_lookup.get(ref_for_fastq, "Unknown")
-                + " ("
-                + ref_for_fastq
-                + ")"
-            )
+        contigs["species"] = contigs["reference"].map(species_lookup)
 
     run_competitive_mapping(
         manifest, contigs, reads, ref_for_fastq, seq_platform, cpus, output_root
