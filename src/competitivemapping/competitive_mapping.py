@@ -9,6 +9,7 @@ import json
 import logging
 import os
 import subprocess
+import typing
 
 import pandas as pd
 from Bio import SeqIO
@@ -243,14 +244,24 @@ def run_competitive_mapping(
             df[col] = df[col].apply(lambda x: float(f"{x:.4g}"))
 
     df = df[FINAL_COLUMNS].copy()
+
+    # add final row with unmapped read count
+    new_row: dict[str, typing.Any] = {col: 0 for col in FINAL_COLUMNS}
+    new_row["genome_name"] = "unmapped"
+    for col in "numreads", "primary_reads", "total_reads":
+        new_row[col] = overall_stats["unmapped_reads"]
+    df.loc[-1] = new_row
+
     # incorporate species information if available
     if "species" in contigs.columns:
         species_lookup = contigs.set_index("reference")["species"].to_dict()
-        print(species_lookup)
+        species_lookup["unmapped"] = "unmapped"
         df["species"] = df["genome_name"].map(species_lookup)
         df = df[["species"] + FINAL_COLUMNS]
 
     df.to_csv(f"{output_root}species_comparison.csv", index=False)
+    # remove the last row with unmapped read count
+    df = df.iloc[:-1]
 
     output = {
         "total_read_counts": overall_stats,
