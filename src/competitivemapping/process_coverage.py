@@ -84,9 +84,10 @@ def aggregate_contigs(referenced_table: pd.DataFrame) -> pd.DataFrame:
         .rename(columns={"reference": "genome_name"})
     )
 
-    filtered = aggregated[aggregated["coverage"] > 0]
+    aggregated["length"] = aggregated["length"].astype(int)
+    aggregated["numreads"] = aggregated["numreads"].astype(int)
 
-    return filtered
+    return aggregated[aggregated["coverage"] > 0]
 
 
 def lookup_and_aggregate(coverage_table: pd.DataFrame, species_table: pd.DataFrame) -> pd.DataFrame:
@@ -133,11 +134,12 @@ def validate_output(file_to_validate: Path):
     validate(instance=output, schema=schema)
 
 
-def process_mapping(
+def process_coverage(
     coverage_file: str | Path,
     secondary_coverage: str | Path | None,
     contigs: pd.DataFrame,
-):
+) -> pd.DataFrame:
+    """Main function for producing summary Dataframe of coverage stats"""
     coverage_table = pd.read_table(coverage_file)
 
     aggregated = lookup_and_aggregate(coverage_table, contigs)
@@ -172,7 +174,7 @@ def cli_entry_point() -> None:
     args = Arguments(sys.argv[1:])
 
     contigs_df = pd.read_csv(args.species_list)
-    aggregated = process_mapping(args.coverage, args.secondary_coverage, contigs_df)
+    aggregated = process_coverage(args.coverage, args.secondary_coverage, contigs_df)
 
     output = {}
     output["references"] = aggregated.to_dict(orient="records")

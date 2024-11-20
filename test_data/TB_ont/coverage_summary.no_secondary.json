@@ -1,0 +1,32 @@
+{
+    "references": [
+        {
+            "genome_name": "M.tuberculosis",
+            "length": 4411532,
+            "coverage": 30.33,
+            "numreads": 1068,
+            "meandepth": 0.369744
+        },
+        {
+            "genome_name": "M.novocastrense",
+            "length": 5624151,
+            "coverage": 0.0126597,
+            "numreads": 2,
+            "meandepth": 0.000126597
+        },
+        {
+            "genome_name": "M.spongiae",
+            "length": 5581157,
+            "coverage": 0.00584108,
+            "numreads": 1,
+            "meandepth": 5.84108e-05
+        },
+        {
+            "genome_name": "M.shinjukuense",
+            "length": 4504020,
+            "coverage": 0.00286411,
+            "numreads": 1,
+            "meandepth": 2.86411e-05
+        }
+    ]
+}
