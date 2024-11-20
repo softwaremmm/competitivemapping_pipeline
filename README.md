@@ -70,7 +70,7 @@ nf-test test tests/nextflow/*.test
 
 If you have made changes to the python code, you may need to build a local test container:
 ```bash
-docker build -t comp_mapping_test .
+docker build -t test_container_cm .
 nf-test test tests/nextflow/*.test --profile local_docker
 ```
 
