@@ -41,7 +41,7 @@ process competitiveMapping {
         --contigs ${species_list} \
         --cpus ${task.cpus} \
         --output_root "out."
-    
+
     mv out.species_comparison.json ${competitive_mapping_report}
     mv out.species_comparison.csv ${competitive_mapping_csv}
 
@@ -71,6 +71,7 @@ process dynamicCompetitiveMapping {
     input:
     tuple val(sample_name), path(fqs), path(sylph_report)
     path (gtdb_genomes)
+    path (assembly_metadata) // Used to go from assembly to species
     val(seq_platform)
 
     output:
@@ -87,9 +88,10 @@ process dynamicCompetitiveMapping {
         --reads ${fqs} \
         --sylph_report ${sylph_report} \
         --genomes ${gtdb_genomes} \
+        --db_metadata ${assembly_metadata} \
         --cpus ${task.cpus} \
         --output_root "out."
-    
+
     mv out.species_comparison.json ${competitive_mapping_report}
     mv out.species_comparison.csv ${competitive_mapping_csv}
     """

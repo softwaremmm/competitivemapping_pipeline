@@ -5,7 +5,7 @@
     },
     "references": [
         {
-            "genome_name": "gtdb_genomes_reps_r220/database/GCF/025/821/625/GCF_025821625.1_genomic.fna.gz",
+            "genome_name": "Mycobacterium pyrenivorans (GCF_025821625.1)",
             "length": 6688400,
             "coverage": 33.82,
             "numreads": 19968,
@@ -21,7 +21,7 @@
             "supplementary_alns": 30
         },
         {
-            "genome_name": "gtdb_genomes_reps_r220/database/GCF/000/195/955/GCF_000195955.2_genomic.fna.gz",
+            "genome_name": "Mycobacterium tuberculosis (GCF_000195955.2)",
             "length": 4411532,
             "coverage": 0.00442,
             "numreads": 2,

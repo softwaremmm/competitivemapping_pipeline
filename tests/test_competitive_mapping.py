@@ -1,7 +1,6 @@
 import os
 from gzip import open as gzopen
 
-import pytest
 from Bio import SeqIO
 from test_utils import check_file
 
@@ -57,7 +56,9 @@ def test_cli_entry_point_manifest(
             check_length(output_root + "reads.fastq.gz", 1042)
 
 
-def test_cli_entry_point_sylph(samples, sylph_db, test_outputs_dir, mocker):
+def test_cli_entry_point_sylph(
+    samples, sylph_db, sylph_metadata, test_outputs_dir, mocker
+):
     output_root = os.path.join(test_outputs_dir, "cm_sylph", samples["sample"] + ".")
     os.makedirs(os.path.join(test_outputs_dir, "cm_sylph"), exist_ok=True)
 
@@ -71,11 +72,13 @@ def test_cli_entry_point_sylph(samples, sylph_db, test_outputs_dir, mocker):
         "--seq_platform",
         seq_platform,
         "--ref_for_fastq",
-        "gtdb_genomes_reps_r220/database/GCF/000/195/955/GCF_000195955.2_genomic.fna.gz",
+        "GCF_000195955.2",  # M.tuberculosis
         "--sylph_report",
         samples["sylph_report"],
         "--genomes",
         sylph_db,
+        "--db_metadata",
+        sylph_metadata,
         "--output_root",
         output_root,
         "--cpus",
@@ -89,7 +92,9 @@ def test_cli_entry_point_sylph(samples, sylph_db, test_outputs_dir, mocker):
 
     competitive_mapping.cli_entry_point()
 
-    check_file(samples["sylph_species_comparison"], output_root + "species_comparison.json")
+    check_file(
+        samples["sylph_species_comparison"], output_root + "species_comparison.json"
+    )
 
     def check_length(path, length):
         assert len(list(SeqIO.parse(gzopen(path, "rt"), format="fastq"))) == length
