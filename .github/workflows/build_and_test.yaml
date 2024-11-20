@@ -25,26 +25,26 @@ jobs:
         with:
           token: "${{ secrets.PAT_TOKEN }}"
           fetch-depth: 0
-      
+
       - name: echo versions
         run: |
           nextflow -v
           nf-test version
-      
+
       - name: softlink reference data # This has already been downloaded to the runner
         run: |
           mkdir data && \
           ln -s /mnt/portal-sp3dev-knowledge/manifest ./data/manifest && \
           tree data/manifest
-          ln -s /mnt/dev-knowledge/sylph ./data/sylph
-      
+          ln -s /mnt/portal-sp3dev-knowledge/sylph ./data/sylph
+
       - name: Login to OCR
         uses: docker/login-action@v2
         with:
           registry: lhr.ocir.io
           username: ${{ secrets.OCR_USERNAME }}
           password: ${{ secrets.OCR_TOKEN }}
-      
+
       - name: Build docker container
         run: |
           docker build -t test_container_cm . --build-arg TESTING=true
@@ -57,8 +57,8 @@ jobs:
         run: |
           docker run -v ${{ github.workspace }}/tests:/app/tests \
             -v ${{ github.workspace }}/test_data:/app/test_data \
-            -v /mnt/dev-knowledge/manifest:/app/data/manifest \
-            -v /mnt/dev-knowledge/sylph:/app/data/sylph \
+            -v /mnt/portal-sp3dev-knowledge/manifest:/app/data/manifest \
+            -v /mnt/portal-sp3dev-knowledge/sylph:/app/data/sylph \
             test_container_cm pytest /app/tests
 
       - name: Run nf-test
