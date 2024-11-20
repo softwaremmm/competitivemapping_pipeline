@@ -46,27 +46,10 @@ workflow competitive_mapping {
     has_enough_reads(competitive_mapping_output.cm_report, threshold)
 
     emit:
-        cm_sample_paths = competitive_mapping_output.cm_sample
+        cm_tb_reads = competitive_mapping_output.cm_tb_reads
         cm_report = competitive_mapping_output.cm_report
-        cm_error = competitive_mapping_output.cm_error
+        cm_csv = competitive_mapping_output.cm_csv
         cm_enough_reads =  has_enough_reads.out
-}
-
-workflow.onComplete {
-    if (workflow.success) {
-        log.info '''
-        ===========================================
-        Competitive Mapping Workflow completed successfully
-        '''
-        .stripIndent()
-    }
-    else {
-        log.info '''
-        ===========================================
-        Competitive Mapping finished with errors
-        '''
-        .stripIndent()
-    }
 }
 
 workflow {
