@@ -54,7 +54,16 @@ COLUMN_EXPLANATIONS = {
 def make_manifest(
     report_path: str, genomes_path: str, output_root: str
 ) -> tuple[str, pd.DataFrame]:
-    """Produce a multifasta manifest and contig df from a sylph report and genomes folder"""
+    """Produce a multifasta manifest and contig df from a sylph report and genomes folder
+
+    Args:
+        report_path (str): Path to the sylph report
+        genomes_path (str): Path to the folder containing the genomes fasta files
+        output_root (str): Path to the output root
+
+    Returns:
+        tuple[str, pd.DataFrame]: Path to the manifest file and a dataframe of contigs
+    """
     manifest_file = f"{output_root}manifest.fasta.gz"
     df = pd.read_csv(report_path, sep="\t")
 
@@ -87,8 +96,21 @@ def make_manifest(
     return manifest_file, contigs_df
 
 
-def map_reads(manifest, reads, seq_platform: str, cpus: int, output_root: str) -> str:
-    """Run minimap2 to map reads to a manifest, and sort to bam file"""
+def map_reads(
+    manifest: str, reads: list[str], seq_platform: str, cpus: int, output_root: str
+) -> str:
+    """Run minimap2 to map reads against manifest, returning sorted bam.
+
+    Args:
+        manifest (str): Path to the manifest file
+        reads (list[str]): List of paths to the read fastqs
+        seq_platform (str): Sequencing platform
+        cpus (int): number of cores to use
+        output_root (str): Path to the output root
+
+    Returns:
+        str: path to the alignment bam file
+    """
     aln_bam = f"{output_root}alignment.bam"
 
     command = f"minimap2 -t {cpus} --secondary yes -N 1000"
@@ -111,7 +133,16 @@ def map_reads(manifest, reads, seq_platform: str, cpus: int, output_root: str) -
 
 
 def get_aln_stats(aln_bam: str, contigs_df: pd.DataFrame) -> tuple[dict, pd.DataFrame]:
-    """Get stats from bam files using pysam"""
+    """Get stats from bam files using pysam.
+
+    Args:
+        aln_bam (str): path to the alignment bam file
+        contigs_df (pd.DataFrame): dataframe of contigs
+
+    Returns:
+        tuple[dict, pd.DataFrame]: dict with overall stats and
+            dataframe with alignment stats per reference
+    """
     name_mapping = contigs_df.set_index("rname")["reference"].to_dict()
     overall_stats, aln_stats_df = get_alignment_stats(aln_bam, name_mapping)
 
@@ -121,7 +152,16 @@ def get_aln_stats(aln_bam: str, contigs_df: pd.DataFrame) -> tuple[dict, pd.Data
 def get_coverage_stats(
     aln_bam: str, contigs_df: pd.DataFrame, output_root: str
 ) -> pd.DataFrame:
-    """Get coverage stats using samtools coverage"""
+    """Get coverage stats using samtools coverage
+
+    Args:
+        aln_bam (str): path to the alignment bam file
+        contigs_df (pd.DataFrame): dataframe of contigs
+        output_root (str): Path to the output root
+
+    Returns:
+        pd.DataFrame: summary of coverage metrics for each reference
+    """
 
     primary_coverage = f"{output_root}coverage_primary.tsv"
     full_coverage = f"{output_root}coverage_full.tsv"
@@ -154,7 +194,17 @@ def output_fastqs(
     cpus: int,
     output_root: str,
 ):
-    """Extract reads from BAM file and output to FASTQ"""
+    """Extract reads from BAM file and output to FASTQ
+
+    Args:
+        aln_bam (str): path to the alignment bam file
+        reference (str): desired reference to extract reads for
+        contigs_df (pd.DataFrame): dataframe of contigs
+        include_unmapped (bool): whether to include unmapped reads
+        seq_platform (str): sequencing platform
+        cpus (int): number of cores to use
+        output_root (str): Path to the output root
+    """
     rnames = contigs_df[contigs_df["reference"] == reference]["rname"].tolist()
     if include_unmapped:
         rnames.append('"*"')
@@ -196,7 +246,7 @@ def output_fastqs(
 
 
 def produce_empty_outputs(output_root: str):
-    """Create empty output files"""
+    """Create empty output files for species comparison json/csv"""
     report = {
         "total_read_counts": {
             "mapped_reads": 0,
@@ -221,7 +271,17 @@ def run_competitive_mapping(
     cpus: int,
     output_root: str,
 ):
-    """Map reads to a manifest and produce a comparison of coverage and alignment stats"""
+    """Map reads to a manifest and produce a comparison of coverage and alignment stats
+
+    Args:
+        manifest (str): Path to the manifest file
+        contigs (pd.DataFrame): Dataframe of contigs
+        reads (list[str]): List of paths to the read fastqs
+        ref_for_fastq (str | None): Reference to extract reads for
+        seq_platform (str): Sequencing platform
+        cpus (int): Number of cores to use
+        output_root (str): Path to the output root
+    """
     aln_bam = map_reads(manifest, reads, seq_platform, cpus, output_root)
 
     coverage_df = get_coverage_stats(aln_bam, contigs, output_root)
@@ -292,7 +352,18 @@ def run_dynamic_competitive_mapping(
     cpus: int,
     output_root: str,
 ):
-    """Create manifest then competitive mapping"""
+    """Create manifest from sylph report then competitive mapping
+
+    Args:
+        sylph_report (str): path to the sylph report
+        genomes (str): path to the genomes directory
+        reads (list[str]): list of paths to the read fastqs
+        ref_for_fastq (str | None): reference to extract reads for
+        db_metadata (str | None): path to the sylph db metadata, with taxonomy info
+        seq_platform (str): sequencing platform
+        cpus (int): number of cores to use
+        output_root (str): path to the output root
+    """
 
     # check if sylph_report is empty
     if os.stat(sylph_report).st_size == 0 or pd.read_csv(sylph_report, sep="\t").empty:
