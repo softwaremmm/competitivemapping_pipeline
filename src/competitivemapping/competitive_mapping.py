@@ -21,6 +21,13 @@ from competitivemapping.process_coverage import process_coverage
 
 multiprocessing.set_start_method("spawn", force=True)
 
+logging.basicConfig(
+    format="%(asctime)s — %(relativeCreated)d — %(levelname)s — %(funcName)s:%(lineno)d — %(message)s",
+    datefmt="%Y-%m-%dT%H:%M:%S%z",
+    level=logging.DEBUG,
+)
+
+
 FINAL_COLUMNS = [
     "genome_name",
     "length",
@@ -137,6 +144,7 @@ def make_manifest(
     Returns:
         tuple[str, pd.DataFrame]: Path to the manifest file and a dataframe of contigs
     """
+    logging.info("Creating manifest and reading contigs")
     manifest_file = f"{output_root}manifest.fasta.gz"
     sylph_df = pd.read_csv(report_path, sep="\t")
     sylph_df["accession"] = (
@@ -257,6 +265,7 @@ def map_reads(
     Returns:
         str: path to the alignment bam file
     """
+    logging.info("Mapping reads")
     aln_bam = f"{output_root}alignment.bam"
 
     command = f"minimap2 -t {cpus} --secondary yes -N 1000"
@@ -289,6 +298,7 @@ def get_aln_stats(aln_bam: str, contigs_df: pd.DataFrame) -> tuple[dict, pd.Data
         tuple[dict, pd.DataFrame]: dict with overall stats and
             dataframe with alignment stats per reference
     """
+    logging.info("Getting alignment stats")
     name_mapping = contigs_df.set_index("rname")["reference"].to_dict()
     overall_stats, aln_stats_df = get_alignment_stats(aln_bam, name_mapping)
 
@@ -328,6 +338,7 @@ def get_coverage_stats(
     Returns:
         pd.DataFrame: summary of coverage metrics for each reference
     """
+    logging.info("Getting coverage stats")
 
     primary_coverage = f"{output_root}coverage_primary.tsv"
     full_coverage = f"{output_root}coverage_full.tsv"
@@ -364,6 +375,7 @@ def output_fastqs(
         cpus (int): number of cores to use
         output_root (str): Path to the output root
     """
+    logging.info("Outputting FASTQs")
     rnames = contigs_df[contigs_df["reference"] == reference]["rname"].tolist()
     if include_unmapped:
         rnames.append('"*"')
@@ -441,12 +453,15 @@ def run_competitive_mapping(
         cpus (int): Number of cores to use
         output_root (str): Path to the output root
     """
+    logging.info("Running competitive mapping")
     aln_bam = map_reads(manifest, reads, seq_platform, cpus, output_root)
 
     coverage_df = get_coverage_stats(aln_bam, contigs, cpus, output_root)
 
     overall_stats, aln_stats = get_aln_stats(aln_bam, contigs)
     df = pd.merge(coverage_df, aln_stats, on="genome_name")
+
+    logging.info("Writing output files")
 
     # Can update numreads to actually reflect reads
     # As samtools coverage actually counts alignments
@@ -499,6 +514,8 @@ def run_competitive_mapping(
             cpus=cpus,
             output_root=output_root,
         )
+
+    logging.info("Finished competitive mapping")
 
 
 def run_dynamic_competitive_mapping(
