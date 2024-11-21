@@ -295,14 +295,34 @@ def get_aln_stats(aln_bam: str, contigs_df: pd.DataFrame) -> tuple[dict, pd.Data
     return overall_stats, aln_stats_df
 
 
+def run_samtools_coverage(args: tuple[str, str, str]) -> str:
+    """Run samtools coverage on a bam file
+
+    Args:
+        args (tuple[str, str, str]): (bam file, flags, output file)
+
+    Returns:
+        str: output file
+    """
+    aln_bam, flags, output_file = args
+    subprocess.run(
+        f"samtools coverage {aln_bam} {flags} -o {output_file}",
+        shell=True,
+        check=True,
+        stdout=subprocess.PIPE,
+    )
+    return output_file
+
+
 def get_coverage_stats(
-    aln_bam: str, contigs_df: pd.DataFrame, output_root: str
+    aln_bam: str, contigs_df: pd.DataFrame, cpus: int, output_root: str
 ) -> pd.DataFrame:
     """Get coverage stats using samtools coverage
 
     Args:
         aln_bam (str): path to the alignment bam file
         contigs_df (pd.DataFrame): dataframe of contigs
+        cpus (int): number of cores to use (uses 2 max)
         output_root (str): Path to the output root
 
     Returns:
@@ -311,20 +331,13 @@ def get_coverage_stats(
 
     primary_coverage = f"{output_root}coverage_primary.tsv"
     full_coverage = f"{output_root}coverage_full.tsv"
+    args = [
+        (aln_bam, "", primary_coverage),
+        (aln_bam, "--excl-flags 1540", full_coverage),
+    ]
 
-    # samtools coverage
-    subprocess.run(
-        f"samtools coverage {aln_bam} -o {primary_coverage}",
-        shell=True,
-        check=True,
-        stdout=subprocess.PIPE,
-    )
-    subprocess.run(
-        f"samtools coverage {aln_bam} --excl-flags 1540 -o {full_coverage}",
-        shell=True,
-        check=True,
-        stdout=subprocess.PIPE,
-    )
+    with ProcessPoolExecutor(max_workers=cpus) as executor:
+        _results = list(executor.map(run_samtools_coverage, args))
 
     coverage_df = process_coverage(primary_coverage, full_coverage, contigs_df)
 
@@ -430,7 +443,7 @@ def run_competitive_mapping(
     """
     aln_bam = map_reads(manifest, reads, seq_platform, cpus, output_root)
 
-    coverage_df = get_coverage_stats(aln_bam, contigs, output_root)
+    coverage_df = get_coverage_stats(aln_bam, contigs, cpus, output_root)
 
     overall_stats, aln_stats = get_aln_stats(aln_bam, contigs)
     df = pd.merge(coverage_df, aln_stats, on="genome_name")
