@@ -11,12 +11,6 @@ from pathlib import Path
 import pandas as pd
 from jsonschema import validate
 
-logging.basicConfig(
-    format="%(asctime)s — %(name)s — %(levelname)s — %(funcName)s:%(lineno)d — %(message)s",
-    datefmt="%Y-%m-%dT%H:%M:%S%z",
-    level=logging.DEBUG,
-)
-
 
 def unmatched_rnames(
     coverage_table: pd.DataFrame, species_table: pd.DataFrame
@@ -221,6 +215,11 @@ def cli_entry_point() -> None:
 
 
 if __name__ == "__main__":
+    logging.basicConfig(
+        format="%(asctime)s — %(name)s — %(levelname)s — %(funcName)s:%(lineno)d — %(message)s",
+        datefmt="%Y-%m-%dT%H:%M:%S%z",
+        level=logging.DEBUG,
+    )
     cli_entry_point()
 
 

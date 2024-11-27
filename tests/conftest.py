@@ -89,6 +89,7 @@ TB_10K = {
     "sylph_report": "test_data/TB_10k/sylph.tsv",
     "sylph_species_comparison": "test_data/TB_10k/sylph_species_comparison.json",
     "sylph_csv_comparison": "test_data/TB_10k/sylph_species_comparison.csv",
+    "sylph_species_comparison_all_genera": "test_data/TB_10k/sylph_species_comparison_all_genera.json",
 }
 
 TB_ONT = {
@@ -106,6 +107,7 @@ TB_ONT = {
     "sylph_report": "test_data/TB_ont/sylph.tsv",
     "sylph_species_comparison": "test_data/TB_ont/sylph_species_comparison.json",
     "sylph_csv_comparison": "test_data/TB_ont/sylph_species_comparison.csv",
+    "sylph_species_comparison_all_genera": "test_data/TB_ont/sylph_species_comparison_all_genera.json",
 }
 
 CHLORO_10k = {
@@ -126,6 +128,7 @@ CHLORO_10k = {
     "sylph_report": "test_data/chloro_10k/sylph.tsv",
     "sylph_species_comparison": "test_data/chloro_10k/sylph_species_comparison.json",
     "sylph_csv_comparison": "test_data/chloro_10k/sylph_species_comparison.csv",
+    "sylph_species_comparison_all_genera": "test_data/chloro_10k/sylph_species_comparison_all_genera.json",
 }
 
 EMPTY_SYLPH = {
@@ -190,8 +193,8 @@ def test_outputs_dir() -> Path:
 
 
 @pytest.fixture
-def sylph_db() -> str:
-    return "data/sylph"
+def sylph_rep_paths() -> str:
+    return "data/sylph/gtdb_genomes_reps_r220"
 
 
 @pytest.fixture

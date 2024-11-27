@@ -1,0 +1,74 @@
+{
+    "total_read_counts": {
+        "mapped_reads": 998,
+        "unmapped_reads": 2
+    },
+    "references": [
+        {
+            "species": "Mycobacterium tuberculosis",
+            "genome_name": "GCF_000195955.2",
+            "length": 4411532,
+            "numreads": 998,
+            "coverage": 30.34,
+            "meandepth": 0.3699,
+            "coverage_including_secondary": 30.94,
+            "meandepth_including_secondary": 0.377,
+            "total_reads": 998,
+            "total_alns": 1103,
+            "exclusive_reads": 987,
+            "primary_reads": 998,
+            "secondary_reads": 0,
+            "supplementary_reads": 0,
+            "supplementary_alns": 73
+        },
+        {
+            "species": "Mycobacterium decipiens",
+            "genome_name": "GCF_002104675.1",
+            "length": 5225940,
+            "numreads": 2,
+            "coverage": 0.01202,
+            "meandepth": 0.0001202,
+            "coverage_including_secondary": 0.01627,
+            "meandepth_including_secondary": 0.0001627,
+            "total_reads": 3,
+            "total_alns": 3,
+            "exclusive_reads": 0,
+            "primary_reads": 0,
+            "secondary_reads": 1,
+            "supplementary_reads": 2,
+            "supplementary_alns": 2
+        },
+        {
+            "species": "Mycobacterium shinjukuense",
+            "genome_name": "GCF_010730055.1",
+            "length": 4504020,
+            "numreads": 1,
+            "coverage": 0.002864,
+            "meandepth": 2.864e-05,
+            "coverage_including_secondary": 0.1026,
+            "meandepth_including_secondary": 0.001138,
+            "total_reads": 7,
+            "total_alns": 7,
+            "exclusive_reads": 0,
+            "primary_reads": 0,
+            "secondary_reads": 6,
+            "supplementary_reads": 1,
+            "supplementary_alns": 1
+        }
+    ],
+    "definitions": {
+        "length": "Length of all contigs in reference",
+        "numreads": "Number of reads which map well to this reference (primary + supplementary)",
+        "coverage": "Percentage of reference covered by reads (not including secondary alignments)",
+        "meandepth": "Mean depth of coverage of reference (not including secondary alignments)",
+        "coverage_including_secondary": "Percentage of reference covered by reads (including secondary alignments)",
+        "meandepth_including_secondary": "Mean depth of coverage of reference (including secondary alignments)",
+        "total_reads": "Total number of reads which map (in any way) to chrom",
+        "total_alns": "Total number of alignments, so will count supplementary separately",
+        "exclusive_reads": "reads which only maps to this chrom",
+        "primary_reads": "reads which map best to this chrom",
+        "secondary_reads": "reads which map to this chrom but not with primary",
+        "supplementary_reads": "reads which have supplementary alignments but not primary",
+        "supplementary_alns": "number of supplementary alignments"
+    }
+}
