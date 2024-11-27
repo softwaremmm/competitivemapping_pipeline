@@ -19,7 +19,7 @@ from Bio import SeqIO
 from competitivemapping.process_aln_stats import get_alignment_stats
 from competitivemapping.process_coverage import process_coverage
 
-multiprocessing.set_start_method("spawn", force=True)
+multiprocessing.set_start_method("fork", force=True)
 
 logging.basicConfig(
     format="%(asctime)s — %(relativeCreated)d — %(levelname)s — %(funcName)s:%(lineno)d — %(message)s",
