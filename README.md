@@ -1,11 +1,11 @@
 # Competitive Mapping Pipeline
 
-Competitive Mapping is an algorithm that compares the sample reads with the references in the manifest and makes a positive selection of the reads matching a specific `rname`. 
+Competitive Mapping is an algorithm that compares the sample reads with the references in the manifest and makes a positive selection of the reads matching a specific `rname`.
 
 The pipeline for competitive mapping takes a pair of FASTQ files and outputs the positive filtering of the h37_rv reads (i.e. those reads that are judged to map to the *Mycobacterium tuberculosis* H37RV reference genome) along with unmapped reads, a report with the mapping rank (a list of species in the manifest to which reads have mapped `competitivemapping_report.json`).
 
 ## Overview
-Competitive mapping uses minimap2 to map reads against manifest (collection of mycobacteria genomes). This is coordinated by `competitive_mapping.py` which does:
+Competitive mapping uses minimap2 to map reads against manifest (multifasta of reference genomes). A species list file is required to match contigs to `rname`'s. This is coordinated by `competitive_mapping.py` which does:
 - (Optional) create manifest if using sylph report as input
 - Map reads against manifest with minimap2
 - Run samtools coverage and aggregate results with `process_coverage.py`
@@ -29,12 +29,12 @@ These can all be found in the (dev) knowledge bucket.
 One step in competitive mapping is to filter the bam file (created by mapping against manifest) for tb reads and unmapped reads, and extracting these to a fastq file. This is complex for paired reads!! And so leads to seeming discrepencies with the `species_comparison_report.json`
 
 Steps:
-* filter bam file for reads mapping to h37rv or "\*". 
-  - "\*" is used for unmapped reads, but only when both reads in a pair are unmapped (as far as Matthew can see from minimap2 outputs). 
+* filter bam file for reads mapping to h37rv or "\*".
+  - "\*" is used for unmapped reads, but only when both reads in a pair are unmapped (as far as Matthew can see from minimap2 outputs).
   - Reads which are unmapped but have a mapped pair will list rname to match the pair, but have the sam flag set for being unmapped.
 * `samtools fastq` is used with:
   - `--excl-flags 0x100` which excludes secondary reads
-  - `-s /dev/null` to exclude singleton reads, so that the resulting fastq files are properly paired. 
+  - `-s /dev/null` to exclude singleton reads, so that the resulting fastq files are properly paired.
 
 The result of this is that reads are only converted to fastq if
 1. Both in a pair are unmapped
@@ -52,13 +52,13 @@ Run the pipeline
 nextflow run . --input_dir $PATH --manifest $PATH_TO_MANIFEST_FILE --species_list $PATH_TO_SPECIES_LIST_FILE --seq_platform $SEQ_PLATFORM
 ```
 
-where $PATH is the path to a folder that contains a pair of FASTQ.GZ files following a *{1,2}.f*q.gz regex convention, 
+where $PATH is the path to a folder that contains a pair of FASTQ.GZ files following a *{1,2}.f*q.gz regex convention,
 $PATH_TO_MANIFEST_FILE is the path to a manifest file containing a list of target contigs and $PATH_TO_SPECIES_LIST_FILE is the path to a species list file where contig rnames are mapped to genomes. Those paths do not need to be absolute paths.
 $SEQ_PLATFORM should be 'ont' or 'illumina' depending on platform used.
 
 
 ### Running Tests
-The tests are executed using [nf-test](https://github.com/askimed/nf-test). 
+The tests are executed using [nf-test](https://github.com/askimed/nf-test).
 
 Before running the tests check that you have [needed data](#needed-data).
 
@@ -97,7 +97,7 @@ pytest tests/
 ### Outputs
 
 The output from the Python CLI is
-validated against a [JSON Schema](src/competitivemapping/competitivemapping.schema.json). [Documentation for the schema](schema_doc.md) 
+validated against a [JSON Schema](src/competitivemapping/competitivemapping.schema.json). [Documentation for the schema](schema_doc.md)
 can be built / updated using:
 
 ```
@@ -132,7 +132,7 @@ cz c
 ## Tags and Releases
 
 [Commitizen](https://commitizen-tools.github.io/commitizen/) is used to manage versioning of releases. This tool
-can be used to make commits to this repository. Regardless, [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) 
+can be used to make commits to this repository. Regardless, [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/)
 are required to ensure correct version numbering and changelog population.
 
 **Do not add tags by hand.**
