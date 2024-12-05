@@ -158,9 +158,12 @@ def make_manifest(
     def get_genome_paths(dir_path):
         """Produce df of genome paths for given directory.
         Assumes a genomes_paths.tsv file which species relative paths to genomes"""
+        # File when downloaded actually seems to be space separated
+        # using regex needs python engine, but file generally small so not a problem
         df = pd.read_csv(
             dir_path + "/genome_paths.tsv",
-            sep="\t",
+            sep=r"\s",
+            engine="python",
             header=None,
             names=["filename", "path"],
         )
