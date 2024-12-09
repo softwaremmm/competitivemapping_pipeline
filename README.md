@@ -113,38 +113,23 @@ If you want to use the Competitive Mapping Pipeline as subworkflow in your pipel
 There is a reference (AP018410.1 - M.pseudoshottsii) which is in the manifest species list, but not in the manifest itself.
 This will be flagged with a warning when running the code.
 
-# Conventional Commits
-Use [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) when developing for this repo.
-You should install the pre-commit hooks to check your commit messages. This can be done using the tool `pre-commit` which is a dev dependency in the `pyproject.toml`.
-You can also use `commitizen` (another dev dependency) to help with writing conventional commits.
 
-To install hooks run
+## Tags, Releases, and Committing
+Use conventional commits. This is enforced with commitizen validate action and pre-commit hooks:
 ```bash
 pre-commit install --hook-type commit-msg
-pre-commit install # to get other hooks for formatting etc
 ```
 
-To make commit with commitizen run
-```bash
-cz c
-```
+This repo uses a standard gitflow approach, but with some changes to deal with docker containers in nextflow:
+- There is a pyproject version which should be updated to match semantic version releases (from main/release branches)
+- There is an `active_version` controlled by version_bumper which allows develop to have commit hash based versions.
+- Every push to develop will cause an action to run `bumper bump <commit-hash> --no-tag --active`. This:
+    - bumps the `active_version` in pyproject.toml
+    - bumps the container tag used by nextflow processes
+    - leaves the pyproject version as is
 
-## Tags and Releases
+  Another workflow then builds and pushes the new container.\
+  **Important: To deploy this you will need to use the hash of the bump commit, not the hash of the merge commit/container.**
 
-[Commitizen](https://commitizen-tools.github.io/commitizen/) is used to manage versioning of releases. This tool
-can be used to make commits to this repository. Regardless, [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/)
-are required to ensure correct version numbering and changelog population.
-
-**Do not add tags by hand.**
-
-On merging a Pull Request a [GitHub action will run](.github/workflows/version.yaml), causing Commitizen to:
-* Determine the new [semver](https://semver.org/) based on conventional commits.
-* Replace the previous semver in [pyproject.toml](pyproject.toml) and other files as specified therein.
-* Update the [CHANGELOG](CHANGELOG.md) based on commit messages.
-* Commit these changes to the `main` branch.
-* Create a tag for this commit with the tag name of the newly determined semver.
-* Build a docker container for this new tag
-* Create a new release from this tag.
-
-There is a workflow for manually triggering a docker build action.
-This shouldn't be required unless something has gone wrong with the commitizen action.
+- In a release branch you can create a release candidate with `bumper bump a.b.c-rcX`. This also updates the pyproject version. Pushing the changes and new tag (automatically created) will trigger a build action.
+- When release branch is ready for main run `bumper bump a.b.c --no-tag`. Push these changes to main and make a release there to build the container.

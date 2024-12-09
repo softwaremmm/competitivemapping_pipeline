@@ -38,6 +38,7 @@ dev = [
     "mypy",
     "pandas-stubs",
     "types-jsonschema",
+    "version_bumper @ git+https://github.com/GlobalPathogenAnalysisService/version_bumper.git",
 ]
 docs = ["json-schema-for-humans"]
 
@@ -47,11 +48,14 @@ competitivemapping = ["*.json"]
 [tool.commitizen]
 name = "cz_conventional_commits"
 bump_message = "bump: version $current_version → $new_version"
-update_changelog_on_bump = true
-changelog_incremental = true
+update_changelog_on_bump = false
 version_type = "semver"
 version_provider = "pep621"
 tag_format = "$version"
+
+
+[tool.version_bumper]
+active_version = "1.3.1"
 version_files = [
     "process/competitive_mapping.nf",
     ".github/workflows/manual_docker.yaml",
