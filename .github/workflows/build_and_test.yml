@@ -63,3 +63,9 @@ jobs:
 
       - name: Run nf-test
         run: nf-test test tests/nextflow/*.test --profile local_docker
+
+      - name: clean up 2
+        if: always()
+        run: |
+          sudo rm -rf .nf-test || true
+          sudo rm -rf tests || true
