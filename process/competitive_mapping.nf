@@ -1,12 +1,11 @@
-
 process competitiveMapping {
-    container = {
-        params.test_container_cm=="" ? 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:4b5de58' : params.test_container_cm
+    container {
+        params.test_container_cm == "" ? 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:4b5de58' : params.test_container_cm
     }
 
-    cpus = 4
-    memory = {
-        params.testing=="" ? {12.GB + (36.GB * (task.attempts - 1))} : "16GB"
+    cpus 4
+    memory {
+        params.testing == "" ? { 12.GB + (36.GB * (task.attempts - 1)) } : "16GB"
     }
 
     debug true
@@ -16,9 +15,9 @@ process competitiveMapping {
 
     input:
     tuple val(sample_name), path(fqs)
-    path (manifest)
-    path (species_list)
-    val(seq_platform)
+    path manifest
+    path species_list
+    val seq_platform
 
     output:
     tuple val(sample_name), path("reads_for_assembly*fastq.gz"), emit: cm_tb_reads
@@ -31,7 +30,7 @@ process competitiveMapping {
     tb_reads_2 = "reads_for_assembly_2.fastq.gz"
     competitive_mapping_report = "species_comparison_report.json"
     competitive_mapping_csv = "species_comparison.csv"
-    h37rv_ref="M.tuberculosis"
+    h37rv_ref = "M.tuberculosis"
     """
     mkdir outputs
     competitive_mapping manifest --seq_platform ${seq_platform} \
@@ -57,8 +56,8 @@ process competitiveMapping {
 }
 
 process dynamicCompetitiveMapping {
-    container = {
-        params.test_container_cm=="" ? 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:4b5de58' : params.test_container_cm
+    container {
+        params.test_container_cm == "" ? 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:4b5de58' : params.test_container_cm
     }
 
     cpus 4
@@ -70,10 +69,11 @@ process dynamicCompetitiveMapping {
 
     input:
     tuple val(sample_name), path(fqs), path(sylph_report)
-    path (gtdb_genomes_dir)
-    path (assembly_metadata) // Used to go from assembly to species
-    val(seq_platform)
-    val(include_whole_genus)
+    path gtdb_genomes_dir
+    path assembly_metadata
+    // Used to go from assembly to species
+    val seq_platform
+    val include_whole_genus
 
     output:
     tuple val(sample_name), path(competitive_mapping_report), emit: cm_report
@@ -82,7 +82,6 @@ process dynamicCompetitiveMapping {
     script:
     competitive_mapping_report = "species_comparison_report.json"
     competitive_mapping_csv = "species_comparison.csv"
-    h37rv_ref="M.tuberculosis"
     whole_genera_arg = include_whole_genus ? "--include_whole_genus" : ""
     """
     mkdir outputs
@@ -101,12 +100,12 @@ process dynamicCompetitiveMapping {
 }
 
 process has_enough_reads {
-    container = {
-        params.test_container_cm=="" ? 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:4b5de58' : params.test_container_cm
+    container {
+        params.test_container_cm == "" ? 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:4b5de58' : params.test_container_cm
     }
 
-    cpus = 1
-    memory = "128MB"
+    cpus 1
+    memory "128MB"
 
     debug true
     pod label: "name", value: "competitive_mapping_pipeline:has_enough_reads"
@@ -114,8 +113,8 @@ process has_enough_reads {
     pod label: "run_id", value: "${params.run_id}"
 
     input:
-    tuple val(sample_name), path (json)
-    val (threshold)
+    tuple val(sample_name), path(json)
+    val threshold
 
     output:
     tuple val(sample_name), stdout
