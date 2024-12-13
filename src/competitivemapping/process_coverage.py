@@ -69,29 +69,19 @@ def aggregate_contigs(referenced_table: pd.DataFrame) -> pd.DataFrame:
         Sorted in descending order of meandepth. Without genomes that
         have no reads.
     """
-    aggregated = (
-        referenced_table.groupby("reference")
-        .apply(
-            lambda contig: pd.Series(
-                {
-                    "length": contig.totallength.iloc[0],
-                    "coverage": (contig.coverage * contig.endpos).sum()
-                    / contig.totallength.iloc[0],
-                    "numreads": contig.numreads.sum(),
-                    "meandepth": (
-                        contig.meandepth * contig.endpos / contig.totallength.iloc[0]
-                    ).sum(),
-                }
-            ),
-            include_groups=False,
-        )
-        .sort_values(by=["meandepth"], ascending=False)
-        .reset_index()
-        .rename(columns={"reference": "genome_name"})
+    aggregated = referenced_table.groupby("reference").apply(
+        lambda contig: pd.Series(
+            {
+                "coverage": (contig.coverage * contig.endpos).sum()
+                / contig.totallength.iloc[0],
+                "numreads": contig.numreads.sum(),
+                "meandepth": (
+                    contig.meandepth * contig.endpos / contig.totallength.iloc[0]
+                ).sum(),
+            }
+        ),
+        include_groups=False,
     )
-
-    aggregated["length"] = aggregated["length"].astype(int)
-    aggregated["numreads"] = aggregated["numreads"].astype(int)
 
     return aggregated[aggregated["coverage"] > 0]
 
@@ -127,7 +117,30 @@ def lookup_and_aggregate(
 
     joined = join_references(coverage_table, species_table)
 
-    return aggregate_contigs(joined)
+    aggregated = aggregate_contigs(joined)
+
+    # ensure that there is a row for each reference, even if there are no reads
+    all_refs = (
+        species_table[["reference", "totallength"]]
+        .drop_duplicates()
+        .rename(columns={"totallength": "length"})
+        .set_index("reference")
+    )
+    aggregated = (
+        all_refs.merge(aggregated, on="reference", how="left")
+        .fillna(0)
+        .sort_values(
+            by=["meandepth", "reference"],
+            ascending=[False, True],
+        )
+        .reset_index()
+        .rename(columns={"reference": "genome_name"})
+    )
+
+    aggregated["length"] = aggregated["length"].astype(int)
+    aggregated["numreads"] = aggregated["numreads"].astype(int)
+
+    return aggregated
 
 
 def validate_output(file_to_validate: Path):

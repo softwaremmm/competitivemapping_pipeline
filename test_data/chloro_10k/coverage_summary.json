@@ -1592,6 +1592,87 @@
             "meandepth": 1.2561e-05,
             "coverage_including_secondary": 0.258652,
             "meandepth_including_secondary": 0.00297193
+        },
+        {
+            "genome_name": "M.algericus",
+            "length": 4619277,
+            "coverage": 0.0,
+            "numreads": 0,
+            "meandepth": 0.0,
+            "coverage_including_secondary": 0.0,
+            "meandepth_including_secondary": 0.0
+        },
+        {
+            "genome_name": "M.boenickei",
+            "length": 6563937,
+            "coverage": 0.0,
+            "numreads": 0,
+            "meandepth": 0.0,
+            "coverage_including_secondary": 0.0,
+            "meandepth_including_secondary": 0.0
+        },
+        {
+            "genome_name": "M.intracellulare_yongonense",
+            "length": 5521023,
+            "coverage": 0.0,
+            "numreads": 0,
+            "meandepth": 0.0,
+            "coverage_including_secondary": 0.0,
+            "meandepth_including_secondary": 0.0
+        },
+        {
+            "genome_name": "M.leprae",
+            "length": 3187112,
+            "coverage": 0.0,
+            "numreads": 0,
+            "meandepth": 0.0,
+            "coverage_including_secondary": 0.0878852,
+            "meandepth_including_secondary": 0.000958862
+        },
+        {
+            "genome_name": "M.lepromatosis",
+            "length": 3271694,
+            "coverage": 0.0,
+            "numreads": 0,
+            "meandepth": 0.0,
+            "coverage_including_secondary": 0.0941103,
+            "meandepth_including_secondary": 0.00107895
+        },
+        {
+            "genome_name": "M.nivoides",
+            "length": 6905961,
+            "coverage": 0.0,
+            "numreads": 0,
+            "meandepth": 0.0,
+            "coverage_including_secondary": 0.0,
+            "meandepth_including_secondary": 0.0
+        },
+        {
+            "genome_name": "M.pseudoshottsii",
+            "length": 6061597,
+            "coverage": 0.0,
+            "numreads": 0,
+            "meandepth": 0.0,
+            "coverage_including_secondary": 0.0,
+            "meandepth_including_secondary": 0.0
+        },
+        {
+            "genome_name": "M.senriense",
+            "length": 5831451,
+            "coverage": 0.0,
+            "numreads": 0,
+            "meandepth": 0.0,
+            "coverage_including_secondary": 0.0,
+            "meandepth_including_secondary": 0.0
+        },
+        {
+            "genome_name": "M.seoulense",
+            "length": 5531300,
+            "coverage": 0.0,
+            "numreads": 0,
+            "meandepth": 0.0,
+            "coverage_including_secondary": 0.0,
+            "meandepth_including_secondary": 0.0
         }
     ]
 }
