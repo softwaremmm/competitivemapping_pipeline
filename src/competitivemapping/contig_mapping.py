@@ -57,7 +57,7 @@ def blastn_contigs(
     if manifest.endswith(".gz"):
         command = (
             f"gzip -dc {manifest} | makeblastdb -in - -dbtype nucl -parse_seqids"
-            + f"-out {blast_db} -title manifest_db"
+            + f" -out {blast_db} -title manifest_db"
         )
     else:
         command = f"makeblastdb -in {manifest} -dbtype nucl -parse_seqids -out {blast_db} -title manifest_db"
