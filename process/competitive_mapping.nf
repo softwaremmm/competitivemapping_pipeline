@@ -32,7 +32,6 @@ process competitiveMapping {
     competitive_mapping_csv = "species_comparison.csv"
     h37rv_ref = "M.tuberculosis"
     """
-    mkdir outputs
     competitive_mapping manifest --seq_platform ${seq_platform} \
         --reads ${fqs} \
         --ref_for_fastq ${h37rv_ref} \
@@ -85,7 +84,6 @@ process dynamicCompetitiveMapping {
     competitive_mapping_csv = "species_comparison.csv"
     whole_genera_arg = include_whole_genus ? "--include_whole_genus" : ""
     """
-    mkdir outputs
     competitive_mapping sylph --seq_platform ${seq_platform} \
         --reads ${fqs} \
         --sylph_report ${sylph_report} \
