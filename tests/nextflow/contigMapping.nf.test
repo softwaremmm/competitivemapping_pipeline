@@ -1,0 +1,29 @@
+nextflow_process {
+
+    name "Test Process contigMapping"
+    script "process/contig_mapping.nf"
+    process "contigMapping"
+
+    test("Process should succeed when sample files provided") {
+        when {
+            process{
+                """
+                input[0] = ['sample_test', file("$projectDir/test_data/chloro_10k/megahit.contigs.fa"), file("$projectDir/data/manifest/manifest_20231001"), file("$projectDir/test_data/species_list_manifest_20240710.csv")]
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert process.exitStatus == 0
+
+
+            with(process.out.species_comparison) {
+                assert size() == 1
+                assert get(0)[1].contains("contig_species_comparison.csv")
+                assert path(get(0)[1]).md5 == path("$projectDir/test_data/chloro_10k/contig_species_comparison.csv").md5
+            }
+        }
+    }
+
+}

@@ -129,6 +129,9 @@ CHLORO_10k = {
     "sylph_species_comparison": "test_data/chloro_10k/sylph_species_comparison.json",
     "sylph_csv_comparison": "test_data/chloro_10k/sylph_species_comparison.csv",
     "sylph_species_comparison_all_genera": "test_data/chloro_10k/sylph_species_comparison_all_genera.json",
+    "contigs": "test_data/chloro_10k/megahit.contigs.fa",
+    "contig_stats": "test_data/chloro_10k/megahit.contigs.stats.csv",
+    "contig_species_comparison": "test_data/chloro_10k/contig_species_comparison.csv",
 }
 
 EMPTY_SYLPH = {
@@ -162,6 +165,11 @@ def empty_sylph():
 )
 def samples(request) -> dict:
     return request.param
+
+
+@pytest.fixture
+def chloro_10k() -> dict:
+    return CHLORO_10k
 
 
 # Fixtures for the test cases in test_check_read_count.py

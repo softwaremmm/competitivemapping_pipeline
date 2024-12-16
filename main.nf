@@ -2,6 +2,7 @@
 include { competitiveMapping } from './process/competitive_mapping.nf'
 include { dynamicCompetitiveMapping } from './process/competitive_mapping.nf'
 include { has_enough_reads } from './process/competitive_mapping.nf'
+include { contigMapping } from './process/contig_mapping.nf'
 
 //Define parameters
 params.help = ''
@@ -153,6 +154,22 @@ workflow dynamic_competitive_mapping {
     emit:
     cm_report = competitive_mapping_output.cm_report
     cm_csv = competitive_mapping_output.cm_csv
+    manifest = competitive_mapping_output.manifest
+}
+
+workflow dynamic_contig_mapping {
+    take:
+    contig_files
+    manifest_files
+
+    main:
+    input_files = contig_files.join(manifest_files)
+    contigMapping(input_files)
+
+
+    emit:
+    species_comparison = contigMapping.species_comparison
+    blast_mapping = contigMapping.blast_mapping
 }
 
 def check_seq_platform(seq_platform) {

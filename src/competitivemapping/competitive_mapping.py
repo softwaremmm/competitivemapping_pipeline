@@ -250,6 +250,7 @@ def make_manifest(
     # add species information from metadata
     species_lookup = metadata_df.set_index("accession")["species"].to_dict()
     contigs_df["species"] = contigs_df["reference"].map(species_lookup)
+    contigs_df.to_csv(f"{output_root}contigs.csv", index=False)
     return manifest_file, contigs_df
 
 
@@ -486,7 +487,7 @@ def run_competitive_mapping(
     new_row["genome_name"] = "unmapped"
     for col in "numreads", "primary_reads", "total_reads":
         new_row[col] = overall_stats["unmapped_reads"]
-    df.loc[-1] = new_row
+    df.loc[-1] = new_row  # type: ignore
 
     # incorporate species information if available
     if "species" in contigs.columns:

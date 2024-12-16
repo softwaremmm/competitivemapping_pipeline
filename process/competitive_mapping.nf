@@ -78,6 +78,7 @@ process dynamicCompetitiveMapping {
     output:
     tuple val(sample_name), path(competitive_mapping_report), emit: cm_report
     tuple val(sample_name), path(competitive_mapping_csv), emit: cm_csv
+    tuple val(sample_name), path("manifest.fasta.gz"), path("contigs.csv"), emit: manifest
 
     script:
     competitive_mapping_report = "species_comparison_report.json"
@@ -96,6 +97,9 @@ process dynamicCompetitiveMapping {
 
     mv out.species_comparison.json ${competitive_mapping_report}
     mv out.species_comparison.csv ${competitive_mapping_csv}
+
+    mv out.manifest.fasta.gz manifest.fasta.gz
+    mv out.contigs.csv contigs.csv
     """
 }
 
