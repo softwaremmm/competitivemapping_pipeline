@@ -147,8 +147,9 @@ def competitive_map_contigs(
         .reset_index()
     )
 
-    result_df = contigs_df[["reference", "totallength"]].drop_duplicates()
+    result_df = contigs_df[["species", "reference", "totallength"]].drop_duplicates()
     result_df = result_df.merge(aggregated, on="reference", how="left").fillna(0)
+    result_df.rename(columns={"reference": "genome_name"}, inplace=True)
     result_df.sort_values("meandepth", ascending=False, inplace=True)
     return result_df
 
