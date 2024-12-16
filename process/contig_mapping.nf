@@ -22,7 +22,6 @@ process contigMapping {
 
     script:
     """
-    mkdir outputs
     contig_mapping --contigs ${contigs} --manifest ${manifest} --manifest_contigs ${species_list} \
         --cpus ${task.cpus} --output_root "contig_"
     """

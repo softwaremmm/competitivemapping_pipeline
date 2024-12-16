@@ -53,7 +53,14 @@ def blastn_contigs(
     """
     logging.info("Making blast db")
     blast_db = f"{output_root}blast_db"
-    command = f"makeblastdb -in {manifest} -dbtype nucl -parse_seqids -out {blast_db}"
+    # if manifest is gzipped then unzip first
+    if manifest.endswith(".gz"):
+        command = (
+            f"gzip -dc {manifest} | makeblastdb -in - -dbtype nucl -parse_seqids"
+            + f"-out {blast_db} -title manifest_db"
+        )
+    else:
+        command = f"makeblastdb -in {manifest} -dbtype nucl -parse_seqids -out {blast_db} -title manifest_db"
     subprocess.run(
         command,
         shell=True,
