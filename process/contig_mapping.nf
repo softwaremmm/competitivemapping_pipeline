@@ -5,8 +5,9 @@ process contigMapping {
 
     cpus 4
     memory {
-        params.testing == "" ? { 4.GB + (8.GB * (task.attempts - 1)) } : "8GB"
+        params.testing == "" ? ( 4.GB + (8.GB * (task.attempt - 1))) : (4.GB)
     }
+
 
     pod label: "name", value: "competitive_mapping_pipeline:contigMapping"
     pod label: "sample_id", value: "${params.sample_id}"
