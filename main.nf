@@ -168,8 +168,8 @@ workflow dynamic_contig_mapping {
 
 
     emit:
-    species_comparison = contigMapping.species_comparison
-    blast_mapping = contigMapping.blast_mapping
+    species_comparison = contigMapping.out.species_comparison
+    blast_mapping = contigMapping.out.blast_mapping
 }
 
 def check_seq_platform(seq_platform) {
