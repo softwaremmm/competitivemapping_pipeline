@@ -33,7 +33,7 @@ jobs:
 
       - name: softlink reference data # This has already been downloaded to the runner
         run: |
-          mkdir data && \
+          mkdir -p data/manifest && \
           ln -s /mnt/portal-sp3dev-knowledge/manifest/* ./data/manifest/ && \
           tree data/manifest
           ln -s /mnt/portal-sp3dev-knowledge/sylph ./data/sylph
