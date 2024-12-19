@@ -9,6 +9,7 @@ import argparse
 import os
 import shutil
 import subprocess
+import zipfile
 
 import pandas as pd
 
@@ -38,10 +39,9 @@ def download_assembly(accession, output_dir):
             ],
             check=True,
         )
-        # unzip
-        subprocess.run(
-            ["unzip", f"tmp_{accession}.zip", "-d", f"{accession}_dir"], check=True
-        )
+
+        with zipfile.ZipFile(f"tmp_{accession}.zip", "r") as zip_ref:
+            zip_ref.extractall(f"{accession}_dir")
 
         # Move the assembly to the output directory. Makes use of glob since not actually sure what filename is
         subprocess.run(
