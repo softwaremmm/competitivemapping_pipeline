@@ -2,11 +2,12 @@
 Script for downloading assemblies from NCBI given a manifest file.
 
 Requires ncbi datasets tool to be downloaded: https://www.ncbi.nlm.nih.gov/datasets/docs/v1/download-and-install/
-Can be installed with conda: conda install -c bioconda ncbi-datasets
+Can be installed with conda: conda install -c conda-forge ncbi-datasets-cli
 """
 
 import argparse
 import os
+import shutil
 import subprocess
 
 import pandas as pd
@@ -42,7 +43,7 @@ def download_assembly(accession, output_dir):
             ["unzip", f"tmp_{accession}.zip", "-d", f"{accession}_dir"], check=True
         )
 
-        # Move the assembly to the output directory
+        # Move the assembly to the output directory. Makes use of glob since not actually sure what filename is
         subprocess.run(
             f"mv {accession}_dir/ncbi_dataset/data/{accession}/* {output_dir}/{accession}.fasta",
             check=True,
@@ -50,8 +51,8 @@ def download_assembly(accession, output_dir):
         )
 
         # Clean up
-        subprocess.run(["rm", "-r", f"{accession}_dir"], check=True)
-        subprocess.run(["rm", f"tmp_{accession}.zip"], check=True)
+        shutil.rmtree(f"{accession}_dir", ignore_errors=True)
+        os.remove(f"tmp_{accession}.zip")
     except subprocess.CalledProcessError as e:
         print(f"Error downloading {accession}: {e}")
 

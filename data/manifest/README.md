@@ -2,7 +2,7 @@
 
 The metadata for the manifest is provided in manifest_metadata_20231001.csv
 
-Download files with (requires https://www.ncbi.nlm.nih.gov/datasets/docs/v1/download-and-install/):
+Download files with:
 ```
 python3 download_manifest.py manifest_metadata_20231001.csv reference_genomes
 ```
@@ -13,6 +13,11 @@ cat reference_genomes/* > new_manifest.fasta
 ```
 
 Note: manifest is not gzipped for some reason of history
+
+## Dependencies
+- ncbi download datasets tool: https://www.ncbi.nlm.nih.gov/datasets/docs/v1/download-and-install/
+- pandas
+- unzip
 
 ## metadata
 
