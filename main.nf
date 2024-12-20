@@ -157,13 +157,15 @@ workflow dynamic_competitive_mapping {
     manifest = competitive_mapping_output.manifest
 }
 
+// dynamic in that it relies on the manifest from dynamic_competitive_mapping
 workflow dynamic_contig_mapping {
     take:
-    contig_files
+    contigs
+    contig_read_count
     manifest_files
 
     main:
-    input_files = contig_files.join(manifest_files)
+    input_files = contigs.join(contig_read_count).join(manifest_files)
     contigMapping(input_files)
 
 

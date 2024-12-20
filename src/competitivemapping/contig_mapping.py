@@ -18,34 +18,33 @@ logging.basicConfig(
 )
 
 
-def get_megahit_contig_stats(contigs: list[str]) -> pd.DataFrame:
+def get_megahit_contig_stats(contigs_file: str) -> pd.DataFrame:
     """Reads metadata from contig fasta header lines"""
     contig_stats = []
-    for contig in contigs:
-        with open(contig, "rt", encoding="utf-8") as handle:
-            for record in SeqIO.parse(handle, "fasta"):
-                attributes = record.description.split(" ")
-                stats = {"qseqid": record.id}
-                for attr in attributes:
-                    if "multi=" in attr:
-                        stats["multi"] = float(attr.split("=")[1])
-                    elif "len=" in attr:
-                        stats["length"] = int(attr.split("=")[1])
-                contig_stats.append(stats)
+    with open(contigs_file, "rt", encoding="utf-8") as handle:
+        for record in SeqIO.parse(handle, "fasta"):
+            attributes = record.description.split(" ")
+            stats = {"qseqid": record.id}
+            for attr in attributes:
+                if "multi=" in attr:
+                    stats["multi"] = float(attr.split("=")[1])
+                elif "len=" in attr:
+                    stats["length"] = int(attr.split("=")[1])
+            contig_stats.append(stats)
 
     df = pd.DataFrame(contig_stats)
     return df
 
 
 def blastn_contigs(
-    manifest: str, contigs: list[str], cpus: int, output_root: str
+    manifest: str, contigs: str, threads: int, output_root: str
 ) -> pd.DataFrame:
     """Run blastn to map contigs against manifest, returning sorted bam.
 
     Args:
         manifest (str): Path to the manifest file
-        contigs (list[str]): List of paths to the contigs
-        cpus (int): number of cores to use
+        contigs (str): Paths to the contigs fasta file
+        threads (int): number of cores to use
         output_root (str): Path to the output root
 
     Returns:
@@ -70,7 +69,7 @@ def blastn_contigs(
 
     logging.info("Running blastn")
     blast_mapping = f"{output_root}blast_mapping.tsv"
-    command = f"blastn -db {blast_db} -query {' '.join(contigs)} -outfmt 6 -num_threads {cpus} -out {blast_mapping}"
+    command = f"blastn -db {blast_db} -query {contigs} -outfmt 6 -num_threads {threads} -out {blast_mapping}"
     subprocess.run(
         command,
         shell=True,
@@ -107,38 +106,52 @@ def blastn_contigs(
 
 def competitive_map_contigs(
     mainfest: str,
-    contigs_df: pd.DataFrame,
-    contigs: list[str],
-    cpus: int,
+    manifest_refs_df: pd.DataFrame,
+    contigs: str,
+    contig_stats_df: pd.DataFrame,
+    threads: int,
     output_root: str,
 ) -> pd.DataFrame:
     """Map contigs to manifest and aggregate results
 
     Args:
         mainfest (str): Path to the manifest file
-        contigs_df (pd.DataFrame): DataFrame of contigs metadata
-        contigs (list[str]): Paths to contig fasta files
-        cpus (int): Number of cores to use
+        manifest_refs_df (pd.DataFrame): DataFrame of contigs metadata
+        contigs (str): Paths to the contigs fasta file
+        contig_stats_df (pd.DataFrame): DataFrame of contig stats (from supernovo)
+        threads (int): Number of cores to use
         output_root (str): Path to the output root
 
     Returns:
         pd.DataFrame: DataFrame of aggregated results
     """
+
+    # Get all contig stats
     contig_multiplicity = get_megahit_contig_stats(contigs).rename(
         columns={"length": "contig_length", "multi": "depth"}
     )
-    blast_df = blastn_contigs(mainfest, contigs, cpus, output_root).rename(
+    contig_stats_df = contig_stats_df.rename(columns={"contig_name": "qseqid"}).merge(
+        contig_multiplicity, on="qseqid", how="inner"
+    )
+
+    # Blast contigs against manifest
+    blast_df = blastn_contigs(mainfest, contigs, threads, output_root).rename(
         columns={"sseqid": "rname"}
     )[["qseqid", "rname"]]
-    blast_df = blast_df.merge(contig_multiplicity, on="qseqid", how="inner")
+    blast_df = blast_df.merge(contig_stats_df, on="qseqid", how="inner")
 
-    df = contigs_df.merge(blast_df, on="rname", how="inner")
+    # Aggregate results
+    df = manifest_refs_df.merge(blast_df, on="rname", how="inner")
     aggregated = (
         df.groupby("reference")
         .apply(
             lambda ref: pd.Series(
                 {
                     "meandepth": (ref.contig_length * ref.depth).sum()
+                    / ref.totallength.iloc[0],
+                    "numreads": ref.read_count.sum(),
+                    "aligned_bases": ref.aligned_bases.sum(),
+                    "alignment_depth": ref.aligned_bases.sum()
                     / ref.totallength.iloc[0],
                 }
             ),
@@ -147,7 +160,10 @@ def competitive_map_contigs(
         .reset_index()
     )
 
-    result_df = contigs_df[["species", "reference", "totallength"]].drop_duplicates()
+    cols_to_use = ["reference", "totallength"]
+    if "species" in manifest_refs_df.columns:
+        cols_to_use = ["species"] + cols_to_use
+    result_df = manifest_refs_df[cols_to_use].drop_duplicates()
     result_df = result_df.merge(aggregated, on="reference", how="left").fillna(0)
     result_df.rename(columns={"reference": "genome_name"}, inplace=True)
     result_df.sort_values("meandepth", ascending=False, inplace=True)
@@ -158,22 +174,40 @@ def cli_entry_point():
     """Entry point for the CLI"""
     parser = argparse.ArgumentParser(description="Process sylph report and genomes.")
 
-    parser.add_argument("--manifest", required=True, help="Path to the manifest file")
     parser.add_argument(
-        "--manifest_contigs", required=True, help="Path to the contigs file"
+        "-m", "--manifest", required=True, help="Path to the manifest file"
     )
     parser.add_argument(
-        "--contigs", required=True, help="Fasta files of contigs to map", nargs="+"
+        "-r", "--manifest_contigs", required=True, help="csv of references in manifest"
     )
-    parser.add_argument("--cpus", help="Number of CPUs to use", default=4, type=int)
-    parser.add_argument("--output_root", required=True, help="Path to the output files")
+    parser.add_argument(
+        "-c", "--contigs", required=True, help="Fasta file of contigs to map"
+    )
+    parser.add_argument(
+        "-s",
+        "--contig_stats",
+        required=True,
+        help="csv of contig stats, particularly read counts",
+    )
+    parser.add_argument(
+        "-t", "--threads", help="Number of threads to use", default=4, type=int
+    )
+    parser.add_argument(
+        "-o", "--output_root", required=True, help="Path to the output files"
+    )
 
     args = parser.parse_args()
 
-    manifest_contigs_df = pd.read_csv(args.manifest_contigs)
+    manifest_refs_df = pd.read_csv(args.manifest_contigs)
+    contig_stats_df = pd.read_csv(args.contig_stats)
 
     result_df = competitive_map_contigs(
-        args.manifest, manifest_contigs_df, args.contigs, args.cpus, args.output_root
+        args.manifest,
+        manifest_refs_df,
+        args.contigs,
+        contig_stats_df,
+        args.threads,
+        args.output_root,
     )
 
     result_df.to_csv(f"{args.output_root}species_comparison.csv", index=False)

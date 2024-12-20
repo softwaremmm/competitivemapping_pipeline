@@ -14,7 +14,7 @@ process contigMapping {
     pod label: "run_id", value: "${params.run_id}"
 
     input:
-    tuple val(sample_name), path(contigs), path(manifest), path(species_list)
+    tuple val(sample_name), path(contigs), path(contig_read_count), path(manifest), path(species_list)
 
     output:
     tuple val(sample_name), path("contig_species_comparison.csv"), emit: species_comparison
@@ -22,7 +22,8 @@ process contigMapping {
 
     script:
     """
-    contig_mapping --contigs ${contigs} --manifest ${manifest} --manifest_contigs ${species_list} \
-        --cpus ${task.cpus} --output_root "contig_"
+    contig_mapping --manifest ${manifest} --manifest_contigs ${species_list} \
+        --contigs ${contigs} --contig_stats ${contig_read_count} \
+        -t ${task.cpus} --output_root "contig_"
     """
 }

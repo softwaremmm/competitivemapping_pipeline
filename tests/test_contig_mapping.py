@@ -6,7 +6,7 @@ from competitivemapping import contig_mapping
 
 
 def test_get_megahit_contig_stats(chloro_10k):
-    df = contig_mapping.get_megahit_contig_stats([chloro_10k["contigs"]])
+    df = contig_mapping.get_megahit_contig_stats(chloro_10k["contigs"])
     pd.testing.assert_frame_equal(df, pd.read_csv(chloro_10k["contig_stats"]))
 
 
@@ -21,7 +21,8 @@ def test_competitive_map_contigs(
     df = contig_mapping.competitive_map_contigs(
         manifest,
         pd.read_csv(species_table_path),
-        [chloro_10k["contigs"]],
+        chloro_10k["contigs"],
+        pd.read_csv(chloro_10k["contig_read_count"]),
         4,
         output_root,
     )

@@ -130,6 +130,7 @@ CHLORO_10k = {
     "sylph_csv_comparison": "test_data/chloro_10k/sylph_species_comparison.csv",
     "sylph_species_comparison_all_genera": "test_data/chloro_10k/sylph_species_comparison_all_genera.json",
     "contigs": "test_data/chloro_10k/megahit.contigs.fa",
+    "contig_read_count": "test_data/chloro_10k/megahit.contig_read_count.csv",
     "contig_stats": "test_data/chloro_10k/megahit.contigs.stats.csv",
     "contig_species_comparison": "test_data/chloro_10k/contig_species_comparison.csv",
 }
