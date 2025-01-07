@@ -33,6 +33,7 @@ def test_full_match(coverage_long, species_long):
 def test_join_references(coverage_table, species_table, expected_joined):
     actual_joined = process_coverage.join_references(coverage_table, species_table)
     if not actual_joined.equals(expected_joined):
+        # Since different to expectation, save to file for inspection
         actual_joined.to_csv("tests/test_outputs/actual_joined.csv", index=True)
     pd.testing.assert_frame_equal(actual_joined, expected_joined)
 
@@ -40,6 +41,7 @@ def test_join_references(coverage_table, species_table, expected_joined):
 def test_aggregate_contigs(expected_joined, expected_aggregated):
     actual_aggregated = process_coverage.aggregate_contigs(expected_joined)
     if not actual_aggregated.equals(expected_aggregated):
+        # Since different to expectation, save to file for inspection
         actual_aggregated.to_csv("tests/test_outputs/actual_aggregated.csv", index=True)
     pd.testing.assert_frame_equal(actual_aggregated, expected_aggregated)
 

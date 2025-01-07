@@ -65,9 +65,8 @@ def aggregate_contigs(referenced_table: pd.DataFrame) -> pd.DataFrame:
         references joined on
 
     Returns:
-        pd.DataFrame: genome_name,length,coverage,numreads,meandepth
-        Sorted in descending order of meandepth. Without genomes that
-        have no reads.
+        pd.DataFrame: reference, coverage, numreads, meandepth
+        Without genomes that have no reads.
     """
     aggregated = referenced_table.groupby("reference").apply(
         lambda contig: pd.Series(
@@ -102,7 +101,8 @@ def lookup_and_aggregate(
         so an error is raised.
 
     Returns:
-        pd.DataFrame: reference, overall_coverage, total_reads, totallength, mean_depth
+        pd.DataFrame: genome_name, length, coverage, numreads, meandepth
+        Sorted by meandepth, then reference
     """
     not_in_coverage, not_in_species = unmatched_rnames(coverage_table, species_table)
 

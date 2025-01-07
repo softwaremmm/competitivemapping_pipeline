@@ -5,10 +5,11 @@ REPLACE_EXPECTATION = False
 
 
 def check_file(expectation, result):
-    """Check if files match, if not replace/save replacement."""
+    """Check if files match, if not replace expectation or save new result for inspection."""
 
     # check if expectation missing
     if not os.path.exists(expectation):
+        # Then just create an empty file
         with open(expectation, "w", encoding="utf-8") as file:
             file.write("")
 

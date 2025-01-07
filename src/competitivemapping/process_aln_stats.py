@@ -90,9 +90,10 @@ def get_alignment_stats(
             elif read.is_supplementary:
                 read_info[query]["supplementary"].append(chrom_name)
             else:
-                assert (
-                    read_info[query]["primary"] == ""
-                ), f"Multiple Primary Reads! \n{query=}\n{read=}"
+                assert read_info[query]["primary"] == "", (
+                    "Read cannot have multiple primary alignments (search SAM file specification online)."
+                    + f"\n{query=}\n{read=}"
+                )
                 read_info[query]["primary"] = chrom_name
 
         overall_stats["mapped_reads"] = len(read_info)
