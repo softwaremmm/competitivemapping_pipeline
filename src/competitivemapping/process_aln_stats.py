@@ -50,7 +50,6 @@ def get_alignment_stats(
         chrom_id_to_name = {}
         # structure of read_info = {query: {"primary": "", "secondary": [], "supplementary": []}}
         read_info: dict[str, dict[str, typing.Any]] = {}
-        chroms = set()
 
         overall_stats = {
             "mapped_reads": 0,
@@ -73,9 +72,10 @@ def get_alignment_stats(
 
             chrom_id = read.reference_id
             if chrom_id not in chrom_id_to_name:
-                chrom_id_to_name[chrom_id] = name_mapping[bam.get_reference_name(chrom_id)]
+                chrom_id_to_name[chrom_id] = name_mapping[
+                    bam.get_reference_name(chrom_id)
+                ]
             chrom_name = chrom_id_to_name[chrom_id]
-            chroms.add(chrom_name)
 
             query = f"{read.query_name}_{2 if read.is_read2 else 1}"
             if query not in read_info:
@@ -90,16 +90,21 @@ def get_alignment_stats(
             elif read.is_supplementary:
                 read_info[query]["supplementary"].append(chrom_name)
             else:
-                assert read_info[query]["primary"] == "", f"Multiple Primary Reads! \n{query=}\n{read=}"
+                assert read_info[query]["primary"] == "", (
+                    "Read cannot have multiple primary alignments (search SAM file specification online)."
+                    + f"\n{query=}\n{read=}"
+                )
                 read_info[query]["primary"] = chrom_name
 
         overall_stats["mapped_reads"] = len(read_info)
 
-        return overall_stats, summarise_by_chrom(chroms, read_info)
+        return overall_stats, summarise_by_chrom(set(name_mapping.values()), read_info)
 
 
 # pylint: disable-next=too-many-branches
-def summarise_by_chrom(chroms: set[str], read_info: dict[str, dict[str, typing.Any]]) -> pd.DataFrame:
+def summarise_by_chrom(
+    chroms: set[str], read_info: dict[str, dict[str, typing.Any]]
+) -> pd.DataFrame:
     """Summarise the alignment information by reference"""
     chrom_info = {
         chrom: {
@@ -150,7 +155,9 @@ def summarise_by_chrom(chroms: set[str], read_info: dict[str, dict[str, typing.A
 
     df = pd.DataFrame.from_dict(chrom_info, orient="index")
     df.reset_index(inplace=True, names="genome_name")
-    df.sort_values(by=["total_reads", "genome_name"], ascending=[False, True], inplace=True)
+    df.sort_values(
+        by=["total_reads", "genome_name"], ascending=[False, True], inplace=True
+    )
     return df
 
 
@@ -160,7 +167,9 @@ def cli_entry_point():
     parser.add_argument("--bam", help="BAM file to process", required=True)
     parser.add_argument("--species_list", help="Reference names file", required=True)
     parser.add_argument("--output", help="Output file", required=True)
-    parser.add_argument("--output_summary", help="Output file for summary", required=True)
+    parser.add_argument(
+        "--output_summary", help="Output file for summary", required=True
+    )
     parser.add_argument("--exclude_secondary", action="store_true", default=False)
     parser.add_argument("--exclude_supplementary", action="store_true", default=False)
     args = parser.parse_args()

@@ -57,7 +57,7 @@ def expected_joined() -> pd.DataFrame:
 
 @pytest.fixture
 def expected_aggregated() -> pd.DataFrame:
-    return pd.read_csv("test_data/expected_aggregated.csv")
+    return pd.read_csv("test_data/expected_aggregated.csv").set_index("reference")
 
 
 @pytest.fixture
