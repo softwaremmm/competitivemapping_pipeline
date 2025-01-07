@@ -1,6 +1,6 @@
 process competitiveMapping {
     container {
-        params.test_container_cm == "" ? 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:7e8d481' : params.test_container_cm
+        params.test_container_cm == "" ? 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:4627e5b' : params.test_container_cm
     }
 
     cpus 4
@@ -57,7 +57,7 @@ process competitiveMapping {
 
 process dynamicCompetitiveMapping {
     container {
-        params.test_container_cm == "" ? 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:7e8d481' : params.test_container_cm
+        params.test_container_cm == "" ? 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:4627e5b' : params.test_container_cm
     }
 
     cpus 4
@@ -101,7 +101,7 @@ process dynamicCompetitiveMapping {
 
 process has_enough_reads {
     container {
-        params.test_container_cm == "" ? 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:7e8d481' : params.test_container_cm
+        params.test_container_cm == "" ? 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:4627e5b' : params.test_container_cm
     }
 
     cpus 1
