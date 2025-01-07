@@ -138,6 +138,8 @@ EMPTY_SYLPH = {
         "test_data/chloro_10k/chloro_2.fastq.gz",
     ],
     "sylph_report": "test_data/empty_sylph/sylph.tsv",
+    "manifest": "test_data/empty_sylph/empty_manifest.fasta.gz",
+    "contigs": "test_data/empty_sylph/empty_contigs.csv",
     "sylph_species_comparison": "test_data/empty_sylph/sylph_species_comparison.json",
     "sylph_csv_comparison": "test_data/empty_sylph/sylph_species_comparison.csv",
 }

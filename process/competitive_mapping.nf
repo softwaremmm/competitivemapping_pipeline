@@ -33,7 +33,7 @@ process competitiveMapping {
     h37rv_ref = "M.tuberculosis"
     """
     mkdir outputs
-    competitive_mapping manifest --seq_platform ${seq_platform} \
+    competitive_mapping --seq_platform ${seq_platform} \
         --reads ${fqs} \
         --ref_for_fastq ${h37rv_ref} \
         --manifest ${manifest} \
@@ -84,14 +84,19 @@ process dynamicCompetitiveMapping {
     competitive_mapping_csv = "species_comparison.csv"
     whole_genera_arg = include_whole_genus ? "--include_whole_genus" : ""
     """
-    mkdir outputs
-    competitive_mapping sylph --seq_platform ${seq_platform} \
-        --reads ${fqs} \
-        --sylph_report ${sylph_report} \
+    manifest_builder --sylph_report ${sylph_report} \
         --genome_dirs ${gtdb_genomes_dir} \
         --metadata_files ${assembly_metadata} \
-        --cpus ${task.cpus} \
         ${whole_genera_arg} \
+        --cpus ${task.cpus} \
+        --output_root "out."
+
+
+    competitive_mapping --seq_platform ${seq_platform} \
+        --reads ${fqs} \
+        --manifest out.manifest.fasta.gz \
+        --contigs out.contigs.csv \
+        --cpus ${task.cpus} \
         --output_root "out."
 
     mv out.species_comparison.json ${competitive_mapping_report}
