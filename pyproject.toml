@@ -25,7 +25,6 @@ process_aln_stats = "competitivemapping.process_aln_stats:cli_entry_point"
 check_read_count = "competitivemapping.check_read_count:cli_entry_point"
 competitive_mapping = "competitivemapping.competitive_mapping:cli_entry_point"
 manifest_builder = "competitivemapping.manifest_builder:cli_entry_point"
-contig_mapping = "competitivemapping.contig_mapping:cli_entry_point"
 
 
 [project.optional-dependencies]

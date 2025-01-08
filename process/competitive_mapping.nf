@@ -32,11 +32,11 @@ process competitiveMapping {
     competitive_mapping_csv = "species_comparison.csv"
     h37rv_ref = "M.tuberculosis"
     """
-    competitive_mapping --seq_platform ${seq_platform} \
-        --reads ${fqs} \
-        --ref_for_fastq ${h37rv_ref} \
+    competitive_mapping --platform ${seq_platform} \
+        --query ${fqs} \
+        --ref_to_extract ${h37rv_ref} \
         --manifest ${manifest} \
-        --contigs ${species_list} \
+        --manifest_contigs ${species_list} \
         --cpus ${task.cpus} \
         --output_root "out."
 
@@ -92,10 +92,10 @@ process dynamicCompetitiveMapping {
         --output_root "out."
 
 
-    competitive_mapping --seq_platform ${seq_platform} \
-        --reads ${fqs} \
+    competitive_mapping --platform ${seq_platform} \
+        --query ${fqs} \
         --manifest out.manifest.fasta.gz \
-        --contigs out.contigs.csv \
+        --manifest_contigs out.contigs.csv \
         --cpus ${task.cpus} \
         --output_root "out."
 
