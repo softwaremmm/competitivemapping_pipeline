@@ -28,7 +28,7 @@ def get_alignment_stats(
     name_mapping: dict[str, str],
     exclude_secondary=False,
     exclude_supplementary=False,
-    weighting: dict | None = None,
+    weighting_df: pd.DataFrame | None = None,
 ) -> tuple[dict, pd.DataFrame]:
     """Iterate through all alignments in the bam file and produce a summary by reference
 
@@ -37,7 +37,7 @@ def get_alignment_stats(
         name_mapping (dict[str, str]): dict with mapping for reference code to human names
         exclude_secondary (bool, optional): exclude secondary alignments. Defaults to False.
         exclude_supplementary (bool, optional): exclude supplementary alignments. Defaults to False.
-        weighting (dict | None, optional): weighting for reads. Defaults to None.
+        weighting (pd.DataFrame | None, optional): weighting for reads. Defaults to None.
 
     Raises:
         ValueError: if a read is both secondary and supplementary
@@ -46,6 +46,12 @@ def get_alignment_stats(
     Returns:
         tuple[dict, pd.DataFrame]: overall stats dict, table with summary of alignments by reference
     """
+    weighting = None
+    if weighting_df is not None:
+        # convert contig_name to string
+        weighting_df["contig_name"] = weighting_df["contig_name"].astype(str)
+        weighting = weighting_df.set_index("contig_name")["numreads"].to_dict()
+
     with AlignmentFile(bam_file, "rb") as bam:  # ignore: no-member
         # This is a mapping from the chomosome id to the human readable name
         # This will also have the effect of combining contigs of multi-chromosome references
@@ -190,14 +196,9 @@ def cli_entry_point():
 
     name_mapping = get_name_mapping(args.species_list)
     if args.weighting:
-        weighting = (
-            pd.read_csv(
-                args.weighting,
-                usecols=["contig_name", "numreads"],
-                dtype={"contig_name": "str", "numreads": "int32"},
-            )
-            .set_index("contig_name")["numreads"]
-            .to_dict()
+        weighting = pd.read_csv(
+            args.weighting,
+            usecols=["contig_name", "numreads"],
         )
     else:
         weighting = None
@@ -207,7 +208,7 @@ def cli_entry_point():
         name_mapping,
         exclude_secondary=args.exclude_secondary,
         exclude_supplementary=args.exclude_supplementary,
-        weighting=weighting,
+        weighting_df=weighting,
     )
     df.to_csv(args.output, index=False)
 

@@ -16,15 +16,15 @@ def test_cli_entry_point(
 
     args = [
         "competitive_mapping",
-        "--reads",
+        "--query",
         " ".join(samples["reads"]),
-        "--seq_platform",
+        "--platform",
         seq_platform,
-        "--ref_for_fastq",
+        "--ref_to_extract",
         "M.tuberculosis",
         "--manifest",
         manifest,
-        "--contigs",
+        "--manifest_contigs",
         species_table_path,
         "--output_root",
         output_root,
@@ -70,11 +70,11 @@ def test_empty_manifest(empty_sylph, test_outputs_dir, mocker):
         "competitive_mapping",
         "--manifest",
         empty_sylph["manifest"],
-        "--contigs",
+        "--manifest_contigs",
         empty_sylph["contigs"],
-        "--reads",
+        "--query",
         " ".join(empty_sylph["reads"]),
-        "--seq_platform",
+        "--platform",
         seq_platform,
         "--output_root",
         output_root,
@@ -130,13 +130,13 @@ def test_sylph_manifest(
             "competitive_mapping",
             "--manifest",
             output_root + "manifest.fasta.gz",
-            "--contigs",
+            "--manifest_contigs",
             output_root + "contigs.csv",
-            "--reads",
+            "--query",
             " ".join(samples["reads"]),
-            "--seq_platform",
+            "--platform",
             seq_platform,
-            "--ref_for_fastq",
+            "--ref_to_extract",
             "GCF_000195955.2",  # M.tuberculosis
             "--output_root",
             output_root,
@@ -201,13 +201,13 @@ def test_sylph_manifest_all_genera(
             "competitive_mapping",
             "--manifest",
             output_root + "manifest.fasta.gz",
-            "--contigs",
+            "--manifest_contigs",
             output_root + "contigs.csv",
-            "--reads",
+            "--query",
             " ".join(samples["reads"]),
-            "--seq_platform",
+            "--platform",
             seq_platform,
-            "--ref_for_fastq",
+            "--ref_to_extract",
             "GCF_000195955.2",  # M.tuberculosis
             "--output_root",
             output_root,
@@ -220,4 +220,40 @@ def test_sylph_manifest_all_genera(
     check_file(
         samples["sylph_species_comparison_all_genera"],
         output_root + "species_comparison.json",
+    )
+
+
+def test_competitive_map_contigs(
+    contigs, species_table_path, manifest, test_outputs_dir, mocker
+):
+    outdir = os.path.join(test_outputs_dir, "map_contigs")
+    os.makedirs(outdir, exist_ok=True)
+    output_root = os.path.join(outdir, contigs["sample"] + ".")
+
+    mocker.patch(
+        "sys.argv",
+        [
+            "competitive_mapping",
+            "--query",
+            contigs["contigs"],
+            "--query_contig_stats",
+            contigs["stats"],
+            "--platform",
+            "fasta",
+            "--ref_to_extract",
+            "M.tuberculosis",
+            "--manifest",
+            manifest,
+            "--manifest_contigs",
+            species_table_path,
+            "--output_root",
+            output_root,
+            "--cpus",
+            "4",
+        ],
+    )
+    competitive_mapping.cli_entry_point()
+
+    check_file(
+        contigs["species_comparison_csv"], output_root + "species_comparison.csv"
     )

@@ -1,5 +1,13 @@
 genome_name,total_reads,total_alns,exclusive_reads,primary_reads,secondary_reads,supplementary_reads,supplementary_alns
-M.tuberculosis,100,160,100,100,0,0,10
+M.tuberculosis,130,360,100,130,0,0,30
+M.lacus,20,20,0,0,20,0,0
+M.vicinigordonae,20,20,0,0,20,0,0
+M.celatum,10,10,0,0,10,0,0
+M.lepraemurium,10,10,0,0,10,0,0
+M.novocastrense,10,10,0,0,10,0,0
+M.palustre,10,10,0,0,10,0,0
+M.simulans,10,10,0,0,10,0,0
+M.spongiae,10,10,0,0,0,10,10
 M.abscessus,0,0,0,0,0,0,0
 M.acidiphilus,0,0,0,0,0,0,0
 M.agri,0,0,0,0,0,0,0
@@ -29,7 +37,6 @@ M.branderi,0,0,0,0,0,0,0
 M.brisbanense,0,0,0,0,0,0,0
 M.brumae,0,0,0,0,0,0,0
 M.canariasense,0,0,0,0,0,0,0
-M.celatum,0,0,0,0,0,0,0
 M.celeriflavum,0,0,0,0,0,0,0
 M.chelonae,0,0,0,0,0,0,0
 M.chitae,0,0,0,0,0,0,0
@@ -89,11 +96,9 @@ M.koreensis,0,0,0,0,0,0,0
 M.kubicae,0,0,0,0,0,0,0
 M.kumamotonensis,0,0,0,0,0,0,0
 M.kyogaense,0,0,0,0,0,0,0
-M.lacus,0,0,0,0,0,0,0
 M.lacusdiani,0,0,0,0,0,0,0
 M.lentiflavum,0,0,0,0,0,0,0
 M.leprae,0,0,0,0,0,0,0
-M.lepraemurium,0,0,0,0,0,0,0
 M.lepromatosis,0,0,0,0,0,0,0
 M.litorale,0,0,0,0,0,0,0
 M.llatzerense,0,0,0,0,0,0,0
@@ -118,12 +123,10 @@ M.neworleansense,0,0,0,0,0,0,0
 M.nivoides,0,0,0,0,0,0,0
 M.nonchromogenicus,0,0,0,0,0,0,0
 M.noviomagense,0,0,0,0,0,0,0
-M.novocastrense,0,0,0,0,0,0,0
 M.novum,0,0,0,0,0,0,0
 M.ostraviense,0,0,0,0,0,0,0
 M.palauense,0,0,0,0,0,0,0
 M.pallens,0,0,0,0,0,0,0
-M.palustre,0,0,0,0,0,0,0
 M.paraense,0,0,0,0,0,0,0
 M.parafortuitum,0,0,0,0,0,0,0
 M.paragordonae,0,0,0,0,0,0,0
@@ -162,10 +165,8 @@ M.shigaense,0,0,0,0,0,0,0
 M.shimoidei,0,0,0,0,0,0,0
 M.shinjukuense,0,0,0,0,0,0,0
 M.simiae,0,0,0,0,0,0,0
-M.simulans,0,0,0,0,0,0,0
 M.smegmatis,0,0,0,0,0,0,0
 M.sphagni,0,0,0,0,0,0,0
-M.spongiae,0,0,0,0,0,0,0
 M.stellerae,0,0,0,0,0,0,0
 M.stephanolepidis,0,0,0,0,0,0,0
 M.stomatepiae,0,0,0,0,0,0,0
@@ -179,7 +180,6 @@ M.trivialis,0,0,0,0,0,0,0
 M.tusciae,0,0,0,0,0,0,0
 M.vaccae,0,0,0,0,0,0,0
 M.vanbaalenii,0,0,0,0,0,0,0
-M.vicinigordonae,0,0,0,0,0,0,0
 M.vinylchloridicum,0,0,0,0,0,0,0
 M.virginiensis,0,0,0,0,0,0,0
 M.vulneris,0,0,0,0,0,0,0

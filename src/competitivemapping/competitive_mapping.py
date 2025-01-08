@@ -11,6 +11,7 @@ import typing
 from concurrent.futures import ProcessPoolExecutor
 
 import pandas as pd
+from pysam import AlignmentFile  # pylint: disable = no-name-in-module
 
 from competitivemapping.process_aln_stats import get_alignment_stats
 from competitivemapping.process_coverage import process_coverage
@@ -57,14 +58,14 @@ COLUMN_EXPLANATIONS = {
 
 
 def map_reads(
-    manifest: str, reads: list[str], seq_platform: str, cpus: int, output_root: str
+    manifest: str, reads: list[str], platform: str, cpus: int, output_root: str
 ) -> str:
     """Run minimap2 to map reads against manifest, returning sorted bam.
 
     Args:
         manifest (str): Path to the manifest file
         reads (list[str]): List of paths to the read fastqs
-        seq_platform (str): Sequencing platform
+        platform (str): Sequencing platform, or "fasta" for assembly contigs
         cpus (int): number of cores to use
         output_root (str): Path to the output root
 
@@ -75,10 +76,12 @@ def map_reads(
     aln_bam = f"{output_root}alignment.bam"
 
     command = f"minimap2 -t {cpus} --secondary yes -N 1000"
-    if seq_platform == "ont":
+    if platform == "ont":
         command += " -ax map-ont"
-    else:
+    elif platform == "illumina":
         command += " -ax sr"
+    else:
+        command += " -a"
     command += f" {manifest} {' '.join(reads)}"
 
     command += f"| samtools sort -@ {cpus} -o {aln_bam}"
@@ -93,12 +96,15 @@ def map_reads(
     return aln_bam
 
 
-def get_aln_stats(aln_bam: str, contigs_df: pd.DataFrame) -> tuple[dict, pd.DataFrame]:
+def get_aln_stats(
+    aln_bam: str, contigs_df: pd.DataFrame, weighting_df: pd.DataFrame | None = None
+) -> tuple[dict, pd.DataFrame]:
     """Get stats from bam files using pysam.
 
     Args:
         aln_bam (str): path to the alignment bam file
         contigs_df (pd.DataFrame): dataframe of contigs
+        weighting_df (pd.DataFrame): dataframe of weights for reads (optional)
 
     Returns:
         tuple[dict, pd.DataFrame]: dict with overall stats and
@@ -106,7 +112,9 @@ def get_aln_stats(aln_bam: str, contigs_df: pd.DataFrame) -> tuple[dict, pd.Data
     """
     logging.info("Getting alignment stats")
     name_mapping = contigs_df.set_index("rname")["reference"].to_dict()
-    overall_stats, aln_stats_df = get_alignment_stats(aln_bam, name_mapping)
+    overall_stats, aln_stats_df = get_alignment_stats(
+        aln_bam, name_mapping, weighting_df=weighting_df
+    )
 
     return overall_stats, aln_stats_df
 
@@ -161,12 +169,75 @@ def get_coverage_stats(
     return coverage_df
 
 
+def estimate_mean_depth(
+    bam_file: str, manifest_contigs: pd.DataFrame, query_contig_stats: pd.DataFrame
+) -> pd.DataFrame:
+    """Use pysam to estimate mean depth of coverage when mapping assembled contigs
+
+    Args:
+        bam_file (str): path to the alignment bam file
+        manifest_contigs (pd.DataFrame): dataframe of manifest contigs
+        query_contig_stats (pd.DataFrame): stats about assembled contigs
+
+    Returns:
+        pd.DataFrame: Dataframe with columns genome_name, meandepth, meandepth_including_secondary
+    """
+    alignments = []
+    with AlignmentFile(bam_file, "rb") as bam:  # ignore: no-member
+        for read in bam:
+            if read.is_qcfail or read.is_duplicate or read.is_unmapped:
+                continue
+
+            alignments.append(
+                {
+                    "contig_name": read.query_name,
+                    "rname": read.reference_name,
+                    "secondary": read.is_secondary,
+                }
+            )
+
+    df = pd.DataFrame(alignments)
+    df = pd.merge(df, manifest_contigs, on="rname").drop(columns=["rname"])
+
+    # So df now has contig_name, secondary, reference, totallength
+    # But only let contig appear once for each reference (favouring primary alignments)
+    df.sort_values(
+        by=["contig_name", "reference", "secondary"],
+        inplace=True,
+        ascending=[True, True, True],
+    )
+    df.drop_duplicates(subset=["contig_name", "reference"], inplace=True)
+
+    df = pd.merge(
+        df, query_contig_stats[["contig_name", "length", "meandepth"]], on="contig_name"
+    )
+    df["depth_contribution"] = df["length"] * df["meandepth"] / df["totallength"]
+
+    all_aggregated = df.groupby("reference", as_index=False).agg(
+        meandepth_including_secondary=("depth_contribution", "sum")
+    )
+    primary_aggregated = (
+        df[~df["secondary"]]
+        .groupby("reference", as_index=False)
+        .agg(meandepth=("depth_contribution", "sum"))
+    )
+    aggregated = (
+        manifest_contigs[["reference"]]
+        .drop_duplicates()
+        .merge(primary_aggregated, on="reference", how="left")
+        .merge(all_aggregated, on="reference", how="left")
+        .fillna(0)
+        .rename(columns={"reference": "genome_name"})
+    )
+    return aggregated
+
+
 def output_fastqs(
     aln_bam: str,
     reference: str,
     contigs_df: pd.DataFrame,
     include_unmapped: bool,
-    seq_platform: str,
+    platform: str,
     cpus: int,
     output_root: str,
 ):
@@ -177,7 +248,7 @@ def output_fastqs(
         reference (str): desired reference to extract reads for
         contigs_df (pd.DataFrame): dataframe of contigs
         include_unmapped (bool): whether to include unmapped reads
-        seq_platform (str): sequencing platform
+        platform (str): sequencing platform
         cpus (int): number of cores to use
         output_root (str): Path to the output root
     """
@@ -212,13 +283,13 @@ def output_fastqs(
     # So for paired reads, only output if both are unmapped, or both map
     # (maybe with supplementary) to the reference
     command = f"samtools fastq --excl-flags 0x100 -@ {cpus} "
-    if seq_platform == "ont":
-        command += f"-0 {output_root}reads.fastq.gz {sorted_ref_bam}"
-    else:
+    if platform == "illumina":
         command += (
             f"-1 {output_root}reads_1.fastq.gz -2 {output_root}reads_2.fastq.gz"
             f" -0 /dev/null -s /dev/null {sorted_ref_bam}"
         )
+    else:
+        command += f"-0 {output_root}reads.fastq.gz {sorted_ref_bam}"
     subprocess.run(command, shell=True, check=True, stdout=subprocess.PIPE)
 
 
@@ -241,10 +312,11 @@ def produce_empty_outputs(output_root: str):
 
 def run_competitive_mapping(
     manifest: str,
-    contigs: pd.DataFrame,
-    reads: list[str],
-    ref_for_fastq: str | None,
-    seq_platform: str,
+    manifest_contigs: pd.DataFrame,
+    query: list[str],
+    query_contig_stats: pd.DataFrame | None,
+    ref_to_extract: str | None,
+    platform: str,
     cpus: int,
     output_root: str,
 ):
@@ -252,26 +324,53 @@ def run_competitive_mapping(
 
     Args:
         manifest (str): Path to the manifest file
-        contigs (pd.DataFrame): Dataframe of contigs
-        reads (list[str]): List of paths to the read fastqs
-        ref_for_fastq (str | None): Reference to extract reads for
-        seq_platform (str): Sequencing platform
+        manifest_contigs (pd.DataFrame): Dataframe of manifest_contigs
+        query (list[str]): List of paths to the read fastqs
+        query_contig_stats (pd.DataFrame): Dataframe of contig stats if using assembled contigs
+        ref_to_extract (str | None): Reference to extract reads for
+        platform (str): Sequencing platform
         cpus (int): Number of cores to use
         output_root (str): Path to the output root
     """
     logging.info("Running competitive mapping")
-    aln_bam = map_reads(manifest, reads, seq_platform, cpus, output_root)
+    aln_bam = map_reads(manifest, query, platform, cpus, output_root)
 
-    coverage_df = get_coverage_stats(aln_bam, contigs, cpus, output_root)
+    coverage_df = get_coverage_stats(aln_bam, manifest_contigs, cpus, output_root)
 
-    overall_stats, aln_stats = get_aln_stats(aln_bam, contigs)
+    overall_stats, aln_stats = get_aln_stats(
+        aln_bam, manifest_contigs, query_contig_stats
+    )
     df = pd.merge(coverage_df, aln_stats, on="genome_name")
+
+    if query_contig_stats is not None:
+        # ensure that contig_name is a string
+        query_contig_stats["contig_name"] = query_contig_stats["contig_name"].astype(
+            str
+        )
+
+        # Drop columns that have not been accurately calculated
+        df.drop(
+            columns=["meandepth", "meandepth_including_secondary", "numreads"],
+            inplace=True,
+        )
+
+        df = pd.merge(
+            df,
+            estimate_mean_depth(aln_bam, manifest_contigs, query_contig_stats),
+            on="genome_name",
+        )
 
     logging.info("Writing output files")
 
     # Can update numreads to actually reflect reads
     # As samtools coverage actually counts alignments
     df["numreads"] = df["primary_reads"] + df["supplementary_reads"]
+
+    df.sort_values(
+        ["meandepth", "meandepth_including_secondary", "genome_name"],
+        ascending=[False, False, True],
+        inplace=True,
+    )
 
     for col in (
         "coverage",
@@ -292,8 +391,8 @@ def run_competitive_mapping(
     df.loc[-1] = new_row  # type: ignore
 
     # incorporate species information if available
-    if "species" in contigs.columns:
-        species_lookup = contigs.set_index("reference")["species"].to_dict()
+    if "species" in manifest_contigs.columns:
+        species_lookup = manifest_contigs.set_index("reference")["species"].to_dict()
         species_lookup["unmapped"] = "unmapped"
         df["species"] = df["genome_name"].map(species_lookup)
         df = df[["species"] + FINAL_COLUMNS]
@@ -310,13 +409,13 @@ def run_competitive_mapping(
     with open(f"{output_root}species_comparison.json", "w", encoding="utf-8") as file:
         json.dump(output, file, indent=4)
 
-    if ref_for_fastq:
+    if ref_to_extract:
         output_fastqs(
             aln_bam,
-            ref_for_fastq,
-            contigs,
+            ref_to_extract,
+            manifest_contigs,
             include_unmapped=True,
-            seq_platform=seq_platform,
+            platform=platform,
             cpus=cpus,
             output_root=output_root,
         )
@@ -329,32 +428,55 @@ def cli_entry_point():
     parser = argparse.ArgumentParser(description="Process sylph report and genomes.")
 
     parser.add_argument("--manifest", required=True, help="Path to the manifest file")
-    parser.add_argument("--contigs", required=True, help="Path to the contigs file")
-    parser.add_argument("--reads", required=True, help="Path to the reads", nargs="+")
     parser.add_argument(
-        "--seq_platform", help="Sequencing platform", default="illumina"
+        "--manifest_contigs",
+        required=True,
+        help="Path to the contigs file for the manifest",
+    )
+    parser.add_argument(
+        "--platform",
+        help="Sequencing platform (illumina/ont/fasta). Use fasta for assembled contigs",
+        default="illumina",
+    )
+    parser.add_argument(
+        "--query",
+        required=True,
+        help="Path to the fastq/fasta files to map against manifest",
+        nargs="+",
+    )
+    parser.add_argument(
+        "--query_contig_stats",
+        required=False,
+        help="If using assembled contigs, provide stats file for numreads and meandepth of each contig",
+    )
+    parser.add_argument(
+        "--ref_to_extract",
+        help="Reference to extract matching reads to output fastq",
+        default=None,
     )
     parser.add_argument("--cpus", help="Number of CPUs to use", default=4, type=int)
-    parser.add_argument(
-        "--ref_for_fastq", help="Reference to extract reads for", default=None
-    )
     parser.add_argument("--output_root", required=True, help="Path to the output files")
 
     args = parser.parse_args()
 
-    contigs = pd.read_csv(args.contigs)
+    manifest_contigs = pd.read_csv(args.manifest_contigs)
 
-    if contigs.empty:
-        logging.warning("No contigs found in input file. Producing empty results.")
+    if manifest_contigs.empty:
+        logging.warning("No manifest contigs found in input. Producing empty results.")
         produce_empty_outputs(args.output_root)
         return
 
+    query_contig_stats = (
+        pd.read_csv(args.query_contig_stats) if args.query_contig_stats else None
+    )
+
     run_competitive_mapping(
         args.manifest,
-        contigs,
-        args.reads,
-        args.ref_for_fastq,
-        args.seq_platform,
+        manifest_contigs,
+        args.query,
+        query_contig_stats,
+        args.ref_to_extract,
+        args.platform,
         args.cpus,
         args.output_root,
     )

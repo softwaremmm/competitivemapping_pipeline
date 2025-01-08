@@ -155,6 +155,7 @@ CONTIGS = {
     "bam": "test_data/contigs/aln.bam",
     "aln_stats": "test_data/contigs/aln_stats.csv",
     "summary": "test_data/contigs/aln_summary.json",
+    "species_comparison_csv": "test_data/contigs/species_comparison.csv",
 }
 
 
