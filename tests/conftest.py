@@ -148,10 +148,24 @@ EMPTY_SYLPH = {
     "sylph_csv_comparison": "test_data/empty_sylph/sylph_species_comparison.csv",
 }
 
+CONTIGS = {
+    "sample": "contigs",
+    "contigs": "test_data/contigs/contigs.fasta.gz",
+    "stats": "test_data/contigs/contig_stats.csv",
+    "bam": "test_data/contigs/aln.bam",
+    "aln_stats": "test_data/contigs/aln_stats.csv",
+    "summary": "test_data/contigs/aln_summary.json",
+}
+
 
 @pytest.fixture()
 def empty_sylph():
     return EMPTY_SYLPH
+
+
+@pytest.fixture()
+def contigs():
+    return CONTIGS
 
 
 @pytest.fixture(

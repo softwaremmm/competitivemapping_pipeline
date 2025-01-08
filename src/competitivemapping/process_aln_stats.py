@@ -28,6 +28,7 @@ def get_alignment_stats(
     name_mapping: dict[str, str],
     exclude_secondary=False,
     exclude_supplementary=False,
+    weighting: dict | None = None,
 ) -> tuple[dict, pd.DataFrame]:
     """Iterate through all alignments in the bam file and produce a summary by reference
 
@@ -36,6 +37,7 @@ def get_alignment_stats(
         name_mapping (dict[str, str]): dict with mapping for reference code to human names
         exclude_secondary (bool, optional): exclude secondary alignments. Defaults to False.
         exclude_supplementary (bool, optional): exclude supplementary alignments. Defaults to False.
+        weighting (dict | None, optional): weighting for reads. Defaults to None.
 
     Raises:
         ValueError: if a read is both secondary and supplementary
@@ -57,8 +59,12 @@ def get_alignment_stats(
         }
 
         for read in bam:
+            weight = 1
+            if weighting is not None:
+                weight = weighting.get(read.query_name, 1)
+
             if read.is_unmapped:
-                overall_stats["unmapped_reads"] += 1
+                overall_stats["unmapped_reads"] += weight
                 continue
 
             if read.is_qcfail or read.is_duplicate:
@@ -80,6 +86,7 @@ def get_alignment_stats(
             query = f"{read.query_name}_{2 if read.is_read2 else 1}"
             if query not in read_info:
                 read_info[query] = {
+                    "weight": weight,
                     "primary": "",
                     "secondary": [],
                     "supplementary": [],
@@ -119,39 +126,40 @@ def summarise_by_chrom(
         for chrom in chroms
     }
     for _, read_dict in read_info.items():
+        weight = read_dict["weight"]
         primary = read_dict["primary"]
         secondary = read_dict["secondary"]
         supplementary = read_dict["supplementary"]
 
         if primary == "":
             for c in set(secondary) | set(supplementary):
-                chrom_info[c]["total_reads"] += 1
+                chrom_info[c]["total_reads"] += weight
             for c in secondary + supplementary:
-                chrom_info[c]["total_alns"] += 1
+                chrom_info[c]["total_alns"] += weight
             for c in set(secondary):
-                chrom_info[c]["secondary_reads"] += 1
+                chrom_info[c]["secondary_reads"] += weight
             for c in set(supplementary):
-                chrom_info[c]["supplementary_reads"] += 1
+                chrom_info[c]["supplementary_reads"] += weight
             for c in supplementary:
-                chrom_info[c]["supplementary_alns"] += 1
+                chrom_info[c]["supplementary_alns"] += weight
             continue
 
         rest = set(secondary) | set(supplementary)
 
-        chrom_info[primary]["primary_reads"] += 1
+        chrom_info[primary]["primary_reads"] += weight
         if len(rest) == 0 or rest == {primary}:
-            chrom_info[primary]["exclusive_reads"] += 1
+            chrom_info[primary]["exclusive_reads"] += weight
 
         for c in rest | {primary}:
-            chrom_info[c]["total_reads"] += 1
+            chrom_info[c]["total_reads"] += weight
         for c in secondary + supplementary + [primary]:
-            chrom_info[c]["total_alns"] += 1
+            chrom_info[c]["total_alns"] += weight
         for c in set(secondary) - {primary}:
-            chrom_info[c]["secondary_reads"] += 1
+            chrom_info[c]["secondary_reads"] += weight
         for c in set(supplementary) - {primary}:
-            chrom_info[c]["supplementary_reads"] += 1
+            chrom_info[c]["supplementary_reads"] += weight
         for c in supplementary:
-            chrom_info[c]["supplementary_alns"] += 1
+            chrom_info[c]["supplementary_alns"] += weight
 
     df = pd.DataFrame.from_dict(chrom_info, orient="index")
     df.reset_index(inplace=True, names="genome_name")
@@ -172,14 +180,34 @@ def cli_entry_point():
     )
     parser.add_argument("--exclude_secondary", action="store_true", default=False)
     parser.add_argument("--exclude_supplementary", action="store_true", default=False)
+    parser.add_argument(
+        "--weighting",
+        help="csv with weighting for reads. Used for contigs representing multiple reads."
+        + " Expects columns 'contig_name' and 'numreads'",
+        default=None,
+    )
     args = parser.parse_args()
 
     name_mapping = get_name_mapping(args.species_list)
+    if args.weighting:
+        weighting = (
+            pd.read_csv(
+                args.weighting,
+                usecols=["contig_name", "numreads"],
+                dtype={"contig_name": "str", "numreads": "int32"},
+            )
+            .set_index("contig_name")["numreads"]
+            .to_dict()
+        )
+    else:
+        weighting = None
+
     overall_stats, df = get_alignment_stats(
         args.bam,
         name_mapping,
         exclude_secondary=args.exclude_secondary,
         exclude_supplementary=args.exclude_supplementary,
+        weighting=weighting,
     )
     df.to_csv(args.output, index=False)
 
