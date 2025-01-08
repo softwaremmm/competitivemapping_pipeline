@@ -197,7 +197,11 @@ def estimate_mean_depth(
             )
 
     df = pd.DataFrame(alignments)
-    df = pd.merge(df, manifest_contigs, on="rname").drop(columns=["rname"])
+
+    # rename length is present to avoid conflict later with length of assembly contigs
+    df = pd.merge(
+        df, manifest_contigs.rename(columns={"length": "rname_length"}), on="rname"
+    ).drop(columns=["rname"])
 
     # So df now has contig_name, secondary, reference, totallength
     # But only let contig appear once for each reference (favouring primary alignments)
