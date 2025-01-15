@@ -161,17 +161,17 @@ workflow dynamic_competitive_mapping {
 workflow dynamic_contig_mapping {
     take:
     contigs
-    contig_read_count
+    contig_stats
     manifest_files
 
     main:
-    input_files = contigs.join(contig_read_count).join(manifest_files)
+    input_files = contigs.join(contig_stats).join(manifest_files)
     contigMapping(input_files)
 
 
     emit:
-    species_comparison = contigMapping.out.species_comparison
-    blast_mapping = contigMapping.out.blast_mapping
+    report_json = contigMapping.out.cm_report
+    cm_csv = contigMapping.out.cm_csv
 }
 
 def check_seq_platform(seq_platform) {

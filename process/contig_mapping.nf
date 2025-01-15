@@ -17,8 +17,8 @@ process contigMapping {
     tuple val(sample_name), path(contigs), path(contig_stats), path(manifest), path(species_list)
 
     output:
-    tuple val(sample_name), path("contig_species_comparison.json"), emit: cm_report
-    tuple val(sample_name), path("contig_species_comparison.csv"), emit: cm_csv
+    tuple val(sample_name), path("contig_comparison_report.json"), emit: cm_report
+    tuple val(sample_name), path("contig_comparison.csv"), emit: cm_csv
 
     script:
     """
@@ -29,6 +29,7 @@ process contigMapping {
 }
 
 
+// Provided as a combined process while testing
 process dynamicContigMapping {
     container {
         params.test_container_cm == "" ? 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:4627e5b' : params.test_container_cm
@@ -55,8 +56,8 @@ process dynamicContigMapping {
     tuple val(sample_name), path("manifest.fasta.gz"), path("contigs.csv"), emit: manifest
 
     script:
-    competitive_mapping_report = "species_comparison_report.json"
-    competitive_mapping_csv = "species_comparison.csv"
+    competitive_mapping_report = "contig_comparison_report.json"
+    competitive_mapping_csv = "contig_comparison.csv"
     whole_genera_arg = include_whole_genus ? "--include_whole_genus" : ""
     """
     manifest_builder --sylph_report ${sylph_report} \
