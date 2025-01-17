@@ -8,6 +8,7 @@ import gzip
 import logging
 import multiprocessing
 import os
+import re
 from concurrent.futures import ProcessPoolExecutor
 
 import pandas as pd
@@ -39,10 +40,9 @@ def read_contigs(args: tuple[str, str]) -> list[dict[str, str]]:
 
 
 def get_base_species_name(species: str) -> str:
-    """removes _AB etc from species names if present"""
-    if "_" in species:
-        return species.split("_")[0]
-    return species
+    """removes _AB etc from species names if present.
+    Should not effect genus names"""
+    return re.sub(r"_[A-Z]+$", "", species)
 
 
 def select_extra_species(
