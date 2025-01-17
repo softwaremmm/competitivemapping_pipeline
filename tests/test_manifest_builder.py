@@ -13,6 +13,25 @@ from test_utils import check_file
 from competitivemapping import manifest_builder
 
 
+def test_get_base_species_name():
+    assert (
+        manifest_builder.get_base_species_name("Streptococcus mitis")
+        == "Streptococcus mitis"
+    )
+    assert (
+        manifest_builder.get_base_species_name("Haemophilus_D parainfluenzae_Y")
+        == "Haemophilus_D parainfluenzae"
+    )
+    assert (
+        manifest_builder.get_base_species_name("Aerococcus urinae_E")
+        == "Aerococcus urinae"
+    )
+    assert (
+        manifest_builder.get_base_species_name("Haemophilus_D sp015255025")
+        == "Haemophilus_D sp015255025"
+    )
+
+
 def test_select_extra_species():
     df = pd.DataFrame(
         {
