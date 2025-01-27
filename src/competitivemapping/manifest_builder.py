@@ -141,7 +141,6 @@ def make_manifest(
         .str[-1]
         .str.replace("_genomic.fna.gz", "")
     )
-    sylph_accessions = sylph_df["accession"].tolist()
 
     def get_genome_paths(dir_path):
         """Produce df of genome paths for given directory.
@@ -190,10 +189,18 @@ def make_manifest(
         lambda x: select_taxa_level(x, "s__").replace("s__", "")
     )
 
+    sylph_df = sylph_df.merge(
+        metadata_df[["accession", "species"]], on="accession", how="left"
+    )
+    # want to depuplicate by species, to avoid multiple refs for same species
+    # Rely on fact that sylph reports are ordered
+    sylph_df = sylph_df.drop_duplicates(subset="species", keep="first")
+    accessions_to_use = sylph_df["accession"].tolist()
+
     if include_whole_genus:
         # Extend accessions to include genomes from rest of the genus(/genera)
         sylph_metadata_df = metadata_df[
-            metadata_df["accession"].isin(sylph_accessions)
+            metadata_df["accession"].isin(accessions_to_use)
         ].copy()
 
         sylph_species = sylph_metadata_df["species"].unique().tolist()
@@ -205,12 +212,10 @@ def make_manifest(
         potential_genomes = select_extra_species(sylph_species, potential_genomes)
 
         # Now add these to the accessions
-        accessions = sylph_accessions + potential_genomes["accession"].tolist()
-    else:
-        accessions = sylph_accessions
+        accessions_to_use += potential_genomes["accession"].tolist()
 
     # Now look up the genome paths
-    selected_df = genome_paths[genome_paths["accession"].isin(accessions)]
+    selected_df = genome_paths[genome_paths["accession"].isin(accessions_to_use)]
 
     # Cat all genomes into a single file
     with open(manifest_file, "wb") as outfile:
