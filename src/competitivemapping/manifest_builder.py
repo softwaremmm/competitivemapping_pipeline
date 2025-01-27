@@ -45,6 +45,23 @@ def get_base_species_name(species: str) -> str:
     return re.sub(r"_[A-Z]+$", "", species)
 
 
+def select_close_genera(genera_list: list[str]) -> set[str]:
+    """Add extra genera to the list if certain genera are present. Like Escherichia and Shigella
+
+    Args:
+        genera_list (list[str]): List of genera found in the sylph report
+
+    Returns:
+        set[str]: Set of genera to include
+    """
+    new_list = genera_list.copy()
+    for group in [["Escherichia", "Shigella"]]:
+        if any(genus in genera_list for genus in group):
+            new_list.extend(group)
+    # remove duplicates
+    return set(new_list)
+
+
 def select_extra_species(
     sylph_species: list[str], potential_species_df: pd.DataFrame
 ) -> pd.DataFrame:
@@ -179,13 +196,9 @@ def make_manifest(
             metadata_df["accession"].isin(sylph_accessions)
         ].copy()
 
-        sylph_species = (
-            metadata_df[metadata_df["accession"].isin(sylph_accessions)]["species"]
-            .unique()
-            .tolist()
-        )
+        sylph_species = sylph_metadata_df["species"].unique().tolist()
 
-        found_genera = sylph_metadata_df["genus"].unique()
+        found_genera = select_close_genera(sylph_metadata_df["genus"].unique().tolist())
 
         potential_genomes = metadata_df[metadata_df["genus"].isin(found_genera)].copy()
 
