@@ -52,9 +52,9 @@ Run the pipeline
 nextflow run . --input_dir $PATH --manifest $PATH_TO_MANIFEST_FILE --species_list $PATH_TO_SPECIES_LIST_FILE --seq_platform $SEQ_PLATFORM
 ```
 
-where $PATH is the path to a folder that contains a pair of FASTQ.GZ files following a *{1,2}.f*q.gz regex convention,
-$PATH_TO_MANIFEST_FILE is the path to a manifest file containing a list of target contigs and $PATH_TO_SPECIES_LIST_FILE is the path to a species list file where contig rnames are mapped to genomes. Those paths do not need to be absolute paths.
-$SEQ_PLATFORM should be 'ont' or 'illumina' depending on platform used.
+where `$PATH` is the path to a folder that contains a pair of FASTQ.GZ files following a *{1,2}.f*q.gz regex convention,
+`$PATH_TO_MANIFEST_FILE` is the path to a manifest file containing a list of target contigs and `$PATH_TO_SPECIES_LIST_FILE` is the path to a species list file where contig rnames are mapped to genomes. Those paths do not need to be absolute paths.
+`$SEQ_PLATFORM` should be 'ont' or 'illumina' depending on platform used.
 
 
 ### Running Tests
