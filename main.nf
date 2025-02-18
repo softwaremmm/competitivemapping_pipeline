@@ -99,9 +99,7 @@ workflow {
             .ifEmpty { error("cannot find any reads matching ${params.input_paired_suffix} in ${params.input_dir}") }
     }
 
-    manifest = Channel.fromPath(params.manifest, checkIfExists: true)
-    species_list = Channel.fromPath(params.species_list, checkIfExists: true)
-    competitive_mapping(input_files, manifest, species_list, params.seq_platform)
+    competitive_mapping(input_files, params.manifest, params.species_list, params.seq_platform)
 }
 
 
