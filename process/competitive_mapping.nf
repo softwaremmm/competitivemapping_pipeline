@@ -1,4 +1,5 @@
 process competitiveMapping {
+    publishDir "results", enabled: true, saveAs: { filename -> sample_name + "_" + filename }
     container {
         params.test_container_cm == "" ? 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:7789cae' : params.test_container_cm
     }
