@@ -100,8 +100,6 @@ workflow {
             .ifEmpty { error("cannot find any reads matching ${params.input_paired_suffix} in ${params.input_dir}") }
     }
 
-    input_files.view()
-
     manifest = Channel.fromPath(params.manifest, checkIfExists: true)
     species_list = Channel.fromPath(params.species_list, checkIfExists: true)
     competitive_mapping(input_files, manifest, species_list, params.seq_platform)
@@ -120,8 +118,6 @@ workflow competitive_mapping {
     check_seq_platform(seq_platform)
 
     competitive_mapping_output = competitiveMapping(input_files, manifest, species_list, seq_platform)
-    threshold = seq_platform == 'illumina' ? params.illumina_threshold : params.ont_threshold
-    has_enough_reads(competitive_mapping_output.cm_report, threshold)
 
     emit:
     cm_tb_reads = competitive_mapping_output.cm_tb_reads
