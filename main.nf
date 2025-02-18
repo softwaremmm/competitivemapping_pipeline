@@ -98,7 +98,6 @@ workflow {
                 size: -1
             )
             .ifEmpty { error("cannot find any reads matching ${params.input_paired_suffix} in ${params.input_dir}") }
-            .first()
     }
 
     input_files.view()
