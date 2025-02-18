@@ -1,11 +1,16 @@
 process competitiveMapping {
     publishDir "results", enabled: true, saveAs: { filename -> sample_name + "_" + filename }
+
+    errorStrategy { sleep(Math.pow(2, task.attempt) * 60 as long); return 'retry' } //seconds
+    maxRetries 3
+    maxForks 15
+
     container {
         params.test_container_cm == "" ? 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:7789cae' : params.test_container_cm
     }
 
     cpus 4
-    memory = "16GB"
+    memory { 16.GB * (0.8 + (task.attempt/5)) }
 
     debug true
     pod label: "name", value: "competitive_mapping_pipeline:competitiveMapping"
