@@ -1,7 +1,6 @@
 #!/usr/bin/env nextflow
 include { competitiveMapping } from './process/competitive_mapping.nf'
 include { dynamicCompetitiveMapping } from './process/competitive_mapping.nf'
-include { has_enough_reads } from './process/competitive_mapping.nf'
 
 //Define parameters
 params.help = ''
@@ -123,7 +122,6 @@ workflow competitive_mapping {
     cm_tb_reads = competitive_mapping_output.cm_tb_reads
     cm_report = competitive_mapping_output.cm_report
     cm_csv = competitive_mapping_output.cm_csv
-    cm_enough_reads = has_enough_reads.out
 }
 
 workflow dynamic_competitive_mapping {
