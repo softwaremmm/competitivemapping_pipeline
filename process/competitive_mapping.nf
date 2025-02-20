@@ -5,11 +5,8 @@ process competitiveMapping {
     }
 
     cpus 4
-    memory {
-        params.testing == "" ? { 12.GB + (36.GB * (task.attempts - 1)) } : "16GB"
-    }
+    memory { 12.GB + (4.GB * task.attempt) }
 
-    debug true
     pod label: "name", value: "competitive_mapping_pipeline:competitiveMapping"
     pod label: "sample_id", value: "${params.sample_id}"
     pod label: "run_id", value: "${params.run_id}"
