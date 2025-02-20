@@ -1,4 +1,5 @@
 process competitiveMapping {
+    publishDir "${params.publish_dir}", enabled: params.publish_dir != "", mode: "copy", saveAs: { filename -> sample_name + "_" + filename }
     container {
         params.test_container_cm == "" ? 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:7789cae' : params.test_container_cm
     }
@@ -56,6 +57,7 @@ process competitiveMapping {
 }
 
 process dynamicCompetitiveMapping {
+    publishDir "${params.publish_dir}", enabled: params.publish_dir != "", mode: "copy", saveAs: { filename -> sample_name + "_" + filename }
     container {
         params.test_container_cm == "" ? 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:7789cae' : params.test_container_cm
     }
