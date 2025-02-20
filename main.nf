@@ -3,12 +3,12 @@ include { competitiveMapping } from './process/competitive_mapping.nf'
 include { dynamicCompetitiveMapping } from './process/competitive_mapping.nf'
 include { has_enough_reads } from './process/competitive_mapping.nf'
 
-//Define parameters
-params.help = ''
+// input parameters
 params.input_dir = ''
 params.manifest = ''
 params.seq_platform = ''
 
+// default thresholds
 params.illumina_threshold = 100000
 params.ont_threshold = 1000
 params.use_whole_genera_in_dynamic_cm = true
@@ -25,19 +25,19 @@ workflow {
     if (params.help) {
         log.info(
             '''
-                ========================================================================
-                Competitive Mapping
+            ========================================================================
+            Competitive Mapping
 
-                Determination of species by Competitive Mapping using minimap2.
+            Determination of species by Competitive Mapping using minimap2.
 
-                Parameters:
-                ------------------------------------------------------------------------
+            Parameters:
+            ------------------------------------------------------------------------
 
-                --input_dir  Directory holding the fastq files *_{1,2}.fastq.gz
-                --manifest
-                --species_list
-                --seq_platform
-                '''.stripIndent()
+            --input_dir  Directory holding the fastq files *_{1,2}.fastq.gz
+            --manifest
+            --species_list
+            --seq_platform
+            '''.stripIndent()
         )
         exit(0)
     }
@@ -87,7 +87,6 @@ workflow {
             .fromPath("${params.input_dir}/${params.input_single_suffix}", checkIfExists: true)
             .ifEmpty { error("cannot find any reads matching ${params.input_single_suffix} in ${params.input_dir}") }
             .map { it -> tuple(it.simpleName, it) }
-            .first()
     }
     else if (params.seq_platform == 'illumina') {
         input_files = Channel
@@ -98,13 +97,14 @@ workflow {
                 size: -1
             )
             .ifEmpty { error("cannot find any reads matching ${params.input_paired_suffix} in ${params.input_dir}") }
-            .first()
     }
 
-    input_files.view()
+    // Show first 3 in channel so user can check if they are correct
+    input_files.take(3).view()
 
-    manifest = Channel.fromPath(params.manifest, checkIfExists: true)
-    species_list = Channel.fromPath(params.species_list, checkIfExists: true)
+    // Using fromPath means they can be provided as relative paths
+    manifest = Channel.fromPath(params.manifest, checkIfExists: true).first()
+    species_list = Channel.fromPath(params.species_list, checkIfExists: true).first()
     competitive_mapping(input_files, manifest, species_list, params.seq_platform)
 }
 

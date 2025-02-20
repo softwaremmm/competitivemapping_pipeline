@@ -24,6 +24,7 @@ data/manifest/manifest_20231001
 !test_data/**
 tests/test_outputs/*
 !tests/test_outputs/.gitkeep
+results/
 
 # Linter
 !.groovylintrc.json
