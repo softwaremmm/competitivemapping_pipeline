@@ -10,6 +10,7 @@
 - Move competitive mapping into python controlled code
 - Move to gitflow system, this includes a system for building commit hash based releases on PR to develop
 - Use nextflow language server style
+- improve local running options by adding publish_dir, simpler configs and examples
 
 ### Fix
 - species comparison reports are now rounded to 4 sig fig
@@ -25,6 +26,7 @@
 ### Other
 - Added folder with metadata, readme, and scripts about the myco manifest
 - added notes on the bam to fastq step as it has some confusing details
+
 
 ## 1.3.1 (2024-08-23)
 
