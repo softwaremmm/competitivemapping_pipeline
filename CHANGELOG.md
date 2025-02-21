@@ -1,3 +1,31 @@
+## 2.0.0 (2025-02-12)
+
+### Feat
+- Dynamic competitive mapping. This system uses sylph output report to select references (gzipped fastas) from a directory to create a manifest on-the-fly
+- Calculate coverage and meandepth both without and without secondary reads
+- Helper scripts for downloading from NCBI and making manifest manually
+- Produce a csv as well as json comparison report
+
+### Refactor
+- Move competitive mapping into python controlled code
+- Move to gitflow system, this includes a system for building commit hash based releases on PR to develop
+- Use nextflow language server style
+
+### Fix
+- species comparison reports are now rounded to 4 sig fig
+- remove cm_error channel as not used
+- Output details for all references in manifest, even if no reads mapped to them
+- Change cpu from 8 to 4. Make memory a steep ramp up starting from 12G
+- Run pytest within docker container
+- better clean up for CI test workflow
+- added standard pre-commits
+- use a conda env.yml
+- rename test container and param to "test_container_cm"
+
+### Other
+- Added folder with metadata, readme, and scripts about the myco manifest
+- added notes on the bam to fastq step as it has some confusing details
+
 ## 1.3.1 (2024-08-23)
 
 ### Fix
