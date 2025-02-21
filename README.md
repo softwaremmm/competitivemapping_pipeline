@@ -19,9 +19,9 @@ Competitive mapping uses minimap2 to map reads against manifest (multifasta of r
 * Nextflow
 
 ### Needed data
-* manifest should be at path: `$projectDir/data/manifest/manifest_20231001`. See [extra readme](data/manifest/README.md) for details about manifest.
+* you will need to download manifest to: `$projectDir/data/manifest/manifest_20231001`. See [extra readme](data/manifest/README.md) for details about manifest.
 * species list is provided at `$projectDir/test_data/species_list_manifest_20240710.csv`
-* (for sylph approach) should have GTDB representative genomes at path: `$projectDir/data/sylph/gtdb_genomes_reps_r220`. Can be found [here](https://data.ace.uq.edu.au/public/gtdb/data/releases/release220/220.0/genomic_files_reps/)
+* (for sylph) should have GTDB representative genomes at path: `$projectDir/data/sylph/gtdb_genomes_reps_r220`. Can be found [here](https://data.ace.uq.edu.au/public/gtdb/data/releases/release220/220.0/genomic_files_reps/)
 
 These can all be found in the (dev) knowledge bucket.
 
@@ -42,19 +42,34 @@ The result of this is that reads are only converted to fastq if
 
 In the future we could change this to out put a read pair as long as **either** read in a pair map to h37rv.
 
-## Nextflow
+## Running Nextflow
+The workflow takes the following inputs
+- input_dir. Path to directory containing input fastq files
+- seq_platform. `illumina` or `ont`.
+- manifest. Path to manifest file
+- species_list. Patht to species list file which has the contig to genome mapping
 
-### Run Locally
+When running locally can save outputs by using `--publish_dir`.
 
-Run the pipeline
-
+Example using test data:
 ```bash
-nextflow run . --input_dir $PATH --manifest $PATH_TO_MANIFEST_FILE --species_list $PATH_TO_SPECIES_LIST_FILE --seq_platform $SEQ_PLATFORM
+nextflow run . \
+		--seq_platform illumina \
+		--input_dir test_data/chloro_10k \
+		--manifest data/manifest/manifest_20231001 \
+		--species_list test_data/species_list_manifest_20240710.csv \
+    --publish_dir results
 ```
 
-where $PATH is the path to a folder that contains a pair of FASTQ.GZ files following a *{1,2}.f*q.gz regex convention,
-$PATH_TO_MANIFEST_FILE is the path to a manifest file containing a list of target contigs and $PATH_TO_SPECIES_LIST_FILE is the path to a species list file where contig rnames are mapped to genomes. Those paths do not need to be absolute paths.
-$SEQ_PLATFORM should be 'ont' or 'illumina' depending on platform used.
+
+By default it will look for files in the input directory based on the following params:
+- `params.input_paired_suffix = "*_{1,2}.fastq.gz"`
+- `params.input_single_suffix = "*.fastq.gz"`
+
+but these can be overriden. e.g.
+```
+nextflow run ... --input_paired_suffix "tb_sample*_{1,2}.fna.gz"
+```
 
 
 ### Running Tests

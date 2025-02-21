@@ -1,14 +1,12 @@
 process competitiveMapping {
+    publishDir "${params.publish_dir}", enabled: params.publish_dir != "", mode: "copy", saveAs: { filename -> sample_name + "_" + filename }
     container {
         params.test_container_cm == "" ? 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:7789cae' : params.test_container_cm
     }
 
     cpus 4
-    memory {
-        params.testing == "" ? { 12.GB + (36.GB * (task.attempts - 1)) } : "16GB"
-    }
+    memory { 12.GB + (4.GB * task.attempt) }
 
-    debug true
     pod label: "name", value: "competitive_mapping_pipeline:competitiveMapping"
     pod label: "sample_id", value: "${params.sample_id}"
     pod label: "run_id", value: "${params.run_id}"
@@ -56,6 +54,7 @@ process competitiveMapping {
 }
 
 process dynamicCompetitiveMapping {
+    publishDir "${params.publish_dir}", enabled: params.publish_dir != "", mode: "copy", saveAs: { filename -> sample_name + "_" + filename }
     container {
         params.test_container_cm == "" ? 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:7789cae' : params.test_container_cm
     }
