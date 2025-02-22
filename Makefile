@@ -15,7 +15,7 @@ test-run:
 
 run:
 	nextflow run . \
-		--input_dir "/mnt/volume_1/input_competitive_mapping" \
+		--input_dir "/mnt/volume_1/input_competitive_mapping_taxid_0" \
 		--manifest "/mnt/volume_1/knowledge/manifest/manifest_20231001" \
 		--species_list "/mnt/volume_1/knowledge/manifest/species_list_manifest_20240710.csv" \
 		--seq_platform "illumina" \
