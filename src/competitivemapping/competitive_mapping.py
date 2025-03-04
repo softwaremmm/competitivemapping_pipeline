@@ -273,15 +273,6 @@ def run_competitive_mapping(
     # As samtools coverage actually counts alignments
     df["numreads"] = df["primary_reads"] + df["supplementary_reads"]
 
-    for col in (
-        "coverage",
-        "meandepth",
-        "coverage_including_secondary",
-        "meandepth_including_secondary",
-    ):
-        if col in df.columns:
-            df[col] = df[col].apply(lambda x: float(f"{x:.4g}"))
-
     df = df[FINAL_COLUMNS].copy()
 
     # add final row with unmapped read count
