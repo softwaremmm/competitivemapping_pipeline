@@ -52,10 +52,10 @@ def test_cli_entry_point(
             check_length(output_root + "reads_1.fastq.gz", 2736)
             check_length(output_root + "reads_2.fastq.gz", 2736)
         case "tb_10k":
-            check_length(output_root + "reads_1.fastq.gz", 9648)
-            check_length(output_root + "reads_2.fastq.gz", 9648)
+            check_length(output_root + "reads_1.fastq.gz", 9711)
+            check_length(output_root + "reads_2.fastq.gz", 9711)
         case "tb_ont":
-            check_length(output_root + "reads.fastq.gz", 1042)
+            check_length(output_root + "reads.fastq.gz", 998)
 
 
 def test_empty_manifest(empty_sylph, test_outputs_dir, mocker):
@@ -159,10 +159,10 @@ def test_sylph_manifest(
             check_length(output_root + "reads_1.fastq.gz", 14)
             check_length(output_root + "reads_2.fastq.gz", 14)
         case "tb_10k":
-            check_length(output_root + "reads_1.fastq.gz", 9940)
-            check_length(output_root + "reads_2.fastq.gz", 9940)
+            check_length(output_root + "reads_1.fastq.gz", 10000)
+            check_length(output_root + "reads_2.fastq.gz", 10000)
         case "tb_ont":
-            check_length(output_root + "reads.fastq.gz", 1044)
+            check_length(output_root + "reads.fastq.gz", 1000)
 
 
 def test_sylph_manifest_all_genera(

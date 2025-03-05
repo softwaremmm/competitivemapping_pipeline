@@ -1,6 +1,7 @@
 # pylint: disable=too-many-arguments
 # pylint: disable=too-many-positional-arguments
 # pylint: disable=too-many-locals
+# pylint: disable=logging-fstring-interpolation
 """Run Competitive Mapping against manifest and aggregate the results"""
 
 import argparse
@@ -185,6 +186,7 @@ def output_fastqs(
     rnames = contigs_df[contigs_df["reference"] == reference]["rname"].tolist()
     if include_unmapped:
         rnames.append('"*"')
+    logging.info("Extracting reads for reference {reference} using rnames: {rnames}")
 
     sorted_ref_bam = f"{output_root}output_aln.bam"
 
@@ -196,8 +198,10 @@ def output_fastqs(
     )
     # In future could add flag -P to always include read pairs
     # But note that this fails to fetch the pair for supplementary alignments
+    command = f"samtools view -h {aln_bam} -u {' '.join(rnames)} | samtools sort -n -@ {cpus} -o {sorted_ref_bam}"
+    logging.info("Running command: %s", command)
     subprocess.run(
-        f"samtools view {aln_bam} -u {' '.join(rnames)} | samtools sort -@ {cpus} -o {sorted_ref_bam}",
+        command,
         shell=True,
         check=True,
         stdout=subprocess.PIPE,
@@ -219,6 +223,7 @@ def output_fastqs(
             f"-1 {output_root}reads_1.fastq.gz -2 {output_root}reads_2.fastq.gz"
             f" -0 /dev/null -s /dev/null {sorted_ref_bam}"
         )
+    logging.info("Running command: %s", command)
     subprocess.run(command, shell=True, check=True, stdout=subprocess.PIPE)
 
 
@@ -272,15 +277,6 @@ def run_competitive_mapping(
     # Can update numreads to actually reflect reads
     # As samtools coverage actually counts alignments
     df["numreads"] = df["primary_reads"] + df["supplementary_reads"]
-
-    for col in (
-        "coverage",
-        "meandepth",
-        "coverage_including_secondary",
-        "meandepth_including_secondary",
-    ):
-        if col in df.columns:
-            df[col] = df[col].apply(lambda x: float(f"{x:.4g}"))
 
     df = df[FINAL_COLUMNS].copy()
 
