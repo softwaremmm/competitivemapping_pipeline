@@ -209,7 +209,7 @@ def output_fastqs(
             stdout=subprocess.PIPE,
         )
 
-    command = f"samtools merge -o {sorted_ref_bam} {' '.join([f'{output_root}.{i}.bam' for i in range(len(rnames))])}"
+    command = f"samtools merge -fo {sorted_ref_bam} {' '.join([f'{output_root}.{i}.bam' for i in range(len(rnames))])}"
     logging.info("Running command: %s", command)
     subprocess.run(
         command,

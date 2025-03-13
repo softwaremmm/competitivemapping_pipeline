@@ -1,5 +1,6 @@
 import os
 from gzip import open as gzopen
+import hashlib
 
 from Bio import SeqIO
 from test_utils import check_file
@@ -47,10 +48,26 @@ def test_cli_entry_point(
     def check_length(path, length):
         assert len(list(SeqIO.parse(gzopen(path, "rt"), format="fastq"))) == length
 
+    def check_order(path, hash_expected):
+        read_names = [
+            record.id for record in SeqIO.parse(gzopen(path, "rt"), format="fastq")
+        ]
+        print(",".join(read_names))
+        read_hash = hashlib.sha256(",".join(read_names).encode()).hexdigest()
+        assert read_hash == hash_expected
+
     match samples["sample"]:
         case "chloro_10k":
             check_length(output_root + "reads_1.fastq.gz", 2736)
             check_length(output_root + "reads_2.fastq.gz", 2736)
+            check_order(
+                output_root + "reads_1.fastq.gz",
+                "729a5634addf363b4848f38ffc1bc9a9edbd10538b45669a7ac2719a6e2d61c2",
+            )
+            check_order(
+                output_root + "reads_2.fastq.gz",
+                "729a5634addf363b4848f38ffc1bc9a9edbd10538b45669a7ac2719a6e2d61c2",
+            )
         case "tb_10k":
             check_length(output_root + "reads_1.fastq.gz", 9711)
             check_length(output_root + "reads_2.fastq.gz", 9711)
