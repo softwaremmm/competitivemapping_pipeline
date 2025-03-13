@@ -196,9 +196,20 @@ def output_fastqs(
         check=True,
         stdout=subprocess.PIPE,
     )
-    # In future could add flag -P to always include read pairs
-    # But note that this fails to fetch the pair for supplementary alignments
-    command = f"samtools view -h {aln_bam} -u {' '.join(rnames)} | samtools sort -n -@ {cpus} -o {sorted_ref_bam}"
+
+    for i, rname in enumerate(rnames):
+        # In future could add flag -P to always include read pairs
+        # But note that this fails to fetch the pair for supplementary alignments
+        command = f"samtools view -h {aln_bam} -u {rname} | samtools sort -n -@ {cpus} -o {output_root}.{i}.bam"
+        logging.info("Running command: %s", command)
+        subprocess.run(
+            command,
+            shell=True,
+            check=True,
+            stdout=subprocess.PIPE,
+        )
+
+    command = f"samtools merge -fo {sorted_ref_bam} {' '.join([f'{output_root}.{i}.bam' for i in range(len(rnames))])}"
     logging.info("Running command: %s", command)
     subprocess.run(
         command,
