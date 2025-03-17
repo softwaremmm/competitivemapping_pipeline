@@ -13,7 +13,6 @@
 - improve local running options by adding publish_dir, simpler configs and examples
 
 ### Fix
-- species comparison reports are now rounded to 4 sig fig
 - remove cm_error channel as not used
 - Output details for all references in manifest, even if no reads mapped to them
 - Change cpu from 8 to 4. Make memory a steep ramp up starting from 12G
