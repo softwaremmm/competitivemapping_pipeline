@@ -1,138 +1,123 @@
-
 # Competitive Mapping Pipeline
 
-Competitive Mapping is an algorithm that compares the sample reads with the references in the manifest and makes a positive selection of the reads matching a specific `rname`. 
+Competitive Mapping is an algorithm that compares the sample reads with the references in the manifest and makes a positive selection of the reads matching a specific `rname`.
 
-The pipeline for competitive mapping takes a pair of FASTQ files and outputs the positive filtering of the h37_rv reads (i.e. those reads that are judged to map to the *Mycobacterium tuberculosis* H37RV reference genome) along with unmapped reads, a report with the mapping rank (a list of species in the manifest to which reads have mapped `competitivemapping_report.json`) and an error report (the concatenated standard error output from the minimap and samtools tools `competitivemapping_error.json` - the contents are not in JSON format).
+The pipeline for competitive mapping takes a pair of FASTQ files and outputs the positive filtering of the h37_rv reads (i.e. those reads that are judged to map to the *Mycobacterium tuberculosis* H37RV reference genome) along with unmapped reads, a report with the mapping rank (a list of species in the manifest to which reads have mapped `competitivemapping_report.json`).
 
 ## Overview
-Competitive mapping uses minimap2 to map reads against manifest (collection of mycobacteria genomes). Samtools coverage is used to get coverage stats against all references. The python script `process_mapping` produces a summary json from this and deals with multi-chromosome references.
-Optionally the script `process_aln_stats` can be run to produce more detailed summary of read alignments. The output can be provided as a parameter to `process_mapping` to be included in the summary json.
+Competitive mapping uses minimap2 to map reads against manifest (multifasta of reference genomes). A species list file is required to match contigs to `rname`'s. This is coordinated by `competitive_mapping.py` which does:
+- (Optional) create manifest if using sylph report as input
+- Map reads against manifest with minimap2
+- Run samtools coverage and aggregate results with `process_coverage.py`
+- Calculate alignment stats from bam file use `process_aln_stats.py`
+- Produce overall csv and report json
 
-## Conventional Commits
-Use [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) when developing for this repo.
-You should install the pre-commit hooks to check your commit messages. This can be done using the tool `pre-commit` which is a dev dependency in the `pyproject.toml`.
-You can also use `commitizen` (another dev dependency) to help with writing conventional commits.
 
-To install hooks run
-```bash
-pre-commit install --hook-type commit-msg
-pre-commit install # to get other hooks for formatting etc
-```
-
-To make commit with commitizen run
-```bash
-cz c
-```
-
-## Tags and Releases
-
-[Commitizen](https://commitizen-tools.github.io/commitizen/) is used to manage versioning of releases. This tool
-can be used to make commits to this repository. Regardless, [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) 
-are required to ensure correct version numbering and changelog population.
-
-**Do not add tags by hand.**
-
-On merging a Pull Request a [GitHub action will run](.github/workflows/version.yaml), causing Commitizen to:
-* Determine the new [semver](https://semver.org/) based on conventional commits.
-* Replace the previous semver in [pyproject.toml](pyproject.toml) and other files as specified therein.
-* Update the [CHANGELOG](CHANGELOG.md) based on commit messages.
-* Commit these changes to the `main` branch.
-* Create a tag for this commit with the tag name of the newly determined semver.
-* Build a docker container for this new tag
-* Create a new release from this tag.
-
-There is a workflow for manually triggering a docker build action.
-This shouldn't be required unless something has gone wrong with the commitizen action.
-
-## Nextflow
 
 ### Dependencies
 * Docker
-* 1G hard-disk 
 * Nextflow
 
-### Run Locally
+### Needed data
+* you will need to download manifest to: `$projectDir/data/manifest/manifest_20231001`. See [extra readme](data/manifest/README.md) for details about manifest.
+* species list is provided at `$projectDir/test_data/species_list_manifest_20240710.csv`
+* (for sylph) should have GTDB representative genomes at path: `$projectDir/data/sylph/gtdb_genomes_reps_r220`. Can be found [here](https://data.ace.uq.edu.au/public/gtdb/data/releases/release220/220.0/genomic_files_reps/)
 
-Clone the project
+These can all be found in the (dev) knowledge bucket.
 
+## Notes on Bam to Fastq
+One step in competitive mapping is to filter the bam file (created by mapping against manifest) for tb reads and unmapped reads, and extracting these to a fastq file. This is complex for paired reads!! And so leads to seeming discrepencies with the `species_comparison_report.json`
+
+Steps:
+* filter bam file for reads mapping to h37rv or "\*".
+  - "\*" is used for unmapped reads, but only when both reads in a pair are unmapped (as far as Matthew can see from minimap2 outputs).
+  - Reads which are unmapped but have a mapped pair will list rname to match the pair, but have the sam flag set for being unmapped.
+* `samtools fastq` is used with:
+  - `--excl-flags 0x100` which excludes secondary reads
+  - `-s /dev/null` to exclude singleton reads, so that the resulting fastq files are properly paired.
+
+The result of this is that reads are only converted to fastq if
+1. Both in a pair are unmapped
+2. Both in a pair have a primary or supplementary mapping to h37rv
+
+In the future we could change this to out put a read pair as long as **either** read in a pair map to h37rv.
+
+## Running Nextflow
+The workflow takes the following inputs
+- input_dir. Path to directory containing input fastq files
+- seq_platform. `illumina` or `ont`.
+- manifest. Path to manifest file
+- species_list. Patht to species list file which has the contig to genome mapping
+
+When running locally can save outputs by using `--publish_dir`.
+
+Example using test data:
 ```bash
-  git clone git@github.com:GlobalPathogenAnalysisService/competitivemapping_pipeline.git
+nextflow run . \
+		--seq_platform illumina \
+		--input_dir test_data/chloro_10k \
+		--manifest data/manifest/manifest_20231001 \
+		--species_list test_data/species_list_manifest_20240710.csv \
+    --publish_dir results
 ```
 
-Go to the project directory
 
-```bash
-  cd competitivemapping_pipeline
+By default it will look for files in the input directory based on the following params:
+- `params.input_paired_suffix = "*_{1,2}.fastq.gz"`
+- `params.input_single_suffix = "*.fastq.gz"`
 
+but these can be overriden. e.g.
+```
+nextflow run ... --input_paired_suffix "tb_sample*_{1,2}.fna.gz"
 ```
 
-Run the pipeline
-
-```bash
-  nextflow run . --input_dir $PATH --manifest $PATH_TO_MANIFEST_FILE --species_list $PATH_TO_SPECIES_LIST_FILE --seq_platform $SEQ_PLATFORM
-```
-
-where $PATH is the path to a folder that contains a pair of FAST.GZ files following a *{1,2}.f*q.gz regex convention, 
-$PATH_TO_MANIFEST_FILE is the path to a manifest file containing a list of target contigs and $PATH_TO_SPECIES_LIST_FILE is the path to a species list file where contig rnames are mapped to genomes. Those paths do not need to be absolute paths.
-$SEQ_PLATFORM should be 'ont' or 'illumina' depending on platform used.
-
-Manifest and species list can be found in a [bucket on OCI](https://cloud.oracle.com/object-storage/buckets/lrbvkel2wjot/dev-relatedness/objects?region=uk-london-1).
 
 ### Running Tests
-The tests are executed using [nf-test](https://github.com/askimed/nf-test). 
+The tests are executed using [nf-test](https://github.com/askimed/nf-test).
 
-Before running the tests, you will need to ensure appropriate test data is available by setting up the following symlinks in
-the root of the repository:
-
-* `data/manifest/manifest_20231001` - a manifest (reference data)
+Before running the tests check that you have [needed data](#needed-data).
 
 To run tests, run the following command
 
 ```bash
- nf-test test tests/nextflow/*.test
+nf-test test tests/nextflow/*.test
 ```
 
-_A copy of a species list file is [included in this repository](test_data/species_list_manifest_20231001.csv) for convenience when running the tests, as well as small test fastqs for both TB and NTM._
-
-### Screenshots
-
-Expected output:
-![output](https://github.com/GlobalPathogenAnalysisService/competitivemapping_pipeline/assets/65816841/b43b60f9-87c9-417a-b11c-67ef9c491f2d)
-
+If you have made changes to the python code, you may need to build a local test container:
+```bash
+docker build -t test_container_cm .
+nf-test test tests/nextflow/*.test --profile local_docker
+```
 
 ## Python
 
-A Python package that processes the output from command line tools orchestrated by NextFlow is included in this repository. For normal
-use it doesn't need to be installed by the user, instructions here are for testing and development. 
+A Python package that processes the output from command line tools orchestrated by NextFlow is included in this repository. This gets installed in the docker image used by nextflow.
 
 ### Installation
 
 Clone the repo as described above. Create a virtual environment and install the package using `pip install -e .[dev]`. Set up pre-commit
 with `pre-commit install`.
 
+
 ### Execution
 
-Use `process_mapping --help` to get CLI options for running the Python code seperately from NextFlow. Files are included in the repo for
-testing e.g.
+Each python module can be run individually. Check arguments with `--help`, e.g. `process_coverage --help` .
 
+### Testing
+The tests take 3 minutes as they include running the full process of mapping reads as well.
 ```
-process_mapping --coverage test_data/cov_WTCHG_885333_73205296.tsv --species_list test_data/species_list_manifest_20231001.csv
+pytest tests/
 ```
 
 ### Outputs
 
 The output from the Python CLI is
-validated against a [JSON Schema](src/competitivemapping/competitivemapping.schema.json). [Documentation for the schema](schema_doc.md) 
+validated against a [JSON Schema](src/competitivemapping/competitivemapping.schema.json). [Documentation for the schema](schema_doc.md)
 can be built / updated using:
 
 ```
 generate-schema-doc src/competitivemapping/competitivemapping.schema.json --config template_name=md
 ```
-
-### Tests
-
-Tests are written in `pytest`. New code should be covered by tests.
 
 ## Integrating to a pipeline
 
@@ -142,3 +127,24 @@ If you want to use the Competitive Mapping Pipeline as subworkflow in your pipel
 ## Manifest remarks
 There is a reference (AP018410.1 - M.pseudoshottsii) which is in the manifest species list, but not in the manifest itself.
 This will be flagged with a warning when running the code.
+
+
+## Tags, Releases, and Committing
+Use conventional commits. This is enforced with commitizen validate action and pre-commit hooks:
+```bash
+pre-commit install --hook-type commit-msg
+```
+
+This repo uses a standard gitflow approach, but with some changes to deal with docker containers in nextflow:
+- There is a pyproject version which should be updated to match semantic version releases (from main/release branches)
+- There is an `active_version` controlled by version_bumper which allows develop to have commit hash based versions.
+- Every push to develop will cause an action to run `bumper bump <commit-hash> --no-tag --active`. This:
+    - bumps the `active_version` in pyproject.toml
+    - bumps the container tag used by nextflow processes
+    - leaves the pyproject version as is
+
+  Another workflow then builds and pushes the new container.\
+  **Important: To deploy this you will need to use the hash of the bump commit, not the hash of the merge commit/container.**
+
+- In a release branch you can create a release candidate with `bumper bump a.b.c-rcX`. This also updates the pyproject version. Pushing the changes and new tag (automatically created) will trigger a build action.
+- When release branch is ready for main run `bumper bump a.b.c --no-tag`. Push these changes to main and make a release there to build the container.

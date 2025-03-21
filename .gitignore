@@ -10,8 +10,11 @@ trace*.txt
 *.*bam*
 *.*sam*
 *.fasta
-data*
 h37rv_100k*
+
+data/*
+!data/manifest/
+data/manifest/manifest_20231001
 
 # nf-tests
 .nf-test/*
@@ -19,6 +22,9 @@ h37rv_100k*
 
 # tests data
 !test_data/**
+tests/test_outputs/*
+!tests/test_outputs/.gitkeep
+results/
 
 # Linter
 !.groovylintrc.json

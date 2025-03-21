@@ -1,0 +1,3 @@
+species,genome_name,length,numreads,coverage,meandepth,coverage_including_secondary,meandepth_including_secondary,total_reads,total_alns,exclusive_reads,primary_reads,secondary_reads,supplementary_reads,supplementary_alns
+Mycobacterium tuberculosis,GCF_000195955.2,4411532,19858,28.4996,0.676788,29.103,0.731132,19858,21781,19858,19858,0,0,48
+unmapped,unmapped,0,142,0.0,0.0,0.0,0.0,142,0,0,142,0,0,0

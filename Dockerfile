@@ -4,17 +4,19 @@ FROM continuumio/miniconda3
 # Set the working directory within the container
 WORKDIR /app
 
-# Set up bioconda
-RUN conda config --add channels bioconda \
-    && conda config --add channels conda-forge
-
-# Install minimap2
-RUN conda install minimap2~=2.26
-
-# Install samtools
-RUN conda install samtools~=1.17
+# Conda install dependencies
+COPY env.yml /app/env.yml
+RUN conda env update -n base --file env.yml
 
 # Install Python code for processing output of minimap and samtools
 COPY ./src /app/src
 COPY ./pyproject.toml /app/pyproject.toml
-RUN pip install .
+# Set the default value for the TESTING build argument
+ARG TESTING=false
+
+# Install pytest if TESTING is true
+RUN if [ "$TESTING" = "true" ]; then \
+        pip install .[dev]; \
+    else \
+        pip install .; \
+    fi

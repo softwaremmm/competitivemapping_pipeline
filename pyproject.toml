@@ -17,12 +17,15 @@ classifiers = [
     "Programming Language :: Python :: 3",
 ]
 requires-python = "~=3.11"
-version = "1.3.1"
+version = "2.0.0"
 
 [project.scripts]
-process_mapping = "competitivemapping.process_mapping:cli_entry_point"
+process_coverage = "competitivemapping.process_coverage:cli_entry_point"
 process_aln_stats = "competitivemapping.process_aln_stats:cli_entry_point"
 check_read_count = "competitivemapping.check_read_count:cli_entry_point"
+competitive_mapping = "competitivemapping.competitive_mapping:cli_entry_point"
+manifest_builder = "competitivemapping.manifest_builder:cli_entry_point"
+
 
 [project.optional-dependencies]
 dev = [
@@ -36,6 +39,7 @@ dev = [
     "mypy",
     "pandas-stubs",
     "types-jsonschema",
+    "version_bumper @ git+https://github.com/GlobalPathogenAnalysisService/version_bumper.git",
 ]
 docs = ["json-schema-for-humans"]
 
@@ -45,14 +49,17 @@ competitivemapping = ["*.json"]
 [tool.commitizen]
 name = "cz_conventional_commits"
 bump_message = "bump: version $current_version → $new_version"
-update_changelog_on_bump = true
-changelog_incremental = true
+update_changelog_on_bump = false
 version_type = "semver"
 version_provider = "pep621"
 tag_format = "$version"
+
+
+[tool.version_bumper]
+active_version = "2.0.0"
 version_files = [
     "process/competitive_mapping.nf",
-    ".github/workflows/manual_docker.yaml",
+    ".github/workflows/manual_docker.yml",
 ]
 
 [tool.black]
