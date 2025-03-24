@@ -437,6 +437,22 @@
             "supplementary_alns": 0
         },
         {
+            "genome_name": "M.basiliense",
+            "length": 5607630,
+            "numreads": 0,
+            "coverage": 0.0,
+            "meandepth": 0.0,
+            "coverage_including_secondary": 0.0,
+            "meandepth_including_secondary": 0.0,
+            "total_reads": 0,
+            "total_alns": 0,
+            "exclusive_reads": 0,
+            "primary_reads": 0,
+            "secondary_reads": 0,
+            "supplementary_reads": 0,
+            "supplementary_alns": 0
+        },
+        {
             "genome_name": "M.boenickei",
             "length": 6563937,
             "numreads": 0,
@@ -2405,24 +2421,8 @@
             "supplementary_alns": 0
         },
         {
-            "genome_name": "M.saopaolens",
-            "length": 4649175,
-            "numreads": 0,
-            "coverage": 0.0,
-            "meandepth": 0.0,
-            "coverage_including_secondary": 0.0,
-            "meandepth_including_secondary": 0.0,
-            "total_reads": 0,
-            "total_alns": 0,
-            "exclusive_reads": 0,
-            "primary_reads": 0,
-            "secondary_reads": 0,
-            "supplementary_reads": 0,
-            "supplementary_alns": 0
-        },
-        {
             "genome_name": "M.saopaulense",
-            "length": 5607630,
+            "length": 4649175,
             "numreads": 0,
             "coverage": 0.0,
             "meandepth": 0.0,

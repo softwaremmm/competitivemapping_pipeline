@@ -361,6 +361,15 @@
             "meandepth_including_secondary": 0.000549094
         },
         {
+            "genome_name": "M.basiliense",
+            "length": 5607630,
+            "coverage": 0.0,
+            "numreads": 0,
+            "meandepth": 0.0,
+            "coverage_including_secondary": 0.0782684,
+            "meandepth_including_secondary": 0.0016342
+        },
+        {
             "genome_name": "M.boenickei",
             "length": 6563937,
             "coverage": 0.0,
@@ -1369,22 +1378,13 @@
             "meandepth_including_secondary": 0.000412838
         },
         {
-            "genome_name": "M.saopaolens",
+            "genome_name": "M.saopaulense",
             "length": 4649175,
             "coverage": 0.0,
             "numreads": 0,
             "meandepth": 0.0,
             "coverage_including_secondary": 0.0195949,
             "meandepth_including_secondary": 0.000427173
-        },
-        {
-            "genome_name": "M.saopaulense",
-            "length": 5607630,
-            "coverage": 0.0,
-            "numreads": 0,
-            "meandepth": 0.0,
-            "coverage_including_secondary": 0.0782684,
-            "meandepth_including_secondary": 0.0016342
         },
         {
             "genome_name": "M.sarraceniae",

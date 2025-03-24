@@ -9,6 +9,6 @@ run:
 		--seq_platform illumina \
 		--input_dir test_data/chloro_10k \
 		--manifest data/manifest/manifest_20231001 \
-		--species_list test_data/species_list_manifest_20240710.csv \
+		--species_list test_data/species_list_manifest_20250324.csv \
 		--publish_dir results \
 		-resume

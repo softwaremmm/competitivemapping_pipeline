@@ -1504,7 +1504,7 @@
             "meandepth_including_secondary": 0.0048491
         },
         {
-            "genome_name": "M.saopaolens",
+            "genome_name": "M.saopaulense",
             "length": 4649175,
             "coverage": 0.00544183,
             "numreads": 3,
@@ -1558,7 +1558,7 @@
             "meandepth_including_secondary": 0.00948791
         },
         {
-            "genome_name": "M.saopaulense",
+            "genome_name": "M.basiliense",
             "length": 5607630,
             "coverage": 0.00274626,
             "numreads": 3,

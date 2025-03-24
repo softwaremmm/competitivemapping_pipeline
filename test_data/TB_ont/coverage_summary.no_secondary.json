@@ -190,6 +190,13 @@
             "meandepth": 0.0
         },
         {
+            "genome_name": "M.basiliense",
+            "length": 5607630,
+            "coverage": 0.0,
+            "numreads": 0,
+            "meandepth": 0.0
+        },
+        {
             "genome_name": "M.boenickei",
             "length": 6563937,
             "coverage": 0.0,
@@ -1051,15 +1058,8 @@
             "meandepth": 0.0
         },
         {
-            "genome_name": "M.saopaolens",
-            "length": 4649175,
-            "coverage": 0.0,
-            "numreads": 0,
-            "meandepth": 0.0
-        },
-        {
             "genome_name": "M.saopaulense",
-            "length": 5607630,
+            "length": 4649175,
             "coverage": 0.0,
             "numreads": 0,
             "meandepth": 0.0

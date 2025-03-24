@@ -2677,7 +2677,7 @@
             "supplementary_alns": 1
         },
         {
-            "genome_name": "M.saopaolens",
+            "genome_name": "M.saopaulense",
             "length": 4649175,
             "numreads": 3,
             "coverage": 0.00544183,
@@ -2773,7 +2773,7 @@
             "supplementary_alns": 1
         },
         {
-            "genome_name": "M.saopaulense",
+            "genome_name": "M.basiliense",
             "length": 5607630,
             "numreads": 3,
             "coverage": 0.00274626,
