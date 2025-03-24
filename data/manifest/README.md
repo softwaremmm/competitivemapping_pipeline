@@ -21,4 +21,9 @@ Note: manifest is not gzipped for some reason of history
 
 ## metadata
 
-Each reference in the manifest has a ncbi assembly accession and the strain it was sequenced from
+## Errors
+
+In version 20231001 there was a naming issue:
+- saopaulense had the assembly/strains for basiliense
+- saopaolens has the assembly/strains for saopaulense. Indeed saopaolens was likely a typo or older name.
+This was fixed for 20250324
