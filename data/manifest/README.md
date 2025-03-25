@@ -25,7 +25,7 @@ Each reference in the manifest has a ncbi assembly accession and the strain it w
 
 Each species in Mykrobe has a list of assembly accessions used for it.
 
-`combined_metadata.csv` list all the references used by manifest, Mykrobe and Tim Walekr strains.
+`combined_metadata.csv` list all the references used by manifest, Mykrobe and Tim Walker strains.
 Note that some names have been combined where sources use slightly different variants.
 The NCBI names (on the right) have been used.
 - arupense/arupensis
