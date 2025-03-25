@@ -169,13 +169,6 @@
             "meandepth": 0.0
         },
         {
-            "genome_name": "M.algericus",
-            "length": 4619277,
-            "coverage": 0.0,
-            "numreads": 0,
-            "meandepth": 0.0
-        },
-        {
             "genome_name": "M.alkanivorans",
             "length": 4050246,
             "coverage": 0.0,
@@ -283,13 +276,6 @@
         {
             "genome_name": "M.basiliense",
             "length": 5607630,
-            "coverage": 0.0,
-            "numreads": 0,
-            "meandepth": 0.0
-        },
-        {
-            "genome_name": "M.boenickei",
-            "length": 6563937,
             "coverage": 0.0,
             "numreads": 0,
             "meandepth": 0.0
@@ -652,13 +638,6 @@
             "meandepth": 0.0
         },
         {
-            "genome_name": "M.intracellulare_yongonense",
-            "length": 5521023,
-            "coverage": 0.0,
-            "numreads": 0,
-            "meandepth": 0.0
-        },
-        {
             "genome_name": "M.iranicum",
             "length": 6335651,
             "coverage": 0.0,
@@ -869,13 +848,6 @@
             "meandepth": 0.0
         },
         {
-            "genome_name": "M.nivoides",
-            "length": 6905961,
-            "coverage": 0.0,
-            "numreads": 0,
-            "meandepth": 0.0
-        },
-        {
             "genome_name": "M.nonchromogenicus",
             "length": 4465329,
             "coverage": 0.0,
@@ -1023,13 +995,6 @@
             "meandepth": 0.0
         },
         {
-            "genome_name": "M.pseudoshottsii",
-            "length": 6061597,
-            "coverage": 0.0,
-            "numreads": 0,
-            "meandepth": 0.0
-        },
-        {
             "genome_name": "M.psychrotolerans",
             "length": 5732362,
             "coverage": 0.0,
@@ -1102,20 +1067,6 @@
         {
             "genome_name": "M.senegalense",
             "length": 6086722,
-            "coverage": 0.0,
-            "numreads": 0,
-            "meandepth": 0.0
-        },
-        {
-            "genome_name": "M.senriense",
-            "length": 5831451,
-            "coverage": 0.0,
-            "numreads": 0,
-            "meandepth": 0.0
-        },
-        {
-            "genome_name": "M.seoulense",
-            "length": 5531300,
             "coverage": 0.0,
             "numreads": 0,
             "meandepth": 0.0
