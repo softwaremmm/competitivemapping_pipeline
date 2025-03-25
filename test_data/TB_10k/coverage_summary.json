@@ -217,15 +217,6 @@
             "meandepth_including_secondary": 0.000528902
         },
         {
-            "genome_name": "M.algericus",
-            "length": 4619277,
-            "coverage": 0.0,
-            "numreads": 0,
-            "meandepth": 0.0,
-            "coverage_including_secondary": 0.0,
-            "meandepth_including_secondary": 0.0
-        },
-        {
             "genome_name": "M.alkanivorans",
             "length": 4050246,
             "coverage": 0.0,
@@ -361,13 +352,13 @@
             "meandepth_including_secondary": 0.000549094
         },
         {
-            "genome_name": "M.boenickei",
-            "length": 6563937,
+            "genome_name": "M.basiliense",
+            "length": 5607630,
             "coverage": 0.0,
             "numreads": 0,
             "meandepth": 0.0,
-            "coverage_including_secondary": 0.0,
-            "meandepth_including_secondary": 0.0
+            "coverage_including_secondary": 0.0782684,
+            "meandepth_including_secondary": 0.0016342
         },
         {
             "genome_name": "M.bohemicum",
@@ -829,15 +820,6 @@
             "meandepth_including_secondary": 0.0015449300000000001
         },
         {
-            "genome_name": "M.intracellulare_yongonense",
-            "length": 5521023,
-            "coverage": 0.0,
-            "numreads": 0,
-            "meandepth": 0.0,
-            "coverage_including_secondary": 0.0,
-            "meandepth_including_secondary": 0.0
-        },
-        {
             "genome_name": "M.iranicum",
             "length": 6335651,
             "coverage": 0.0,
@@ -1108,15 +1090,6 @@
             "meandepth_including_secondary": 0.00046553599999999996
         },
         {
-            "genome_name": "M.nivoides",
-            "length": 6905961,
-            "coverage": 0.0,
-            "numreads": 0,
-            "meandepth": 0.0,
-            "coverage_including_secondary": 0.0,
-            "meandepth_including_secondary": 0.0
-        },
-        {
             "genome_name": "M.nonchromogenicus",
             "length": 4465329,
             "coverage": 0.0,
@@ -1306,15 +1279,6 @@
             "meandepth_including_secondary": 0.00222758806929767
         },
         {
-            "genome_name": "M.pseudoshottsii",
-            "length": 6061597,
-            "coverage": 0.0,
-            "numreads": 0,
-            "meandepth": 0.0,
-            "coverage_including_secondary": 0.0,
-            "meandepth_including_secondary": 0.0
-        },
-        {
             "genome_name": "M.psychrotolerans",
             "length": 5732362,
             "coverage": 0.0,
@@ -1369,22 +1333,13 @@
             "meandepth_including_secondary": 0.000412838
         },
         {
-            "genome_name": "M.saopaolens",
+            "genome_name": "M.saopaulense",
             "length": 4649175,
             "coverage": 0.0,
             "numreads": 0,
             "meandepth": 0.0,
             "coverage_including_secondary": 0.0195949,
             "meandepth_including_secondary": 0.000427173
-        },
-        {
-            "genome_name": "M.saopaulense",
-            "length": 5607630,
-            "coverage": 0.0,
-            "numreads": 0,
-            "meandepth": 0.0,
-            "coverage_including_secondary": 0.0782684,
-            "meandepth_including_secondary": 0.0016342
         },
         {
             "genome_name": "M.sarraceniae",
@@ -1421,24 +1376,6 @@
             "meandepth": 0.0,
             "coverage_including_secondary": 0.0344356,
             "meandepth_including_secondary": 0.000715656
-        },
-        {
-            "genome_name": "M.senriense",
-            "length": 5831451,
-            "coverage": 0.0,
-            "numreads": 0,
-            "meandepth": 0.0,
-            "coverage_including_secondary": 0.0,
-            "meandepth_including_secondary": 0.0
-        },
-        {
-            "genome_name": "M.seoulense",
-            "length": 5531300,
-            "coverage": 0.0,
-            "numreads": 0,
-            "meandepth": 0.0,
-            "coverage_including_secondary": 0.0,
-            "meandepth_including_secondary": 0.0
         },
         {
             "genome_name": "M.septicum",

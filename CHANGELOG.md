@@ -1,3 +1,10 @@
+## 2.0.1
+
+### Fix
+
+- Correctly report species names for _M. basiliense_ and _M. saopaulense_
+- Remove unused species
+
 ## 2.0.0 (2025-02-12)
 
 ### Feat

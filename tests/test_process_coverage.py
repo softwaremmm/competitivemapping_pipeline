@@ -5,7 +5,7 @@ import pytest
 from jsonschema import exceptions
 from test_utils import check_file
 
-import competitivemapping.process_coverage as process_coverage
+from competitivemapping import process_coverage
 
 
 def test_not_in_species(coverage_long, species_short):
@@ -31,18 +31,19 @@ def test_full_match(coverage_long, species_long):
 
 
 def test_join_references(coverage_table, species_table, expected_joined):
-    actual_joined = process_coverage.join_references(coverage_table, species_table)
+    actual_joined = process_coverage.join_references(coverage_table, species_table).reset_index(drop=True)
     if not actual_joined.equals(expected_joined):
         # Since different to expectation, save to file for inspection
-        actual_joined.to_csv("tests/test_outputs/actual_joined.csv", index=True)
+        actual_joined.to_csv("tests/test_outputs/actual_joined.csv", index=False)
     pd.testing.assert_frame_equal(actual_joined, expected_joined)
 
 
 def test_aggregate_contigs(expected_joined, expected_aggregated):
-    actual_aggregated = process_coverage.aggregate_contigs(expected_joined)
+    actual_aggregated = process_coverage.aggregate_contigs(expected_joined).reset_index(drop=False)
+    print(actual_aggregated)
     if not actual_aggregated.equals(expected_aggregated):
         # Since different to expectation, save to file for inspection
-        actual_aggregated.to_csv("tests/test_outputs/actual_aggregated.csv", index=True)
+        actual_aggregated.to_csv("tests/test_outputs/actual_aggregated.csv", index=False)
     pd.testing.assert_frame_equal(actual_aggregated, expected_aggregated)
 
 

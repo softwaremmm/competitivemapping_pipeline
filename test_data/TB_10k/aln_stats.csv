@@ -23,8 +23,8 @@ M.mantenii,76,78,0,0,76,0,0
 M.kubicae,74,74,0,0,74,0,0
 M.palustre,72,72,0,0,72,0,0
 M.nebraskense,70,70,0,0,70,0,0
+M.basiliense,68,68,0,0,68,0,0
 M.marinum,68,84,2,2,66,0,0
-M.saopaulense,68,68,0,0,68,0,0
 M.intracellulare_chimaera,66,66,0,0,66,0,0
 M.florentinum,64,64,0,0,64,0,0
 M.paraseoulense,64,64,0,0,64,0,0
@@ -148,7 +148,7 @@ M.phocaicum,14,20,0,0,14,0,0
 M.poriferae,14,22,0,0,14,0,0
 M.rufum,14,22,0,0,14,0,0
 M.salmoniphilum,14,14,0,0,14,0,0
-M.saopaolens,14,14,0,0,14,0,0
+M.saopaulense,14,14,0,0,14,0,0
 M.septicum,14,22,0,0,14,0,0
 M.setense,14,16,0,0,14,0,0
 M.smegmatis,14,26,0,0,14,0,0
@@ -178,10 +178,3 @@ M.sediminis,10,16,0,0,10,0,0
 M.vanbaalenii,10,16,0,0,10,0,0
 M.gilvum,8,14,0,0,8,0,0
 M.austroafricanum,6,6,0,0,6,0,0
-M.algericus,0,0,0,0,0,0,0
-M.boenickei,0,0,0,0,0,0,0
-M.intracellulare_yongonense,0,0,0,0,0,0,0
-M.nivoides,0,0,0,0,0,0,0
-M.pseudoshottsii,0,0,0,0,0,0,0
-M.senriense,0,0,0,0,0,0,0
-M.seoulense,0,0,0,0,0,0,0

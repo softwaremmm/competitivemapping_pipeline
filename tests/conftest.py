@@ -37,7 +37,7 @@ def coverage_table(coverage_table_path) -> pd.DataFrame:
 
 @pytest.fixture
 def species_table_path() -> str:
-    return "test_data/species_list_manifest_20240710.csv"
+    return "test_data/species_list_manifest_20250324.csv"
 
 
 @pytest.fixture
@@ -57,7 +57,7 @@ def expected_joined() -> pd.DataFrame:
 
 @pytest.fixture
 def expected_aggregated() -> pd.DataFrame:
-    return pd.read_csv("test_data/expected_aggregated.csv").set_index("reference")
+    return pd.read_csv("test_data/expected_aggregated.csv")
 
 
 @pytest.fixture
