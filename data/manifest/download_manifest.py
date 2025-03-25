@@ -22,6 +22,11 @@ def download_assembly(accession, output_dir):
         accession (str): The NCBI assembly accession.
         output_dir (str): Directory to save the downloaded assembly.
     """
+    # check if output file is already downloaded
+    if os.path.exists(f"{output_dir}/{accession}.fasta"):
+        print(f"{accession} already downloaded.")
+        return
+
     try:
         # Download the assembly
         print(f"Downloading {accession}...")
@@ -72,6 +77,13 @@ def main(manifest_metadata, output_dir):
 
     # Remove the excluded assemblies
     df = df[df["not_used_in_manifest"] != "y"]
+
+    # Check for duplicate assemblies
+    duplicated_assemblies = df[df.duplicated(subset="assembly", keep=False)]
+    if not duplicated_assemblies.empty:
+        print("Duplicated assemblies:")
+        print(duplicated_assemblies)
+        return
 
     for accession in df["assembly"]:
         download_assembly(accession.strip(), output_dir)

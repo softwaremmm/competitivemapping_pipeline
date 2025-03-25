@@ -1170,7 +1170,7 @@
             "meandepth": 5.95652e-05
         },
         {
-            "genome_name": "M.saopaolens",
+            "genome_name": "M.saopaulense",
             "length": 4649175,
             "coverage": 0.00544183,
             "numreads": 3,
@@ -1212,7 +1212,7 @@
             "meandepth": 3.11071e-05
         },
         {
-            "genome_name": "M.saopaulense",
+            "genome_name": "M.basiliense",
             "length": 5607630,
             "coverage": 0.00274626,
             "numreads": 3,
@@ -1240,27 +1240,6 @@
             "meandepth": 1.2561e-05
         },
         {
-            "genome_name": "M.algericus",
-            "length": 4619277,
-            "coverage": 0.0,
-            "numreads": 0,
-            "meandepth": 0.0
-        },
-        {
-            "genome_name": "M.boenickei",
-            "length": 6563937,
-            "coverage": 0.0,
-            "numreads": 0,
-            "meandepth": 0.0
-        },
-        {
-            "genome_name": "M.intracellulare_yongonense",
-            "length": 5521023,
-            "coverage": 0.0,
-            "numreads": 0,
-            "meandepth": 0.0
-        },
-        {
             "genome_name": "M.leprae",
             "length": 3187112,
             "coverage": 0.0,
@@ -1270,34 +1249,6 @@
         {
             "genome_name": "M.lepromatosis",
             "length": 3271694,
-            "coverage": 0.0,
-            "numreads": 0,
-            "meandepth": 0.0
-        },
-        {
-            "genome_name": "M.nivoides",
-            "length": 6905961,
-            "coverage": 0.0,
-            "numreads": 0,
-            "meandepth": 0.0
-        },
-        {
-            "genome_name": "M.pseudoshottsii",
-            "length": 6061597,
-            "coverage": 0.0,
-            "numreads": 0,
-            "meandepth": 0.0
-        },
-        {
-            "genome_name": "M.senriense",
-            "length": 5831451,
-            "coverage": 0.0,
-            "numreads": 0,
-            "meandepth": 0.0
-        },
-        {
-            "genome_name": "M.seoulense",
-            "length": 5531300,
             "coverage": 0.0,
             "numreads": 0,
             "meandepth": 0.0

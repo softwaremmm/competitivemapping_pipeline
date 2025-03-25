@@ -15,7 +15,6 @@ M.acidiphilus,0,0,0,0,0,0,0
 M.agri,0,0,0,0,0,0,0
 M.ahvazicum,0,0,0,0,0,0,0
 M.aichiense,0,0,0,0,0,0,0
-M.algericus,0,0,0,0,0,0,0
 M.alkanivorans,0,0,0,0,0,0,0
 M.alsense,0,0,0,0,0,0,0
 M.alvei,0,0,0,0,0,0,0
@@ -33,7 +32,7 @@ M.austroafricanum,0,0,0,0,0,0,0
 M.avium,0,0,0,0,0,0,0
 M.bacteremicum,0,0,0,0,0,0,0
 M.baixiangningiae,0,0,0,0,0,0,0
-M.boenickei,0,0,0,0,0,0,0
+M.basiliense,0,0,0,0,0,0,0
 M.bohemicum,0,0,0,0,0,0,0
 M.branderi,0,0,0,0,0,0,0
 M.brisbanense,0,0,0,0,0,0,0
@@ -90,7 +89,6 @@ M.interjectum,0,0,0,0,0,0,0
 M.intermedium,0,0,0,0,0,0,0
 M.intracellulare,0,0,0,0,0,0,0
 M.intracellulare_chimaera,0,0,0,0,0,0,0
-M.intracellulare_yongonense,0,0,0,0,0,0,0
 M.iranicum,0,0,0,0,0,0,0
 M.kansasii,0,0,0,0,0,0,0
 M.komanii,0,0,0,0,0,0,0
@@ -121,7 +119,6 @@ M.mucogenicum,0,0,0,0,0,0,0
 M.nebraskense,0,0,0,0,0,0,0
 M.neoaurum,0,0,0,0,0,0,0
 M.neworleansense,0,0,0,0,0,0,0
-M.nivoides,0,0,0,0,0,0,0
 M.nonchromogenicus,0,0,0,0,0,0,0
 M.noviomagense,0,0,0,0,0,0,0
 M.novum,0,0,0,0,0,0,0
@@ -144,21 +141,17 @@ M.phocaicum,0,0,0,0,0,0,0
 M.porcinum,0,0,0,0,0,0,0
 M.poriferae,0,0,0,0,0,0,0
 M.pseudokansasii,0,0,0,0,0,0,0
-M.pseudoshottsii,0,0,0,0,0,0,0
 M.psychrotolerans,0,0,0,0,0,0,0
 M.pulveris,0,0,0,0,0,0,0
 M.rhodesiae,0,0,0,0,0,0,0
 M.rufum,0,0,0,0,0,0,0
 M.rutilum,0,0,0,0,0,0,0
 M.salmoniphilum,0,0,0,0,0,0,0
-M.saopaolens,0,0,0,0,0,0,0
 M.saopaulense,0,0,0,0,0,0,0
 M.sarraceniae,0,0,0,0,0,0,0
 M.saskatchewanense,0,0,0,0,0,0,0
 M.sediminis,0,0,0,0,0,0,0
 M.senegalense,0,0,0,0,0,0,0
-M.senriense,0,0,0,0,0,0,0
-M.seoulense,0,0,0,0,0,0,0
 M.septicum,0,0,0,0,0,0,0
 M.setense,0,0,0,0,0,0,0
 M.sherrisii,0,0,0,0,0,0,0

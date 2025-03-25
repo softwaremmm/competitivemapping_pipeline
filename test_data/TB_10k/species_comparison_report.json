@@ -389,22 +389,6 @@
             "supplementary_alns": 0
         },
         {
-            "genome_name": "M.algericus",
-            "length": 4619277,
-            "numreads": 0,
-            "coverage": 0.0,
-            "meandepth": 0.0,
-            "coverage_including_secondary": 0.0,
-            "meandepth_including_secondary": 0.0,
-            "total_reads": 0,
-            "total_alns": 0,
-            "exclusive_reads": 0,
-            "primary_reads": 0,
-            "secondary_reads": 0,
-            "supplementary_reads": 0,
-            "supplementary_alns": 0
-        },
-        {
             "genome_name": "M.alkanivorans",
             "length": 4050246,
             "numreads": 0,
@@ -645,18 +629,18 @@
             "supplementary_alns": 0
         },
         {
-            "genome_name": "M.boenickei",
-            "length": 6563937,
+            "genome_name": "M.basiliense",
+            "length": 5607630,
             "numreads": 0,
             "coverage": 0.0,
             "meandepth": 0.0,
-            "coverage_including_secondary": 0.0,
-            "meandepth_including_secondary": 0.0,
-            "total_reads": 0,
-            "total_alns": 0,
+            "coverage_including_secondary": 0.0782684,
+            "meandepth_including_secondary": 0.0016342,
+            "total_reads": 68,
+            "total_alns": 68,
             "exclusive_reads": 0,
             "primary_reads": 0,
-            "secondary_reads": 0,
+            "secondary_reads": 68,
             "supplementary_reads": 0,
             "supplementary_alns": 0
         },
@@ -1477,22 +1461,6 @@
             "supplementary_alns": 0
         },
         {
-            "genome_name": "M.intracellulare_yongonense",
-            "length": 5521023,
-            "numreads": 0,
-            "coverage": 0.0,
-            "meandepth": 0.0,
-            "coverage_including_secondary": 0.0,
-            "meandepth_including_secondary": 0.0,
-            "total_reads": 0,
-            "total_alns": 0,
-            "exclusive_reads": 0,
-            "primary_reads": 0,
-            "secondary_reads": 0,
-            "supplementary_reads": 0,
-            "supplementary_alns": 0
-        },
-        {
             "genome_name": "M.iranicum",
             "length": 6335651,
             "numreads": 0,
@@ -1973,22 +1941,6 @@
             "supplementary_alns": 0
         },
         {
-            "genome_name": "M.nivoides",
-            "length": 6905961,
-            "numreads": 0,
-            "coverage": 0.0,
-            "meandepth": 0.0,
-            "coverage_including_secondary": 0.0,
-            "meandepth_including_secondary": 0.0,
-            "total_reads": 0,
-            "total_alns": 0,
-            "exclusive_reads": 0,
-            "primary_reads": 0,
-            "secondary_reads": 0,
-            "supplementary_reads": 0,
-            "supplementary_alns": 0
-        },
-        {
             "genome_name": "M.nonchromogenicus",
             "length": 4465329,
             "numreads": 0,
@@ -2325,22 +2277,6 @@
             "supplementary_alns": 0
         },
         {
-            "genome_name": "M.pseudoshottsii",
-            "length": 6061597,
-            "numreads": 0,
-            "coverage": 0.0,
-            "meandepth": 0.0,
-            "coverage_including_secondary": 0.0,
-            "meandepth_including_secondary": 0.0,
-            "total_reads": 0,
-            "total_alns": 0,
-            "exclusive_reads": 0,
-            "primary_reads": 0,
-            "secondary_reads": 0,
-            "supplementary_reads": 0,
-            "supplementary_alns": 0
-        },
-        {
             "genome_name": "M.psychrotolerans",
             "length": 5732362,
             "numreads": 0,
@@ -2437,7 +2373,7 @@
             "supplementary_alns": 0
         },
         {
-            "genome_name": "M.saopaolens",
+            "genome_name": "M.saopaulense",
             "length": 4649175,
             "numreads": 0,
             "coverage": 0.0,
@@ -2449,22 +2385,6 @@
             "exclusive_reads": 0,
             "primary_reads": 0,
             "secondary_reads": 14,
-            "supplementary_reads": 0,
-            "supplementary_alns": 0
-        },
-        {
-            "genome_name": "M.saopaulense",
-            "length": 5607630,
-            "numreads": 0,
-            "coverage": 0.0,
-            "meandepth": 0.0,
-            "coverage_including_secondary": 0.0782684,
-            "meandepth_including_secondary": 0.0016342,
-            "total_reads": 68,
-            "total_alns": 68,
-            "exclusive_reads": 0,
-            "primary_reads": 0,
-            "secondary_reads": 68,
             "supplementary_reads": 0,
             "supplementary_alns": 0
         },
@@ -2529,38 +2449,6 @@
             "exclusive_reads": 0,
             "primary_reads": 0,
             "secondary_reads": 24,
-            "supplementary_reads": 0,
-            "supplementary_alns": 0
-        },
-        {
-            "genome_name": "M.senriense",
-            "length": 5831451,
-            "numreads": 0,
-            "coverage": 0.0,
-            "meandepth": 0.0,
-            "coverage_including_secondary": 0.0,
-            "meandepth_including_secondary": 0.0,
-            "total_reads": 0,
-            "total_alns": 0,
-            "exclusive_reads": 0,
-            "primary_reads": 0,
-            "secondary_reads": 0,
-            "supplementary_reads": 0,
-            "supplementary_alns": 0
-        },
-        {
-            "genome_name": "M.seoulense",
-            "length": 5531300,
-            "numreads": 0,
-            "coverage": 0.0,
-            "meandepth": 0.0,
-            "coverage_including_secondary": 0.0,
-            "meandepth_including_secondary": 0.0,
-            "total_reads": 0,
-            "total_alns": 0,
-            "exclusive_reads": 0,
-            "primary_reads": 0,
-            "secondary_reads": 0,
             "supplementary_reads": 0,
             "supplementary_alns": 0
         },
