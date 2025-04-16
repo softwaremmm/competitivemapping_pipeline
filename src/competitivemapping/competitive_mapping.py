@@ -164,7 +164,7 @@ def get_coverage_stats(
 
 def output_fastqs(
     aln_bam: str,
-    reference: str,
+    references: list[str],
     contigs_df: pd.DataFrame,
     include_unmapped: bool,
     seq_platform: str,
@@ -175,7 +175,7 @@ def output_fastqs(
 
     Args:
         aln_bam (str): path to the alignment bam file
-        reference (str): desired reference to extract reads for
+        references (list[str]): list of desired references to extract reads for
         contigs_df (pd.DataFrame): dataframe of contigs
         include_unmapped (bool): whether to include unmapped reads
         seq_platform (str): sequencing platform
@@ -183,10 +183,10 @@ def output_fastqs(
         output_root (str): Path to the output root
     """
     logging.info("Outputting FASTQs")
-    rnames = contigs_df[contigs_df["reference"] == reference]["rname"].tolist()
+    rnames = contigs_df[contigs_df["reference"].isin(references)]["rname"].tolist()
     if include_unmapped:
         rnames.append('"*"')
-    logging.info("Extracting reads for reference {reference} using rnames: {rnames}")
+    logging.info("Extracting reads for references {references} using rnames: {rnames}")
 
     sorted_ref_bam = f"{output_root}output_aln.bam"
 
@@ -318,9 +318,10 @@ def run_competitive_mapping(
         json.dump(output, file, indent=4)
 
     if ref_for_fastq:
+        refs = [ref.strip() for ref in ref_for_fastq.split(',')]
         output_fastqs(
             aln_bam,
-            ref_for_fastq,
+            refs,
             contigs,
             include_unmapped=True,
             seq_platform=seq_platform,

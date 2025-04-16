@@ -12,3 +12,9 @@ run:
 		--species_list test_data/species_list_manifest_20250324.csv \
 		--publish_dir results \
 		-resume
+
+build-container:
+	docker build -t test_container_cm .
+
+test:
+	nf-test test tests/nextflow/*.test

@@ -16,6 +16,7 @@ process competitiveMapping {
     path manifest
     path species_list
     val seq_platform
+    val reference_name
 
     output:
     tuple val(sample_name), path("reads_for_assembly*fastq.gz"), emit: cm_tb_reads
@@ -33,7 +34,7 @@ process competitiveMapping {
     mkdir outputs
     competitive_mapping --seq_platform ${seq_platform} \
         --reads ${fqs} \
-        --ref_for_fastq ${h37rv_ref} \
+        --ref_for_fastq ${reference_name} \
         --manifest ${manifest} \
         --contigs ${species_list} \
         --cpus ${task.cpus} \
