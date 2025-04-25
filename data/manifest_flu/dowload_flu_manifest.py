@@ -22,8 +22,8 @@ def main(manifest_metadata: str):
     """
     # Read the manifest metadata file
     df = pd.read_csv(manifest_metadata)
-    # Get the NCBI Reference Sequences
-    sequences = df["NCBI Reference Sequence"].tolist()
+    # Get the references
+    sequences = df["reference"].tolist()
 
     # Download each assembly
     multifasta = ""
