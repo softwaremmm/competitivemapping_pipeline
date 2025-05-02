@@ -1,3 +1,7 @@
+## New
+
+- Split the minimap2 and the analysis steps into separate python scripts
+
 ## 2.0.1
 
 ### Fix

@@ -23,6 +23,7 @@ data/manifest/manifest_20231001
 # tests data
 !test_data/**
 test_data/**/*.new
+test_data/**/*.bai
 tests/test_outputs/*
 !tests/test_outputs/.gitkeep
 results/

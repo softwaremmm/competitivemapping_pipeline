@@ -137,6 +137,7 @@ EMPTY_SYLPH = {
         "test_data/chloro_10k/chloro_1.fastq.gz",
         "test_data/chloro_10k/chloro_2.fastq.gz",
     ],
+    "bam": "path_to_nothing.bam",
     "sylph_report": "test_data/empty_sylph/sylph.tsv",
     "manifest": "test_data/empty_sylph/empty_manifest.fasta.gz",
     "contigs": "test_data/empty_sylph/empty_contigs.csv",
