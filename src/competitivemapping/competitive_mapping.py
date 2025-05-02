@@ -5,6 +5,7 @@
 """Run Competitive Mapping against manifest and aggregate the results"""
 
 import argparse
+import dataclasses
 import json
 import logging
 import subprocess
@@ -21,6 +22,22 @@ logging.basicConfig(
     datefmt="%Y-%m-%dT%H:%M:%S%z",
     level=logging.DEBUG,
 )
+
+
+@dataclasses.dataclass
+class Config:
+    """
+    Config class for the module
+
+    Args:
+        seq_platform (str): Sequencing platform
+        cpus (int): Number of cores to use
+        output_root (str): Path to the output root
+    """
+
+    seq_platform: str
+    cpus: int
+    output_root: str
 
 
 FINAL_COLUMNS = [
@@ -55,43 +72,6 @@ COLUMN_EXPLANATIONS = {
     "supplementary_reads": "reads which have supplementary alignments but not primary",
     "supplementary_alns": "number of supplementary alignments",
 }
-
-
-def map_reads(
-    manifest: str, reads: list[str], seq_platform: str, cpus: int, output_root: str
-) -> str:
-    """Run minimap2 to map reads against manifest, returning sorted bam.
-
-    Args:
-        manifest (str): Path to the manifest file
-        reads (list[str]): List of paths to the read fastqs
-        seq_platform (str): Sequencing platform
-        cpus (int): number of cores to use
-        output_root (str): Path to the output root
-
-    Returns:
-        str: path to the alignment bam file
-    """
-    logging.info("Mapping reads")
-    aln_bam = f"{output_root}alignment.bam"
-
-    command = f"minimap2 -t {cpus} --secondary yes -N 1000"
-    if seq_platform == "ont":
-        command += " -ax map-ont"
-    else:
-        command += " -ax sr"
-    command += f" {manifest} {' '.join(reads)}"
-
-    command += f"| samtools sort -@ {cpus} -o {aln_bam}"
-
-    subprocess.run(
-        command,
-        shell=True,
-        check=True,
-        stdout=subprocess.PIPE,
-    )
-
-    return aln_bam
 
 
 def get_aln_stats(aln_bam: str, contigs_df: pd.DataFrame) -> tuple[dict, pd.DataFrame]:
@@ -132,33 +112,36 @@ def run_samtools_coverage(args: tuple[str, str, str]) -> str:
 
 
 def get_coverage_stats(
-    aln_bam: str, contigs_df: pd.DataFrame, cpus: int, output_root: str
+    aln_bam: str, contigs_df: pd.DataFrame, config: Config
 ) -> pd.DataFrame:
     """Get coverage stats using samtools coverage
 
     Args:
         aln_bam (str): path to the alignment bam file
         contigs_df (pd.DataFrame): dataframe of contigs
-        cpus (int): number of cores to use (uses 2 max)
-        output_root (str): Path to the output root
+        config (Config): Config object
 
     Returns:
         pd.DataFrame: summary of coverage metrics for each reference
     """
     logging.info("Getting coverage stats")
 
-    primary_coverage = f"{output_root}coverage_primary.tsv"
-    full_coverage = f"{output_root}coverage_full.tsv"
+    primary_coverage = f"{config.output_root}coverage_primary.tsv"
+    full_coverage = f"{config.output_root}coverage_full.tsv"
+
     args = [
         (aln_bam, "", primary_coverage),
-        (aln_bam, "--excl-flags 1540", full_coverage),
+        (
+            aln_bam,
+            "--excl-flags 1540",
+            full_coverage,
+        ),  # 1540 just excludes unmapped, and failed
     ]
 
-    with ProcessPoolExecutor(max_workers=cpus) as executor:
-        _results = list(executor.map(run_samtools_coverage, args))
+    with ProcessPoolExecutor(max_workers=config.cpus) as executor:
+        _ = list(executor.map(run_samtools_coverage, args))
 
     coverage_df = process_coverage(primary_coverage, full_coverage, contigs_df)
-
     return coverage_df
 
 
@@ -167,9 +150,7 @@ def output_fastqs(
     reference: str,
     contigs_df: pd.DataFrame,
     include_unmapped: bool,
-    seq_platform: str,
-    cpus: int,
-    output_root: str,
+    config: Config,
 ):
     """Extract reads from BAM file and output to FASTQ
 
@@ -178,17 +159,15 @@ def output_fastqs(
         reference (str): desired reference to extract reads for
         contigs_df (pd.DataFrame): dataframe of contigs
         include_unmapped (bool): whether to include unmapped reads
-        seq_platform (str): sequencing platform
-        cpus (int): number of cores to use
-        output_root (str): Path to the output root
+        config (Config): Config object
     """
     logging.info("Outputting FASTQs")
     rnames = contigs_df[contigs_df["reference"] == reference]["rname"].tolist()
     if include_unmapped:
         rnames.append('"*"')
-    logging.info("Extracting reads for reference {reference} using rnames: {rnames}")
+    logging.info(f"Extracting reads for reference {reference} using rnames: {rnames}")
 
-    sorted_ref_bam = f"{output_root}output_aln.bam"
+    sorted_ref_bam = f"{config.output_root}output_aln.bam"
 
     subprocess.run(
         f"samtools index {aln_bam}",
@@ -197,10 +176,17 @@ def output_fastqs(
         stdout=subprocess.PIPE,
     )
 
+    # Note: At some point can change to much simpler, but will slightly alter ordering of bam file
+    # rnames_string = " ".join(rnames)
+    # command = f"samtools view -h {aln_bam} -u {rnames_string} | samtools sort -n -@ {config.cpus} -o {sorted_ref_bam}"
+
     for i, rname in enumerate(rnames):
         # In future could add flag -P to always include read pairs
         # But note that this fails to fetch the pair for supplementary alignments
-        command = f"samtools view -h {aln_bam} -u {rname} | samtools sort -n -@ {cpus} -o {output_root}.{i}.bam"
+        command = (
+            f"samtools view -h {aln_bam} -u {rname}"
+            + f" | samtools sort -n -@ {config.cpus} -o {config.output_root}.{i}.bam"
+        )
         logging.info("Running command: %s", command)
         subprocess.run(
             command,
@@ -209,7 +195,10 @@ def output_fastqs(
             stdout=subprocess.PIPE,
         )
 
-    command = f"samtools merge -fo {sorted_ref_bam} {' '.join([f'{output_root}.{i}.bam' for i in range(len(rnames))])}"
+    command = (
+        f"samtools merge -fo {sorted_ref_bam}"
+        + f" {' '.join([f'{config.output_root}.{i}.bam' for i in range(len(rnames))])}"
+    )
     logging.info("Running command: %s", command)
     subprocess.run(
         command,
@@ -226,12 +215,12 @@ def output_fastqs(
 
     # So for paired reads, only output if both are unmapped, or both map
     # (maybe with supplementary) to the reference
-    command = f"samtools fastq --excl-flags 0x100 -@ {cpus} "
-    if seq_platform == "ont":
-        command += f"-0 {output_root}reads.fastq.gz {sorted_ref_bam}"
+    command = f"samtools fastq --excl-flags 0x100 -@ {config.cpus} "
+    if config.seq_platform == "ont":
+        command += f"-0 {config.output_root}reads.fastq.gz {sorted_ref_bam}"
     else:
         command += (
-            f"-1 {output_root}reads_1.fastq.gz -2 {output_root}reads_2.fastq.gz"
+            f"-1 {config.output_root}reads_1.fastq.gz -2 {config.output_root}reads_2.fastq.gz"
             f" -0 /dev/null -s /dev/null {sorted_ref_bam}"
         )
     logging.info("Running command: %s", command)
@@ -255,30 +244,25 @@ def produce_empty_outputs(output_root: str):
         file.write(",".join(FINAL_COLUMNS) + "\n")
 
 
-def run_competitive_mapping(
-    manifest: str,
+def competitive_mapping_analysis(
+    aln_bam: str,
     contigs: pd.DataFrame,
-    reads: list[str],
     ref_for_fastq: str | None,
-    seq_platform: str,
-    cpus: int,
-    output_root: str,
-):
+    config: Config,
+) -> tuple[pd.DataFrame, dict]:
     """Map reads to a manifest and produce a comparison of coverage and alignment stats
 
     Args:
-        manifest (str): Path to the manifest file
+        aln_bam (str): Path to the alignment bam file
         contigs (pd.DataFrame): Dataframe of contigs
-        reads (list[str]): List of paths to the read fastqs
         ref_for_fastq (str | None): Reference to extract reads for
-        seq_platform (str): Sequencing platform
-        cpus (int): Number of cores to use
-        output_root (str): Path to the output root
-    """
-    logging.info("Running competitive mapping")
-    aln_bam = map_reads(manifest, reads, seq_platform, cpus, output_root)
+        config (Config): Config object
 
-    coverage_df = get_coverage_stats(aln_bam, contigs, cpus, output_root)
+    Returns:
+        tuple[pd.DataFrame, dict]: Dataframe of species comparison and JSON report
+    """
+    logging.info("Running competitive mapping analysis")
+    coverage_df = get_coverage_stats(aln_bam, contigs, config)
 
     overall_stats, aln_stats = get_aln_stats(aln_bam, contigs)
     df = pd.merge(coverage_df, aln_stats, on="genome_name")
@@ -289,33 +273,35 @@ def run_competitive_mapping(
     # As samtools coverage actually counts alignments
     df["numreads"] = df["primary_reads"] + df["supplementary_reads"]
 
-    df = df[FINAL_COLUMNS].copy()
+    final_columns = [c for c in FINAL_COLUMNS if c in df.columns]
+    df = df[final_columns].copy()
 
     # add final row with unmapped read count
-    new_row: dict[str, typing.Any] = {col: 0 for col in FINAL_COLUMNS}
+    new_row: dict[str, typing.Any] = {col: 0 for col in final_columns}
     new_row["genome_name"] = "unmapped"
     for col in "numreads", "primary_reads", "total_reads":
         new_row[col] = overall_stats["unmapped_reads"]
-    df.loc[-1] = new_row
+    df.loc[-1] = pd.Series(new_row)
 
     # incorporate species information if available
     if "species" in contigs.columns:
         species_lookup = contigs.set_index("reference")["species"].to_dict()
         species_lookup["unmapped"] = "unmapped"
         df["species"] = df["genome_name"].map(species_lookup)
-        df = df[["species"] + FINAL_COLUMNS]
+        df = df[["species"] + final_columns]
 
-    df.to_csv(f"{output_root}species_comparison.csv", index=False)
+    df.to_csv(f"{config.output_root}species_comparison.csv", index=False)
     # remove the last row with unmapped read count
-    df = df.iloc[:-1]
 
-    output = {
+    output_json = {
         "total_read_counts": overall_stats,
-        "references": df.to_dict(orient="records"),
+        "references": (df.iloc[:-1]).to_dict(orient="records"),
         "definitions": COLUMN_EXPLANATIONS,
     }
-    with open(f"{output_root}species_comparison.json", "w", encoding="utf-8") as file:
-        json.dump(output, file, indent=4)
+    with open(
+        f"{config.output_root}species_comparison.json", "w", encoding="utf-8"
+    ) as file:
+        json.dump(output_json, file, indent=4)
 
     if ref_for_fastq:
         output_fastqs(
@@ -323,21 +309,21 @@ def run_competitive_mapping(
             ref_for_fastq,
             contigs,
             include_unmapped=True,
-            seq_platform=seq_platform,
-            cpus=cpus,
-            output_root=output_root,
+            config=config,
         )
 
     logging.info("Finished competitive mapping")
+    return df, output_json
 
 
 def cli_entry_point():
     """Entry point for the CLI"""
     parser = argparse.ArgumentParser(description="Process sylph report and genomes.")
 
-    parser.add_argument("--manifest", required=True, help="Path to the manifest file")
+    parser.add_argument(
+        "-i", "--input_bam", required=True, help="Path to the manifest file"
+    )
     parser.add_argument("--contigs", required=True, help="Path to the contigs file")
-    parser.add_argument("--reads", required=True, help="Path to the reads", nargs="+")
     parser.add_argument(
         "--seq_platform", help="Sequencing platform", default="illumina"
     )
@@ -345,7 +331,9 @@ def cli_entry_point():
     parser.add_argument(
         "--ref_for_fastq", help="Reference to extract reads for", default=None
     )
-    parser.add_argument("--output_root", required=True, help="Path to the output files")
+    parser.add_argument(
+        "-o", "--output_root", required=True, help="Path to the output files"
+    )
 
     args = parser.parse_args()
 
@@ -356,14 +344,17 @@ def cli_entry_point():
         produce_empty_outputs(args.output_root)
         return
 
-    run_competitive_mapping(
-        args.manifest,
-        contigs,
-        args.reads,
-        args.ref_for_fastq,
+    config = Config(
         args.seq_platform,
         args.cpus,
         args.output_root,
+    )
+
+    competitive_mapping_analysis(
+        args.input_bam,
+        contigs,
+        args.ref_for_fastq,
+        config,
     )
 
 

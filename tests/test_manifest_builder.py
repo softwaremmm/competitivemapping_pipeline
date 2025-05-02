@@ -1,6 +1,6 @@
 """
 Testing for manifest builder.
-Note that majority of tests are in test_competitive_mapping.py
+Note that majority of tests are in test_sylph.py
 as manifest is a large intermediate file for competitive mapping.
 """
 

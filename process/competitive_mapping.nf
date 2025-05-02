@@ -30,12 +30,18 @@ process competitiveMapping {
     competitive_mapping_csv = "species_comparison.csv"
     h37rv_ref = "M.tuberculosis"
     """
-    mkdir outputs
-    competitive_mapping --seq_platform ${seq_platform} \
-        --reads ${fqs} \
-        --ref_for_fastq ${h37rv_ref} \
+    manifest_mapper \
+        --seq_platform ${seq_platform} \
         --manifest ${manifest} \
+        --reads ${fqs} \
+        --cpus ${task.cpus} \
+        -o aln.bam
+
+    competitive_mapping \
+        --input_bam aln.bam \
+        --seq_platform ${seq_platform} \
         --contigs ${species_list} \
+        --ref_for_fastq ${h37rv_ref} \
         --cpus ${task.cpus} \
         --output_root "out."
 
@@ -50,6 +56,9 @@ process competitiveMapping {
         mv out.reads_1.fastq.gz ${tb_reads_1}
         mv out.reads_2.fastq.gz ${tb_reads_2}
     fi
+
+    # clean up large intermediate files
+    rm aln.bam
     """
 }
 
@@ -91,15 +100,26 @@ process dynamicCompetitiveMapping {
         --output_root "out."
 
 
-    competitive_mapping --seq_platform ${seq_platform} \
-        --reads ${fqs} \
+    manifest_mapper \
+        --seq_platform ${seq_platform} \
         --manifest out.manifest.fasta.gz \
+        --reads ${fqs} \
+        --cpus ${task.cpus} \
+        -o aln.bam
+
+    competitive_mapping \
+        --input_bam aln.bam \
+        --seq_platform ${seq_platform} \
         --contigs out.contigs.csv \
         --cpus ${task.cpus} \
         --output_root "out."
 
     mv out.species_comparison.json ${competitive_mapping_report}
     mv out.species_comparison.csv ${competitive_mapping_csv}
+
+    # clean up large intermediate files
+    rm aln.bam
+    rm out.manifest.fasta.gz
     """
 }
 
