@@ -1,7 +1,3 @@
-# pylint: disable=too-many-arguments
-# pylint: disable=too-many-positional-arguments
-# pylint: disable=too-many-locals
-# pylint: disable=logging-fstring-interpolation
 """Run Competitive Mapping against manifest and aggregate the results"""
 
 import argparse

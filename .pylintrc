@@ -1,0 +1,7 @@
+[MESSAGES CONTROL]
+disable=duplicate-code, logging-fstring-interpolation
+# pylint considers the config dataclass pattern to be duplicate code
+# f-strings are much more readable
+
+[FORMAT]
+max-line-length=120
