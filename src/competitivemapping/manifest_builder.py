@@ -1,9 +1,8 @@
-# pylint: disable=too-many-arguments
-# pylint: disable=too-many-positional-arguments
 # pylint: disable=too-many-locals
 """Build manifest and contigs dataframe from sylph report"""
 
 import argparse
+import dataclasses
 import gzip
 import logging
 import multiprocessing
@@ -21,6 +20,22 @@ logging.basicConfig(
     datefmt="%Y-%m-%dT%H:%M:%S%z",
     level=logging.DEBUG,
 )
+
+
+@dataclasses.dataclass
+class Config:
+    """
+    Config class for the module
+
+    Args:
+        cpus (int): Number of cores to use
+        include_whole_genus (bool): Whether to include all genomes from genera found
+        output_root (str): Path to the output root
+    """
+
+    cpus: int
+    include_whole_genus: bool
+    output_root: str
 
 
 def read_contigs(args: tuple[str, str]) -> list[dict[str, str]]:
@@ -87,9 +102,7 @@ def make_manifest(
     report_path: str,
     metadata_files: list[str],
     genome_dirs: list[str],
-    include_whole_genus: bool,
-    output_root: str,
-    cpus: int,
+    config: Config,
 ) -> tuple[str, pd.DataFrame]:
     """Produce a multifasta manifest and contig df from a sylph report and genomes folder
 
@@ -97,15 +110,13 @@ def make_manifest(
         report_path (str): Path to the sylph report
         metadata_files (list[str]): path to the db metadata files, with taxonomy info
         genome_dirs (list[str]): path to the directories with the genome fastas
-        include_whole_genus (bool): Whether to include all genomes from genera found
-        output_root (str): Path to the output root
-        cpus (int): number of cores to use
+        config (Config): Config object
 
     Returns:
         tuple[str, pd.DataFrame]: Path to the manifest file and a dataframe of contigs
     """
     logging.info("Creating manifest and reading contigs")
-    manifest_file = f"{output_root}manifest.fasta.gz"
+    manifest_file = f"{config.output_root}manifest.fasta.gz"
 
     # Check if the sylph report is empty
     if os.stat(report_path).st_size == 0 or pd.read_csv(report_path, sep="\t").empty:
@@ -173,7 +184,7 @@ def make_manifest(
         lambda x: select_taxa_level(x, "s__").replace("s__", "")
     )
 
-    if include_whole_genus:
+    if config.include_whole_genus:
         # Extend accessions to include genomes from rest of the genus(/genera)
         sylph_metadata_df = metadata_df[
             metadata_df["accession"].isin(sylph_accessions)
@@ -206,7 +217,7 @@ def make_manifest(
                 outfile.write(infile.read())
 
     # Read contigs in parallel
-    with ProcessPoolExecutor(max_workers=cpus) as executor:
+    with ProcessPoolExecutor(max_workers=config.cpus) as executor:
         results = list(
             executor.map(
                 read_contigs, zip(selected_df["accession"], selected_df["path"])
@@ -255,13 +266,17 @@ def cli_entry_point():
 
     sylph_report = args.sylph_report
 
+    config = Config(
+        cpus=int(args.cpus),
+        include_whole_genus=args.include_whole_genus,
+        output_root=args.output_root,
+    )
+
     _manifest, contigs = make_manifest(
         sylph_report,
         args.metadata_files,
         args.genome_dirs,
-        args.include_whole_genus,
-        args.output_root,
-        args.cpus,
+        config,
     )
 
     contigs.to_csv(f"{args.output_root}contigs.csv", index=False)
