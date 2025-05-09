@@ -1,11 +1,17 @@
 import hashlib
 import os
+import subprocess
+import tempfile
 from gzip import open as gzopen
+from unittest.mock import MagicMock, patch
 
+import pandas as pd
+import pytest
 from Bio import SeqIO
 from test_utils import check_file, get_cpus
 
 from competitivemapping import competitive_mapping
+from competitivemapping.competitive_mapping import Config, output_fastqs
 
 
 def test_cli_entry_point(samples, species_table_path, test_outputs_dir, mocker):
@@ -105,4 +111,191 @@ def test_empty_contigs(empty_sylph, test_outputs_dir, mocker):
     )
     check_file(
         empty_sylph["sylph_csv_comparison"], output_root + "species_comparison.csv"
+    )
+
+
+@pytest.fixture
+def mock_contigs_df():
+    """Create a mock contigs dataframe for testing"""
+    return pd.DataFrame(
+        {"reference": ["ref1", "ref2", "ref3"], "rname": ["r1", "r2", "r3"]}
+    )
+
+
+@pytest.fixture
+def temp_output_dir():
+    """Create a temporary directory for test outputs"""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        yield tmpdir
+
+
+@patch("subprocess.run")
+def test_output_fastqs_single_reference(mock_run, mock_contigs_df, temp_output_dir):
+    """Test output_fastqs with a single reference"""
+    # Setup
+    mock_run.return_value = MagicMock()
+    aln_bam = "test.bam"
+    references = ["ref1"]
+
+    config = Config(
+        cpus=1,
+        seq_platform="illumina",
+        output_root=temp_output_dir,
+    )
+
+    # Execute
+    output_fastqs(
+        aln_bam=aln_bam,
+        references=references,
+        contigs_df=mock_contigs_df,
+        include_unmapped=False,
+        config=config,
+    )
+
+    # Verify
+    # Check that samtools index was called
+    mock_run.assert_any_call(
+        f"samtools index {aln_bam}", shell=True, check=True, stdout=subprocess.PIPE
+    )
+    # Check that the correct rname was used
+    mock_run.assert_any_call(
+        f"samtools view -h {aln_bam} -u r1 | samtools sort -n -@ 1 -o {temp_output_dir}.0.bam",
+        shell=True,
+        check=True,
+        stdout=subprocess.PIPE,
+    )
+
+
+@patch("subprocess.run")
+def test_output_fastqs_multiple_references(mock_run, mock_contigs_df, temp_output_dir):
+    """Test output_fastqs with multiple references"""
+    # Setup
+    mock_run.return_value = MagicMock()
+    aln_bam = "test.bam"
+    references = ["ref1", "ref2"]
+
+    config = Config(
+        cpus=1,
+        seq_platform="illumina",
+        output_root=temp_output_dir,
+    )
+
+    # Execute
+    output_fastqs(
+        aln_bam=aln_bam,
+        references=references,
+        contigs_df=mock_contigs_df,
+        include_unmapped=False,
+        config=config,
+    )
+
+    # Verify
+    # Check that both rnames were used
+    mock_run.assert_any_call(
+        f"samtools view -h {aln_bam} -u r1 | samtools sort -n -@ 1 -o {temp_output_dir}.0.bam",
+        shell=True,
+        check=True,
+        stdout=subprocess.PIPE,
+    )
+    mock_run.assert_any_call(
+        f"samtools view -h {aln_bam} -u r2 | samtools sort -n -@ 1 -o {temp_output_dir}.1.bam",
+        shell=True,
+        check=True,
+        stdout=subprocess.PIPE,
+    )
+
+
+@patch("subprocess.run")
+def test_output_fastqs_with_unmapped(mock_run, mock_contigs_df, temp_output_dir):
+    """Test output_fastqs with unmapped reads included"""
+    # Setup
+    mock_run.return_value = MagicMock()
+    aln_bam = "test.bam"
+    references = ["ref1"]
+
+    config = Config(
+        cpus=1,
+        seq_platform="illumina",
+        output_root=temp_output_dir,
+    )
+
+    # Execute
+    output_fastqs(
+        aln_bam=aln_bam,
+        references=references,
+        contigs_df=mock_contigs_df,
+        include_unmapped=True,
+        config=config,
+    )
+
+    # Verify
+    # Check that unmapped reads were included
+    mock_run.assert_any_call(
+        f'samtools view -h {aln_bam} -u "*" | samtools sort -n -@ 1 -o {temp_output_dir}.1.bam',
+        shell=True,
+        check=True,
+        stdout=subprocess.PIPE,
+    )
+
+
+@patch("subprocess.run")
+def test_output_fastqs_nonexistent_reference(
+    mock_run, mock_contigs_df, temp_output_dir
+):
+    """Test output_fastqs with references that don't exist in contigs"""
+    # Setup
+    mock_run.return_value = MagicMock()
+    aln_bam = "test.bam"
+    references = ["nonexistent_ref"]
+
+    config = Config(
+        cpus=1,
+        seq_platform="illumina",
+        output_root=temp_output_dir,
+    )
+
+    # Execute
+    output_fastqs(
+        aln_bam=aln_bam,
+        references=references,
+        contigs_df=mock_contigs_df,
+        include_unmapped=False,
+        config=config,
+    )
+
+    # Verify
+    # Check that no rnames were used (empty list)
+    assert not any("samtools view" in str(call) for call in mock_run.call_args_list)
+
+
+@patch("subprocess.run")
+def test_output_fastqs_ont_platform(mock_run, mock_contigs_df, temp_output_dir):
+    """Test output_fastqs with ONT platform"""
+    # Setup
+    mock_run.return_value = MagicMock()
+    aln_bam = "test.bam"
+    references = ["ref1"]
+
+    config = Config(
+        cpus=1,
+        seq_platform="ont",
+        output_root=temp_output_dir,
+    )
+
+    # Execute
+    output_fastqs(
+        aln_bam=aln_bam,
+        references=references,
+        contigs_df=mock_contigs_df,
+        include_unmapped=False,
+        config=config,
+    )
+
+    # Verify
+    # Check that ONT-specific command was used
+    mock_run.assert_any_call(
+        f"samtools fastq --excl-flags 0x100 -@ 1 -0 {temp_output_dir}reads.fastq.gz {temp_output_dir}output_aln.bam",
+        shell=True,
+        check=True,
+        stdout=subprocess.PIPE,
     )
