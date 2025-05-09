@@ -1,8 +1,3 @@
-# pylint: disable=too-many-arguments
-# pylint: disable=too-many-positional-arguments
-# pylint: disable=too-many-locals
-# pylint: disable=logging-fstring-interpolation
-# pylint: disable=duplicate-code
 """Maps reads against a manifest to produce bam file"""
 import argparse
 import dataclasses

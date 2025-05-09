@@ -1,4 +1,3 @@
-# pylint: disable=logging-fstring-interpolation
 """Process output from Competitive Mapping"""
 
 import argparse
