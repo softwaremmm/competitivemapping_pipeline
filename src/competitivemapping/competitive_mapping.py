@@ -143,7 +143,7 @@ def get_coverage_stats(
 
 def output_fastqs(
     aln_bam: str,
-    reference: str,
+    references: list[str],
     contigs_df: pd.DataFrame,
     include_unmapped: bool,
     config: Config,
@@ -152,16 +152,16 @@ def output_fastqs(
 
     Args:
         aln_bam (str): path to the alignment bam file
-        reference (str): desired reference to extract reads for
+        references (list[str]): list of desired references to extract reads for
         contigs_df (pd.DataFrame): dataframe of contigs
         include_unmapped (bool): whether to include unmapped reads
         config (Config): Config object
     """
     logging.info("Outputting FASTQs")
-    rnames = contigs_df[contigs_df["reference"] == reference]["rname"].tolist()
+    rnames = contigs_df[contigs_df["reference"].isin(references)]["rname"].tolist()
     if include_unmapped:
         rnames.append('"*"')
-    logging.info(f"Extracting reads for reference {reference} using rnames: {rnames}")
+    logging.info(f"Extracting reads for reference {references} using rnames: {rnames}")
 
     sorted_ref_bam = f"{config.output_root}output_aln.bam"
 
@@ -300,9 +300,10 @@ def competitive_mapping_analysis(
         json.dump(output_json, file, indent=4)
 
     if ref_for_fastq:
+        refs = [ref.strip() for ref in ref_for_fastq.split(",")]
         output_fastqs(
             aln_bam,
-            ref_for_fastq,
+            refs,
             contigs,
             include_unmapped=True,
             config=config,

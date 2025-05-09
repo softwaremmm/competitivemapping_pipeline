@@ -13,6 +13,9 @@ run:
 		--publish_dir results \
 		-resume
 
+build-container:
+	docker build -t test_container_cm .
+
 test:
 	pytest tests
 	nf-test test tests/nextflow/*.test

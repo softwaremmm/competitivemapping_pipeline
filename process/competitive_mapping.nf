@@ -16,6 +16,7 @@ process competitiveMapping {
     path manifest
     path species_list
     val seq_platform
+    val reference_name
 
     output:
     tuple val(sample_name), path("reads_for_assembly*fastq.gz"), emit: cm_tb_reads
@@ -28,7 +29,6 @@ process competitiveMapping {
     tb_reads_2 = "reads_for_assembly_2.fastq.gz"
     competitive_mapping_report = "species_comparison_report.json"
     competitive_mapping_csv = "species_comparison.csv"
-    h37rv_ref = "M.tuberculosis"
     """
     manifest_mapper \
         --seq_platform ${seq_platform} \
@@ -41,7 +41,7 @@ process competitiveMapping {
         --input_bam aln.bam \
         --seq_platform ${seq_platform} \
         --contigs ${species_list} \
-        --ref_for_fastq ${h37rv_ref} \
+        --ref_for_fastq ${reference_name} \
         --cpus ${task.cpus} \
         --output_root "out."
 

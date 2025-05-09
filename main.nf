@@ -7,6 +7,7 @@ include { has_enough_reads } from './process/competitive_mapping.nf'
 params.input_dir = ''
 params.manifest = ''
 params.seq_platform = ''
+params.reference_name = ''
 
 // default thresholds
 params.illumina_threshold = 100000
@@ -37,6 +38,7 @@ workflow {
             --manifest
             --species_list
             --seq_platform
+            --reference_name: Reference name to use for the fastq files. Default: 'M.tuberculosis'. If you want to use a list of names, input a string separated by commas.
             '''.stripIndent()
         )
         exit(0)
@@ -53,6 +55,9 @@ workflow {
     }
     if (params.seq_platform == '') {
         exit(1, 'error: --seq_platform is mandatory')
+    }
+    if (params.reference_name == '') {
+        exit(1, 'error: --reference_name is mandatory')
     }
 
 
@@ -71,6 +76,7 @@ workflow {
         --manifest     ${params.manifest}
         --species_list ${params.species_list}
         --seq_platform ${params.seq_platform}
+        --reference_name ${params.reference_name}
 
         Runtime data:
         ------------------------------------------------------------------------
@@ -105,7 +111,7 @@ workflow {
     // Using fromPath means they can be provided as relative paths
     manifest = Channel.fromPath(params.manifest, checkIfExists: true).first()
     species_list = Channel.fromPath(params.species_list, checkIfExists: true).first()
-    competitive_mapping(input_files, manifest, species_list, params.seq_platform)
+    competitive_mapping(input_files, manifest, species_list, params.seq_platform, params.reference_name)
 }
 
 
@@ -115,12 +121,13 @@ workflow competitive_mapping {
     manifest
     species_list
     seq_platform
+    reference_name
 
     main:
 
     check_seq_platform(seq_platform)
 
-    competitive_mapping_output = competitiveMapping(input_files, manifest, species_list, seq_platform)
+    competitive_mapping_output = competitiveMapping(input_files, manifest, species_list, seq_platform, reference_name)
     threshold = seq_platform == 'illumina' ? params.illumina_threshold : params.ont_threshold
     has_enough_reads(competitive_mapping_output.cm_report, threshold)
 
