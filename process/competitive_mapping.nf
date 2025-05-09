@@ -1,7 +1,7 @@
 process competitiveMapping {
     publishDir "${params.publish_dir}", enabled: params.publish_dir != "", mode: "copy", saveAs: { filename -> sample_name + "_" + filename }
     container {
-        params.test_container_cm == "" ? 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:35b25fa' : params.test_container_cm
+        params.test_container_cm == "" ? 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:bca3398' : params.test_container_cm
     }
 
     cpus 4
@@ -65,7 +65,7 @@ process competitiveMapping {
 process dynamicCompetitiveMapping {
     publishDir "${params.publish_dir}", enabled: params.publish_dir != "", mode: "copy", saveAs: { filename -> sample_name + "_" + filename }
     container {
-        params.test_container_cm == "" ? 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:35b25fa' : params.test_container_cm
+        params.test_container_cm == "" ? 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:bca3398' : params.test_container_cm
     }
 
     cpus 4
@@ -125,7 +125,7 @@ process dynamicCompetitiveMapping {
 
 process has_enough_reads {
     container {
-        params.test_container_cm == "" ? 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:35b25fa' : params.test_container_cm
+        params.test_container_cm == "" ? 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:bca3398' : params.test_container_cm
     }
 
     cpus 1
