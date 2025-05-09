@@ -13,6 +13,7 @@ nextflow_process {
                 input[1] = file("$projectDir/data/manifest/manifest_20231001")
                 input[2] = file("$projectDir/test_data/species_list_manifest_20250324.csv")
                 input[3] = 'illumina'
+                input[4] = 'M.tuberculosis'
                 """
             }
         }
@@ -50,6 +51,7 @@ nextflow_process {
                 input[1] = file("$projectDir/data/manifest/manifest_20231001")
                 input[2] = file("$projectDir/test_data/species_list_manifest_20250324.csv")
                 input[3] = 'illumina'
+                input[4] = 'M.tuberculosis'
                 """
             }
         }
@@ -87,6 +89,7 @@ nextflow_process {
                 input[1] = file("$projectDir/data/manifest/manifest_20231001")
                 input[2] = file("$projectDir/test_data/species_list_manifest_20250324.csv")
                 input[3] = 'ont'
+                input[4] = 'M.tuberculosis'
                 """
             }
         }
