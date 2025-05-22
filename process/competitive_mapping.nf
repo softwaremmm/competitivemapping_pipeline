@@ -77,8 +77,8 @@ process dynamicCompetitiveMapping {
 
     input:
     tuple val(sample_name), path(fqs), path(sylph_report)
-    path gtdb_genomes_dir
-    path assembly_metadata
+    path db_genome_path_files // Can be a list of files
+    path db_taxonomy // Can be a list of files
     // Used to go from assembly to species
     val seq_platform
     val include_whole_genus
@@ -93,8 +93,8 @@ process dynamicCompetitiveMapping {
     whole_genera_arg = include_whole_genus ? "--include_whole_genus" : ""
     """
     manifest_builder --sylph_report ${sylph_report} \
-        --genome_path_files ${gtdb_genomes_dir} \
-        --taxonomy_files ${assembly_metadata} \
+        --genome_path_files ${db_genome_path_files} \
+        --taxonomy_files ${db_taxonomy} \
         ${whole_genera_arg} \
         --cpus ${task.cpus} \
         --output_root "out."
