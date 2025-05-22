@@ -203,3 +203,29 @@ def sylph_rep_paths() -> str:
 @pytest.fixture
 def sylph_metadata() -> str:
     return "data/sylph/gtdb_r220_metadata.tsv"
+
+
+@pytest.fixture
+def sylph_db_A() -> dict:
+    return {
+        "db": "test_data/sylph_databases/A/db.syldb",
+        "taxonomy": "test_data/sylph_databases/A/taxonomy.tsv",
+        "genome_paths": "test_data/sylph_databases/A/genome_paths.tsv",
+        "sylph_report": "test_data/sylph_databases/A/sylph.tsv",
+        "manifest": "test_data/sylph_databases/A/manifest.fasta.gz",
+        "contigs": "test_data/sylph_databases/A/contigs.csv",
+        "manifest_with_whole_genus": "test_data/sylph_databases/A/manifest_with_whole_genus.fasta.gz",
+        "contigs_with_whole_genus": "test_data/sylph_databases/A/contigs_with_whole_genus.csv",
+    }
+
+
+@pytest.fixture
+def sylph_db_B() -> dict:
+    return {
+        "db": "test_data/sylph_databases/B/db.syldb",
+        "taxonomy": "test_data/sylph_databases/B/taxonomy.tsv",
+        "genome_paths": "test_data/sylph_databases/B/genome_paths.tsv",
+        "sylph_report": "test_data/sylph_databases/B/sylph.tsv",
+        "manifest": "test_data/sylph_databases/B/manifest.fasta.gz",
+        "contigs": "test_data/sylph_databases/B/contigs.csv",
+    }

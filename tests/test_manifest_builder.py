@@ -8,7 +8,7 @@ import os
 from gzip import open as gzopen
 
 import pandas as pd
-from test_utils import check_file
+from test_utils import check_file, check_gzipped_file, get_cpus
 
 from competitivemapping import manifest_builder
 
@@ -119,6 +119,101 @@ def test_get_genome_paths(test_outputs_dir):
     assert expectation.equals(result_df)
 
 
+def test_build_manifest_A(sylph_db_A, test_outputs_dir, mocker):
+    output_dir = os.path.join(test_outputs_dir, "test_build_manifest_A")
+    os.makedirs(output_dir, exist_ok=True)
+    output_root = str(output_dir) + "/"
+
+    mocker.patch(
+        "sys.argv",
+        [
+            "manifest_builder",
+            "--sylph_report",
+            sylph_db_A["sylph_report"],
+            "--genome_path_files",
+            sylph_db_A["genome_paths"],
+            "--taxonomy_files",
+            sylph_db_A["taxonomy"],
+            "--output_root",
+            output_root,
+            "--cpus",
+            str(get_cpus()),
+        ],
+    )
+
+    manifest_builder.cli_entry_point()
+
+    # check that manifest and contigs are the same
+    check_gzipped_file(sylph_db_A["manifest"], output_root + "manifest.fasta.gz")
+    check_file(sylph_db_A["contigs"], output_root + "contigs.csv")
+
+
+def test_build_manifest_A_with_whole_genus(sylph_db_A, test_outputs_dir, mocker):
+    output_dir = os.path.join(
+        test_outputs_dir, "test_build_manifest_A_with_whole_genus"
+    )
+    os.makedirs(output_dir, exist_ok=True)
+    output_root = str(output_dir) + "/"
+
+    mocker.patch(
+        "sys.argv",
+        [
+            "manifest_builder",
+            "--sylph_report",
+            sylph_db_A["sylph_report"],
+            "--genome_path_files",
+            sylph_db_A["genome_paths"],
+            "--taxonomy_files",
+            sylph_db_A["taxonomy"],
+            "--output_root",
+            output_root,
+            "--cpus",
+            str(get_cpus()),
+            "--include_whole_genus",
+        ],
+    )
+
+    manifest_builder.cli_entry_point()
+
+    # check that manifest and contigs are the same
+    check_gzipped_file(
+        sylph_db_A["manifest_with_whole_genus"], output_root + "manifest.fasta.gz"
+    )
+    check_file(sylph_db_A["contigs_with_whole_genus"], output_root + "contigs.csv")
+
+
+def test_build_manifest_A_and_B(sylph_db_A, sylph_db_B, test_outputs_dir, mocker):
+    # test that manifest builder works with two sylph databases
+    output_dir = os.path.join(test_outputs_dir, "test_build_manifest_A_and_B")
+    os.makedirs(output_dir, exist_ok=True)
+    output_root = str(output_dir) + "/"
+
+    mocker.patch(
+        "sys.argv",
+        [
+            "manifest_builder",
+            "--sylph_report",
+            sylph_db_B["sylph_report"],
+            "--genome_path_files",
+            sylph_db_A["genome_paths"],
+            sylph_db_B["genome_paths"],
+            "--taxonomy_files",
+            sylph_db_A["taxonomy"],
+            sylph_db_B["taxonomy"],
+            "--output_root",
+            output_root,
+            "--cpus",
+            str(get_cpus()),
+        ],
+    )
+
+    manifest_builder.cli_entry_point()
+
+    # check that manifest and contigs are the same
+    check_gzipped_file(sylph_db_B["manifest"], output_root + "manifest.fasta.gz")
+    check_file(sylph_db_B["contigs"], output_root + "contigs.csv")
+
+
 def test_empty_sylph(
     empty_sylph, sylph_rep_paths, sylph_metadata, test_outputs_dir, mocker
 ):
@@ -140,7 +235,7 @@ def test_empty_sylph(
             "--output_root",
             output_root,
             "--cpus",
-            "4",
+            str(get_cpus()),
         ],
     )
 
