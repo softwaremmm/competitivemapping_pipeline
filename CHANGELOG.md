@@ -1,6 +1,8 @@
 ## New
 
 - Split the minimap2 and the analysis steps into separate python scripts
+- The genome_paths.tsv files should be provided as direct params to manifest builder (previously you input the parent directory)
+- manifest_builder params relabelled to remove gtdb as can use any db
 
 ## 2.0.0 (2025-02-12)
 
