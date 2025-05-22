@@ -65,6 +65,60 @@ def test_select_extra_species():
     }
 
 
+def test_get_genome_paths(test_outputs_dir):
+    test_dir = os.path.join(test_outputs_dir, "test_get_genome_paths")
+    os.makedirs(test_dir, exist_ok=True)
+    df = pd.DataFrame(
+        {
+            "filename": [
+                "species_A.fna.gz",
+                "species_B.fna.gz",
+            ],
+            "path": [
+                "genomes/",
+                "genomes/",
+            ],
+        }
+    )
+    expectation = pd.DataFrame(
+        {
+            "filename": [
+                "species_A.fna.gz",
+                "species_B.fna.gz",
+            ],
+            "path": [
+                os.path.join(test_dir, "genomes/", "species_A.fna.gz"),
+                os.path.join(test_dir, "genomes/", "species_B.fna.gz"),
+            ],
+        }
+    )
+
+    paths_file = os.path.join(test_dir, "genome_paths.csv")
+    df.to_csv(
+        paths_file,
+        sep="\t",
+        index=False,
+        header=False,
+    )
+
+    result_df = manifest_builder.get_genome_paths(paths_file)
+
+    if not expectation.equals(result_df):
+        # If the dataframes are not equal, we can print the differences
+        expectation.to_csv(
+            os.path.join(test_dir, "expected_genome_paths.csv"),
+            sep="\t",
+            index=False,
+        )
+        result_df.to_csv(
+            os.path.join(test_dir, "result_genome_paths.csv"),
+            sep="\t",
+            index=False,
+        )
+
+    assert expectation.equals(result_df)
+
+
 def test_empty_sylph(
     empty_sylph, sylph_rep_paths, sylph_metadata, test_outputs_dir, mocker
 ):
@@ -79,9 +133,9 @@ def test_empty_sylph(
             "manifest_builder",
             "--sylph_report",
             empty_sylph["sylph_report"],
-            "--genome_dirs",
+            "--genome_path_files",
             sylph_rep_paths,
-            "--metadata_files",
+            "--taxonomy_files",
             sylph_metadata,
             "--output_root",
             output_root,
