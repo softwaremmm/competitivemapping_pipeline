@@ -93,7 +93,7 @@ def test_get_genome_paths(test_outputs_dir):
         }
     )
 
-    paths_file = os.path.join(test_dir, "genome_paths.csv")
+    paths_file = os.path.join(test_dir, "genome_paths.tsv")
     df.to_csv(
         paths_file,
         sep="\t",
@@ -101,7 +101,7 @@ def test_get_genome_paths(test_outputs_dir):
         header=False,
     )
 
-    result_df = manifest_builder.get_genome_paths(paths_file)
+    result_df = manifest_builder.get_genome_paths(test_dir)
 
     if not expectation.equals(result_df):
         # If the dataframes are not equal, we can print the differences
@@ -130,8 +130,8 @@ def test_build_manifest_A(sylph_db_A, test_outputs_dir, mocker):
             "manifest_builder",
             "--sylph_report",
             sylph_db_A["sylph_report"],
-            "--genome_path_files",
-            sylph_db_A["genome_paths"],
+            "--genome_dirs",
+            sylph_db_A["genomes_dir"],
             "--taxonomy_files",
             sylph_db_A["taxonomy"],
             "--output_root",
@@ -161,8 +161,8 @@ def test_build_manifest_A_with_whole_genus(sylph_db_A, test_outputs_dir, mocker)
             "manifest_builder",
             "--sylph_report",
             sylph_db_A["sylph_report"],
-            "--genome_path_files",
-            sylph_db_A["genome_paths"],
+            "--genome_dirs",
+            sylph_db_A["genomes_dir"],
             "--taxonomy_files",
             sylph_db_A["taxonomy"],
             "--output_root",
@@ -194,9 +194,9 @@ def test_build_manifest_A_and_B(sylph_db_A, sylph_db_B, test_outputs_dir, mocker
             "manifest_builder",
             "--sylph_report",
             sylph_db_B["sylph_report"],
-            "--genome_path_files",
-            sylph_db_A["genome_paths"],
-            sylph_db_B["genome_paths"],
+            "--genome_dirs",
+            sylph_db_A["genomes_dir"],
+            sylph_db_B["genomes_dir"],
             "--taxonomy_files",
             sylph_db_A["taxonomy"],
             sylph_db_B["taxonomy"],
@@ -228,7 +228,7 @@ def test_empty_sylph(
             "manifest_builder",
             "--sylph_report",
             empty_sylph["sylph_report"],
-            "--genome_path_files",
+            "--genome_dirs",
             sylph_rep_paths,
             "--taxonomy_files",
             sylph_metadata,

@@ -210,7 +210,7 @@ def sylph_db_A() -> dict:
     return {
         "db": "test_data/sylph_databases/A/db.syldb",
         "taxonomy": "test_data/sylph_databases/A/taxonomy.tsv",
-        "genome_paths": "test_data/sylph_databases/A/genome_paths.tsv",
+        "genomes_dir": "test_data/sylph_databases/A",
         "sylph_report": "test_data/sylph_databases/A/sylph.tsv",
         "manifest": "test_data/sylph_databases/A/manifest.fasta.gz",
         "contigs": "test_data/sylph_databases/A/contigs.csv",
@@ -224,7 +224,7 @@ def sylph_db_B() -> dict:
     return {
         "db": "test_data/sylph_databases/B/db.syldb",
         "taxonomy": "test_data/sylph_databases/B/taxonomy.tsv",
-        "genome_paths": "test_data/sylph_databases/B/genome_paths.tsv",
+        "genomes_dir": "test_data/sylph_databases/B",
         "sylph_report": "test_data/sylph_databases/B/sylph.tsv",
         "manifest": "test_data/sylph_databases/B/manifest.fasta.gz",
         "contigs": "test_data/sylph_databases/B/contigs.csv",

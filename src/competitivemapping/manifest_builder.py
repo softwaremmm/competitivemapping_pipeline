@@ -98,16 +98,15 @@ def select_extra_species(
     return potential_species_df.copy()
 
 
-def get_genome_paths(paths_file: str) -> pd.DataFrame:
-    """Produce df of genome paths using file provided.
-    The paths in the table must be relative to the paths_file directory"""
+def get_genome_paths(genome_dir: str) -> pd.DataFrame:
+    """Produce df of genome paths using directory provided.
+    Directory should contain a genome_paths.tsv file
+    The paths in the table must be relative to the directory"""
+
     # File when downloaded actually seems to be space separated
     # using regex needs python engine, but file generally small so not a problem
-
-    parent_dir = os.path.dirname(paths_file)
-
     df = pd.read_csv(
-        paths_file,
+        genome_dir + "/genome_paths.tsv",
         sep=r"\s",
         engine="python",
         header=None,
@@ -115,7 +114,7 @@ def get_genome_paths(paths_file: str) -> pd.DataFrame:
     )
     # use os.path.join to ensure correct path separator
     df["path"] = df.apply(
-        lambda x: os.path.join(parent_dir, x["path"], x["filename"]), axis=1
+        lambda x: os.path.join(genome_dir, x["path"], x["filename"]), axis=1
     )
     return df
 
@@ -123,7 +122,7 @@ def get_genome_paths(paths_file: str) -> pd.DataFrame:
 def make_manifest(
     report_path: str,
     taxonomy_files: list[str],
-    genome_path_files: list[str],
+    genome_dirs: list[str],
     config: Config,
 ) -> tuple[str, pd.DataFrame]:
     """Produce a multifasta manifest and contig df from a sylph report and genomes folder
@@ -131,7 +130,7 @@ def make_manifest(
     Args:
         report_path (str): Path to the sylph report
         taxonomy_files (list[str]): path to the db metadata files, with taxonomy info
-        genome_path_files (list[str]): path to the directories with the genome fastas
+        genome_dirs (list[str]): path to the directories with the genome fastas
         config (Config): Config object
 
     Returns:
@@ -159,9 +158,7 @@ def make_manifest(
     )
     sylph_accessions = sylph_df["accession"].tolist()
 
-    genome_paths = pd.concat(
-        get_genome_paths(path_file) for path_file in genome_path_files
-    )
+    genome_paths = pd.concat(get_genome_paths(genome_dir) for genome_dir in genome_dirs)
     genome_paths["accession"] = genome_paths["filename"].str.replace(
         "_genomic.fna.gz", ""
     )
@@ -255,11 +252,12 @@ def cli_entry_point():
         help="Path to the metadata files with assembly to taxonomy mapping",
         nargs="+",
     )
+    # Need to provide parent directory to work with nextflow symlinks
     parser.add_argument(
-        "--genome_path_files",
+        "--genome_dirs",
         required=True,
-        help="tsvs with relative paths to reference genomes."
-        + " See genome_paths.tsv in gtdb_genomes_reps",
+        help="Path to the directories containing the genome files."
+        + " Must contain a genome_paths.tsv file like in gtdb_genomes_reps",
         nargs="+",
     )
     parser.add_argument(
@@ -283,7 +281,7 @@ def cli_entry_point():
     _manifest, contigs = make_manifest(
         sylph_report,
         args.taxonomy_files,
-        args.genome_path_files,
+        args.genome_dirs,
         config,
     )
 
