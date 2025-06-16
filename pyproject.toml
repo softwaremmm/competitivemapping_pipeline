@@ -57,7 +57,7 @@ tag_format = "$version"
 
 
 [tool.version_bumper]
-active_version = "bca3398"
+active_version = "dabf2d4"
 version_files = [
     "process/competitive_mapping.nf",
     ".github/workflows/manual_docker.yml",
