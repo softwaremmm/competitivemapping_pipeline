@@ -1,6 +1,8 @@
 ## New
 
 - Split the minimap2 and the analysis steps into separate python scripts
+- manifest_builder params relabelled to remove gtdb as can use any db
+- support supplying multiple dbs to manifest building
 
 ## 2.0.0 (2025-02-12)
 

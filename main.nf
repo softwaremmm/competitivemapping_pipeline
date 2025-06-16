@@ -133,9 +133,9 @@ workflow competitive_mapping {
 
 workflow dynamic_competitive_mapping {
     take:
-    input_files
-    gtdb_genomes_path
-    assembly_metadata
+    input_files // Channel expected to be tuple (sample_name, fqs, sylph_report)
+    db_genome_path_files // Used to find genome for manifest
+    db_taxonomy // Taxonomy data of genomes in sylph db
     seq_platform
 
     main:
@@ -144,8 +144,8 @@ workflow dynamic_competitive_mapping {
 
     competitive_mapping_output = dynamicCompetitiveMapping(
         input_files,
-        gtdb_genomes_path,
-        assembly_metadata,
+        db_genome_path_files,
+        db_taxonomy,
         seq_platform,
         params.use_whole_genera_in_dynamic_cm
     )
