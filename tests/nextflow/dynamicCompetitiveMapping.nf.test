@@ -68,4 +68,35 @@ nextflow_process {
         }
     }
 
+    test("Illumina - Process should accept multiple taxonomy and genome path files") {
+        tag "illumina"
+        when {
+            process{
+                """
+                input[0] = ['sample_test', [file("$projectDir/test_data/TB_10k/TB_1.fastq.gz"), file("$projectDir/test_data/TB_10k/TB_2.fastq.gz")], file("$projectDir/test_data/sylph_databases/B/sylph.tsv")]
+                input[1] = [file("$projectDir/test_data/sylph_databases/A"), file("$projectDir/test_data/sylph_databases/B")]
+                input[2] = [file("$projectDir/test_data/sylph_databases/A/taxonomy.tsv"), file("$projectDir/test_data/sylph_databases/B/taxonomy.tsv")]
+                input[3] = 'illumina'
+                input[4] = false
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert process.exitStatus == 0
+
+
+            with(process.out.cm_report) {
+                assert size() == 1
+                assert get(0)[1].contains("species_comparison_report.json")
+            }
+
+            with(process.out.cm_csv) {
+                assert size() == 1
+                assert get(0)[1].contains("species_comparison.csv")
+            }
+        }
+    }
+
 }

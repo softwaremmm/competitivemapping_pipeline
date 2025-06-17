@@ -1,7 +1,7 @@
 process competitiveMapping {
     publishDir "${params.publish_dir}", enabled: params.publish_dir != "", mode: "copy", saveAs: { filename -> sample_name + "_" + filename }
     container {
-        params.test_container_cm == "" ? 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:bca3398' : params.test_container_cm
+        params.test_container_cm == "" ? 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:dabf2d4' : params.test_container_cm
     }
 
     cpus 4
@@ -65,7 +65,7 @@ process competitiveMapping {
 process dynamicCompetitiveMapping {
     publishDir "${params.publish_dir}", enabled: params.publish_dir != "", mode: "copy", saveAs: { filename -> sample_name + "_" + filename }
     container {
-        params.test_container_cm == "" ? 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:bca3398' : params.test_container_cm
+        params.test_container_cm == "" ? 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:dabf2d4' : params.test_container_cm
     }
 
     cpus 4
@@ -77,8 +77,10 @@ process dynamicCompetitiveMapping {
 
     input:
     tuple val(sample_name), path(fqs), path(sylph_report)
-    path gtdb_genomes_dir
-    path assembly_metadata
+    // genome dir paths and taxonomy files can be single paths, or lists of paths
+    // Renamed to avoid any name clashes
+    path "db_genome_dirs"
+    path "db_taxonomy"
     // Used to go from assembly to species
     val seq_platform
     val include_whole_genus
@@ -93,8 +95,8 @@ process dynamicCompetitiveMapping {
     whole_genera_arg = include_whole_genus ? "--include_whole_genus" : ""
     """
     manifest_builder --sylph_report ${sylph_report} \
-        --genome_dirs ${gtdb_genomes_dir} \
-        --metadata_files ${assembly_metadata} \
+        --genome_dirs db_genome_dirs* \
+        --taxonomy_files db_taxonomy* \
         ${whole_genera_arg} \
         --cpus ${task.cpus} \
         --output_root "out."
@@ -125,7 +127,7 @@ process dynamicCompetitiveMapping {
 
 process has_enough_reads {
     container {
-        params.test_container_cm == "" ? 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:bca3398' : params.test_container_cm
+        params.test_container_cm == "" ? 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:dabf2d4' : params.test_container_cm
     }
 
     cpus 1

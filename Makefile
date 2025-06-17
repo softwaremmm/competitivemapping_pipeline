@@ -13,7 +13,7 @@ run:
 		--publish_dir results \
 		-resume
 
-build-container:
+container:
 	docker build -t test_container_cm .
 
 test:
