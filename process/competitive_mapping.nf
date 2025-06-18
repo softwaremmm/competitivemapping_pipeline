@@ -29,7 +29,7 @@ process competitiveMapping {
     tb_reads_2 = "reads_for_assembly_2.fastq.gz"
     competitive_mapping_report = "species_comparison_report.json"
     competitive_mapping_csv = "species_comparison.csv"
-    ref_for_fastq = reference_name == "" ? "" : "--ref_for_fastq" + reference_name
+    ref_for_fastq = reference_name == "" ? "" : "--ref_for_fastq " + reference_name
     """
     manifest_mapper \
         --seq_platform ${seq_platform} \
