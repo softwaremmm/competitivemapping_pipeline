@@ -38,7 +38,7 @@ workflow {
             --manifest
             --species_list
             --seq_platform
-            --reference_name: Reference name to use for the fastq files. Default: 'M.tuberculosis'. If you want to use a list of names, input a string separated by commas.
+            --reference_name: Reference name to use for the fastq files. Default: ''. If you want to use a list of names, input a string separated by commas.
             '''.stripIndent()
         )
         exit(0)
@@ -55,9 +55,6 @@ workflow {
     }
     if (params.seq_platform == '') {
         exit(1, 'error: --seq_platform is mandatory')
-    }
-    if (params.reference_name == '') {
-        exit(1, 'error: --reference_name is mandatory')
     }
 
 
