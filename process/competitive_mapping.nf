@@ -49,13 +49,17 @@ process competitiveMapping {
     mv out.species_comparison.json ${competitive_mapping_report}
     mv out.species_comparison.csv ${competitive_mapping_csv}
 
-    if [ ${seq_platform} == 'ont' ]
+    # Rename filtered fastqs if we're filtering reads
+    if [ ${ref_for_fastq} != '' ]
     then
-        mv out.reads.fastq.gz ${tb_reads}
-    elif [ ${seq_platform} == 'illumina' ]
-    then
-        mv out.reads_1.fastq.gz ${tb_reads_1}
-        mv out.reads_2.fastq.gz ${tb_reads_2}
+        if [ ${seq_platform} == 'ont' ]
+        then
+            mv out.reads.fastq.gz ${tb_reads}
+        elif [ ${seq_platform} == 'illumina' ]
+        then
+            mv out.reads_1.fastq.gz ${tb_reads_1}
+            mv out.reads_2.fastq.gz ${tb_reads_2}
+        fi
     fi
 
     # clean up large intermediate files
