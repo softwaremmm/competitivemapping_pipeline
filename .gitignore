@@ -15,7 +15,7 @@ h37rv_100k*
 data/*
 !data/manifest/
 !data/manifest_flu/
-!data/manifest_flu/multifasta.fasta
+!data/manifest_flu/all_influenza_A.fasta
 data/manifest/manifest_20231001
 
 # nf-tests
