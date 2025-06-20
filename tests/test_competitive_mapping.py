@@ -1,36 +1,38 @@
-import os
-from gzip import open as gzopen
 import hashlib
+import os
+import subprocess
+import tempfile
+from gzip import open as gzopen
+from unittest.mock import MagicMock, patch
 
+import pandas as pd
+import pytest
 from Bio import SeqIO
-from test_utils import check_file
+from test_utils import check_file, get_cpus
 
-from competitivemapping import competitive_mapping, manifest_builder
+from competitivemapping import competitive_mapping
+from competitivemapping.competitive_mapping import Config, output_fastqs
 
 
-def test_cli_entry_point(
-    samples, species_table_path, manifest, test_outputs_dir, mocker
-):
+def test_cli_entry_point(samples, species_table_path, test_outputs_dir, mocker):
     output_root = os.path.join(test_outputs_dir, samples["sample"] + ".")
 
     seq_platform = "ont" if len(samples["reads"]) == 1 else "illumina"
 
     args = [
         "competitive_mapping",
-        "--reads",
-        " ".join(samples["reads"]),
+        "--input_bam",
+        samples["bam"],
         "--seq_platform",
         seq_platform,
         "--ref_for_fastq",
         "M.tuberculosis",
-        "--manifest",
-        manifest,
         "--contigs",
         species_table_path,
         "--output_root",
         output_root,
         "--cpus",
-        "4",
+        str(get_cpus()),
     ]
 
     mocker.patch(
@@ -75,7 +77,7 @@ def test_cli_entry_point(
             check_length(output_root + "reads.fastq.gz", 998)
 
 
-def test_empty_manifest(empty_sylph, test_outputs_dir, mocker):
+def test_empty_contigs(empty_sylph, test_outputs_dir, mocker):
     output_root = os.path.join(
         test_outputs_dir, "cm_sylph", empty_sylph["sample"] + "."
     )
@@ -85,18 +87,16 @@ def test_empty_manifest(empty_sylph, test_outputs_dir, mocker):
 
     args = [
         "competitive_mapping",
-        "--manifest",
-        empty_sylph["manifest"],
+        "--input_bam",
+        empty_sylph["bam"],
         "--contigs",
         empty_sylph["contigs"],
-        "--reads",
-        " ".join(empty_sylph["reads"]),
         "--seq_platform",
         seq_platform,
         "--output_root",
         output_root,
         "--cpus",
-        "4",
+        str(get_cpus()),
     ]
 
     mocker.patch(
@@ -114,127 +114,188 @@ def test_empty_manifest(empty_sylph, test_outputs_dir, mocker):
     )
 
 
-def test_sylph_manifest(
-    samples, sylph_rep_paths, sylph_metadata, test_outputs_dir, mocker
+@pytest.fixture
+def mock_contigs_df():
+    """Create a mock contigs dataframe for testing"""
+    return pd.DataFrame(
+        {"reference": ["ref1", "ref2", "ref3"], "rname": ["r1", "r2", "r3"]}
+    )
+
+
+@pytest.fixture
+def temp_output_dir():
+    """Create a temporary directory for test outputs"""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        yield tmpdir
+
+
+@patch("subprocess.run")
+def test_output_fastqs_single_reference(mock_run, mock_contigs_df, temp_output_dir):
+    """Test output_fastqs with a single reference"""
+    # Setup
+    mock_run.return_value = MagicMock()
+    aln_bam = "test.bam"
+    references = ["ref1"]
+
+    config = Config(
+        cpus=1,
+        seq_platform="illumina",
+        output_root=temp_output_dir,
+    )
+
+    # Execute
+    output_fastqs(
+        aln_bam=aln_bam,
+        references=references,
+        contigs_df=mock_contigs_df,
+        include_unmapped=False,
+        config=config,
+    )
+
+    # Verify
+    # Check that samtools index was called
+    mock_run.assert_any_call(
+        f"samtools index {aln_bam}", shell=True, check=True, stdout=subprocess.PIPE
+    )
+    # Check that the correct rname was used
+    mock_run.assert_any_call(
+        f"samtools view -h {aln_bam} -u r1 | samtools sort -n -@ 1 -o {temp_output_dir}.0.bam",
+        shell=True,
+        check=True,
+        stdout=subprocess.PIPE,
+    )
+
+
+@patch("subprocess.run")
+def test_output_fastqs_multiple_references(mock_run, mock_contigs_df, temp_output_dir):
+    """Test output_fastqs with multiple references"""
+    # Setup
+    mock_run.return_value = MagicMock()
+    aln_bam = "test.bam"
+    references = ["ref1", "ref2"]
+
+    config = Config(
+        cpus=1,
+        seq_platform="illumina",
+        output_root=temp_output_dir,
+    )
+
+    # Execute
+    output_fastqs(
+        aln_bam=aln_bam,
+        references=references,
+        contigs_df=mock_contigs_df,
+        include_unmapped=False,
+        config=config,
+    )
+
+    # Verify
+    # Check that both rnames were used
+    mock_run.assert_any_call(
+        f"samtools view -h {aln_bam} -u r1 | samtools sort -n -@ 1 -o {temp_output_dir}.0.bam",
+        shell=True,
+        check=True,
+        stdout=subprocess.PIPE,
+    )
+    mock_run.assert_any_call(
+        f"samtools view -h {aln_bam} -u r2 | samtools sort -n -@ 1 -o {temp_output_dir}.1.bam",
+        shell=True,
+        check=True,
+        stdout=subprocess.PIPE,
+    )
+
+
+@patch("subprocess.run")
+def test_output_fastqs_with_unmapped(mock_run, mock_contigs_df, temp_output_dir):
+    """Test output_fastqs with unmapped reads included"""
+    # Setup
+    mock_run.return_value = MagicMock()
+    aln_bam = "test.bam"
+    references = ["ref1"]
+
+    config = Config(
+        cpus=1,
+        seq_platform="illumina",
+        output_root=temp_output_dir,
+    )
+
+    # Execute
+    output_fastqs(
+        aln_bam=aln_bam,
+        references=references,
+        contigs_df=mock_contigs_df,
+        include_unmapped=True,
+        config=config,
+    )
+
+    # Verify
+    # Check that unmapped reads were included
+    mock_run.assert_any_call(
+        f'samtools view -h {aln_bam} -u "*" | samtools sort -n -@ 1 -o {temp_output_dir}.1.bam',
+        shell=True,
+        check=True,
+        stdout=subprocess.PIPE,
+    )
+
+
+@patch("subprocess.run")
+def test_output_fastqs_nonexistent_reference(
+    mock_run, mock_contigs_df, temp_output_dir
 ):
-    output_root = os.path.join(test_outputs_dir, "cm_sylph", samples["sample"] + ".")
-    os.makedirs(os.path.join(test_outputs_dir, "cm_sylph"), exist_ok=True)
+    """Test output_fastqs with references that don't exist in contigs"""
+    # Setup
+    mock_run.return_value = MagicMock()
+    aln_bam = "test.bam"
+    references = ["nonexistent_ref"]
 
-    seq_platform = "ont" if len(samples["reads"]) == 1 else "illumina"
-
-    # make manifest first
-    mocker.patch(
-        "sys.argv",
-        [
-            "manifest_builder",
-            "--sylph_report",
-            samples["sylph_report"],
-            "--genome_dirs",
-            sylph_rep_paths,
-            "--metadata_files",
-            sylph_metadata,
-            "--output_root",
-            output_root,
-            "--cpus",
-            "4",
-        ],
+    config = Config(
+        cpus=1,
+        seq_platform="illumina",
+        output_root=temp_output_dir,
     )
-    manifest_builder.cli_entry_point()
 
-    mocker.patch(
-        "sys.argv",
-        [
-            "competitive_mapping",
-            "--manifest",
-            output_root + "manifest.fasta.gz",
-            "--contigs",
-            output_root + "contigs.csv",
-            "--reads",
-            " ".join(samples["reads"]),
-            "--seq_platform",
-            seq_platform,
-            "--ref_for_fastq",
-            "GCF_000195955.2",  # M.tuberculosis
-            "--output_root",
-            output_root,
-            "--cpus",
-            "10",
-        ],
+    # Execute
+    output_fastqs(
+        aln_bam=aln_bam,
+        references=references,
+        contigs_df=mock_contigs_df,
+        include_unmapped=False,
+        config=config,
     )
-    competitive_mapping.cli_entry_point()
 
-    check_file(
-        samples["sylph_species_comparison"], output_root + "species_comparison.json"
+    # Verify
+    # Check that no rnames were used (empty list)
+    assert not any("samtools view" in str(call) for call in mock_run.call_args_list)
+
+
+@patch("subprocess.run")
+def test_output_fastqs_ont_platform(mock_run, mock_contigs_df, temp_output_dir):
+    """Test output_fastqs with ONT platform"""
+    # Setup
+    mock_run.return_value = MagicMock()
+    aln_bam = "test.bam"
+    references = ["ref1"]
+
+    config = Config(
+        cpus=1,
+        seq_platform="ont",
+        output_root=temp_output_dir,
     )
-    check_file(samples["sylph_csv_comparison"], output_root + "species_comparison.csv")
 
-    def check_length(path, length):
-        assert len(list(SeqIO.parse(gzopen(path, "rt"), format="fastq"))) == length
-
-    match samples["sample"]:
-        case "chloro_10k":
-            check_length(output_root + "reads_1.fastq.gz", 14)
-            check_length(output_root + "reads_2.fastq.gz", 14)
-        case "tb_10k":
-            check_length(output_root + "reads_1.fastq.gz", 10000)
-            check_length(output_root + "reads_2.fastq.gz", 10000)
-        case "tb_ont":
-            check_length(output_root + "reads.fastq.gz", 1000)
-
-
-def test_sylph_manifest_all_genera(
-    samples, sylph_rep_paths, sylph_metadata, test_outputs_dir, mocker
-):
-    output_root = os.path.join(
-        test_outputs_dir, "cm_sylph_all_genera", samples["sample"] + "."
+    # Execute
+    output_fastqs(
+        aln_bam=aln_bam,
+        references=references,
+        contigs_df=mock_contigs_df,
+        include_unmapped=False,
+        config=config,
     )
-    os.makedirs(os.path.join(test_outputs_dir, "cm_sylph_all_genera"), exist_ok=True)
 
-    seq_platform = "ont" if len(samples["reads"]) == 1 else "illumina"
-
-    # make manifest first
-    mocker.patch(
-        "sys.argv",
-        [
-            "manifest_builder",
-            "--include_whole_genus",
-            "--sylph_report",
-            samples["sylph_report"],
-            "--genome_dirs",
-            sylph_rep_paths,
-            "--metadata_files",
-            sylph_metadata,
-            "--output_root",
-            output_root,
-            "--cpus",
-            "4",
-        ],
-    )
-    manifest_builder.cli_entry_point()
-
-    mocker.patch(
-        "sys.argv",
-        [
-            "competitive_mapping",
-            "--manifest",
-            output_root + "manifest.fasta.gz",
-            "--contigs",
-            output_root + "contigs.csv",
-            "--reads",
-            " ".join(samples["reads"]),
-            "--seq_platform",
-            seq_platform,
-            "--ref_for_fastq",
-            "GCF_000195955.2",  # M.tuberculosis
-            "--output_root",
-            output_root,
-            "--cpus",
-            "10",
-        ],
-    )
-    competitive_mapping.cli_entry_point()
-
-    check_file(
-        samples["sylph_species_comparison_all_genera"],
-        output_root + "species_comparison.json",
+    # Verify
+    # Check that ONT-specific command was used
+    mock_run.assert_any_call(
+        f"samtools fastq --excl-flags 0x100 -@ 1 -0 {temp_output_dir}reads.fastq.gz {temp_output_dir}output_aln.bam",
+        shell=True,
+        check=True,
+        stdout=subprocess.PIPE,
     )

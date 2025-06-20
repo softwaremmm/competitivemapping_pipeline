@@ -1,5 +1,3 @@
-# pylint: disable=W1203
-
 """Check if the number of reads for a genome is above a threshold."""
 
 import argparse
@@ -7,11 +5,15 @@ import json
 import logging
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
-def check_threshold(json_file_path: str, threshold: int, genome_name: str = "M.tuberculosis") -> str:
+def check_threshold(
+    json_file_path: str, threshold: int, genome_name: str = "M.tuberculosis"
+) -> str:
     """Check if the number of reads is above a certain threshold.
 
     Args:
@@ -49,16 +51,22 @@ def check_threshold(json_file_path: str, threshold: int, genome_name: str = "M.t
 
 def cli_entry_point():
     """Main function for the script"""
-    parser = argparse.ArgumentParser(description="Check if number of reads are above threshold")
+    parser = argparse.ArgumentParser(
+        description="Check if number of reads are above threshold"
+    )
     parser.add_argument(
         "--json_file_path",
         help="JSON file output by Competitive Mapping",
         required=True,
     )
-    parser.add_argument("--read_threshold", help="Threshold number of reads", required=True)
+    parser.add_argument(
+        "--read_threshold", help="Threshold number of reads", required=True
+    )
     args = parser.parse_args()
 
-    logger.info(f"Checking if number of reads are above threshold of {args.read_threshold} in {args.json_file_path}")
+    logger.info(
+        f"Checking if number of reads are above threshold of {args.read_threshold} in {args.json_file_path}"
+    )
 
     # Using print statements as Nextflow expects output on stdout, without a newline
     # Nextflow expects the output to be in lowercase

@@ -51,7 +51,7 @@ def make_manifest(
         "sum"
     )
 
-    contigs_df.to_csv(f"{output_root}contigs.tsv", sep="\t", index=False)
+    contigs_df.to_csv(f"{output_root}contigs.csv", index=False)
     return manifest_file, contigs_df
 
 

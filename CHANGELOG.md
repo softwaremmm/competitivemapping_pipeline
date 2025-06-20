@@ -1,7 +1,19 @@
+## 2.2.0
+
+### Feat
+- Breaking: Make reference name a parameter so reads mapping to references other than _M. tuberculosis_ can be output if needed
+
+### Chores
+- Split the minimap2 and the analysis steps into separate python scripts
+- manifest_builder params relabelled to remove gtdb as can use any db
+- support supplying multiple dbs to manifest building
+
+### Tests
+- Tests for reference name as a parameter, and for flu specifically
+
 ## 2.0.1
 
 ### Fix
-
 - Correctly report species names for _M. basiliense_ and _M. saopaulense_
 - Remove unused species
 
