@@ -1,4 +1,4 @@
-## New
+## 2.2.0
 
 ### Feat
 - Breaking: Make reference name a parameter so reads mapping to references other than _M. tuberculosis_ can be output if needed
