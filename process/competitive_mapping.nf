@@ -50,7 +50,7 @@ process competitiveMapping {
     mv out.species_comparison.csv ${competitive_mapping_csv}
 
     # Rename filtered fastqs if we're filtering reads
-    if [ ${ref_for_fastq} != '' ]
+    if [ ${reference_name} != '' ]
     then
         if [ ${seq_platform} == 'ont' ]
         then
