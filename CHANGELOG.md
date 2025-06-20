@@ -1,10 +1,15 @@
 ## New
 
-- Split the minimap2 and the analysis steps into separate python scripts
+### Feat
 - Breaking: Make reference name a parameter so reads mapping to references other than _M. tuberculosis_ can be output if needed
-- Tests for reference name as a parameter, and for flu specifically
+
+### Chores
+- Split the minimap2 and the analysis steps into separate python scripts
 - manifest_builder params relabelled to remove gtdb as can use any db
 - support supplying multiple dbs to manifest building
+
+### Tests
+- Tests for reference name as a parameter, and for flu specifically
 
 ## 2.0.1
 
