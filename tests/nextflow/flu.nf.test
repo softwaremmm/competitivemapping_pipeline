@@ -32,6 +32,10 @@ nextflow_process {
                 assert size() == 1
                 assert get(0)[1].contains("species_comparison.csv")
             }
+
+            with(process.out.cm_tb_reads) {
+                assert size() == 0
+            }
         }
     }
 }
