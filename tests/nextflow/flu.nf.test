@@ -14,7 +14,7 @@ nextflow_process {
                 input[1] = file("$projectDir/data/manifest/influenza/multifasta.fasta.gz")
                 input[2] = file("$projectDir/test_data/flu_contigs_20250513.csv")
                 input[3] = 'illumina'
-                input[4] = 'H1,H2,H3,H4,H5,H6,H7,H8,H9,H10,H11,H12,H13,H14,H15,H16,H17,H18,N1,N2,N3,N4,N5,N6,N7,N8,N9,N10,N11,NS,PB1,PB2,M,PA,NP'
+                input[4] = ''
                 """
             }
         }
