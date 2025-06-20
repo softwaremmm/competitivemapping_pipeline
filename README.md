@@ -54,6 +54,7 @@ parameters:
 - contigs: the species list file
 - seq_platform: `ont` or `illumina`
 - ref_for_fastq: If set then the reads which mapped to the provided reference will be extracted from the bam file. Used in myco to select TB reads.
+- reference_name (optional): Set this to the name of the reference you want to filter reads for e.g. `M.tuberculosis` to output filtered _M. tuberculosis_ reads. Can also take a comma seperated list.
 Note: currently unmapped reads will also be extracted by default
 
 ## Notes on Bam to Fastq

@@ -9,10 +9,12 @@ nextflow_workflow {
         when {
             workflow {
                 """
+                params.reference_name = 'M.tuberculosis'
                 input[0] = Channel.of(['sample_test', [file("$projectDir/test_data/TB_10k/TB_1.fastq.gz"), file("$projectDir/test_data/TB_10k/TB_2.fastq.gz")]])
                 input[1] = file("$projectDir/data/manifest/manifest_20231001")
                 input[2] = file("$projectDir/test_data/species_list_manifest_20250324.csv")
                 input[3] = 'illumina'
+                input[4] = 'M.tuberculosis'
                 """
             }
         }
@@ -43,10 +45,12 @@ nextflow_workflow {
         when {
             workflow {
                 """
+                params.reference_name = 'M.tuberculosis'
                 input[0] = ['sample_test', file("$projectDir/test_data/TB_ont/ont_lineage4_10.fastq.gz")]
                 input[1] = file("$projectDir/data/manifest/manifest_20231001")
                 input[2] = file("$projectDir/test_data/species_list_manifest_20250324.csv")
                 input[3] = 'ont'
+                input[4] = 'M.tuberculosis'
                 """
             }
         }
@@ -84,6 +88,7 @@ nextflow_workflow {
                 input[1] = file("$projectDir/data/manifest/manifest_20231001")
                 input[2] = file("$projectDir/test_data/species_list_manifest_20250324.csv")
                 input[3] = 'illumina'
+                input[4] = 'M.tuberculosis'
                 """
             }
 
@@ -109,6 +114,7 @@ nextflow_workflow {
                 input[1] = file("$projectDir/data/manifest/manifest_20231001")
                 input[2] = file("$projectDir/test_data/species_list_manifest_20250324.csv")
                 input[3] = 'illumina'
+                input[4] = 'M.tuberculosis'
                 """
             }
 

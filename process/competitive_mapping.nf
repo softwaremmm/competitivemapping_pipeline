@@ -16,9 +16,10 @@ process competitiveMapping {
     path manifest
     path species_list
     val seq_platform
+    val reference_name
 
     output:
-    tuple val(sample_name), path("reads_for_assembly*fastq.gz"), emit: cm_tb_reads
+    tuple val(sample_name), path("reads_for_assembly*fastq.gz"), emit: cm_tb_reads, optional: true
     tuple val(sample_name), path(competitive_mapping_report), emit: cm_report
     tuple val(sample_name), path(competitive_mapping_csv), emit: cm_csv
 
@@ -28,7 +29,7 @@ process competitiveMapping {
     tb_reads_2 = "reads_for_assembly_2.fastq.gz"
     competitive_mapping_report = "species_comparison_report.json"
     competitive_mapping_csv = "species_comparison.csv"
-    h37rv_ref = "M.tuberculosis"
+    ref_for_fastq = reference_name == "" ? "" : "--ref_for_fastq " + reference_name
     """
     manifest_mapper \
         --seq_platform ${seq_platform} \
@@ -41,20 +42,24 @@ process competitiveMapping {
         --input_bam aln.bam \
         --seq_platform ${seq_platform} \
         --contigs ${species_list} \
-        --ref_for_fastq ${h37rv_ref} \
+        ${ref_for_fastq} \
         --cpus ${task.cpus} \
         --output_root "out."
 
     mv out.species_comparison.json ${competitive_mapping_report}
     mv out.species_comparison.csv ${competitive_mapping_csv}
 
-    if [ ${seq_platform} == 'ont' ]
+    # Rename filtered fastqs if we're filtering reads
+    if [ ${reference_name} != '' ]
     then
-        mv out.reads.fastq.gz ${tb_reads}
-    elif [ ${seq_platform} == 'illumina' ]
-    then
-        mv out.reads_1.fastq.gz ${tb_reads_1}
-        mv out.reads_2.fastq.gz ${tb_reads_2}
+        if [ ${seq_platform} == 'ont' ]
+        then
+            mv out.reads.fastq.gz ${tb_reads}
+        elif [ ${seq_platform} == 'illumina' ]
+        then
+            mv out.reads_1.fastq.gz ${tb_reads_1}
+            mv out.reads_2.fastq.gz ${tb_reads_2}
+        fi
     fi
 
     # clean up large intermediate files
