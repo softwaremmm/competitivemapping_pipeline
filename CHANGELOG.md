@@ -6,6 +6,11 @@
 - manifest_builder params relabelled to remove gtdb as can use any db
 - support supplying multiple dbs to manifest building
 
+## 2.0.1
+
+### Fix
+- Correctly report species names for _M. basiliense_ and _M. saopaulense_
+- Remove unused species
 
 ## 2.0.0 (2025-02-12)
 
