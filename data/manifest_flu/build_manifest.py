@@ -1,6 +1,7 @@
 """Given a multi-fasta of all RefSeq influenza A sequences, build the manifest."""
 import argparse
 import re
+import pandas as pd
 
 class Fasta:
     """Hold a fasta sequence and its header."""
@@ -60,20 +61,11 @@ if __name__ == "__main__":
             # We have an N segment
             segment = "N" + N
         else:
-            segment = "Other"
+            segment = fasta.header.split("|")[1].strip() 
         
         manifest.append([fasta.rname, len(fasta.sequence), segment])
-    
-    with open(args.manifest_out, "w") as manifest_file:
-        manifest_file.write("rname,totallength,reference\n")
-        for entry in manifest:
-            manifest_file.write(",".join(map(str, entry)) + "\n")
-        
 
-
-
-
-
-
+    manifest = pd.DataFrame(sorted(manifest, key=lambda x: x[2]), columns=["rname", "totallength", "reference"])
+    manifest.to_csv(args.manifest_out, index=False)
 
 
