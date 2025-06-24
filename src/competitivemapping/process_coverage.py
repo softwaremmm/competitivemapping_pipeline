@@ -208,7 +208,7 @@ def process_coverage(
             # This should be fine, as it just means there is no secondary coverage file
             logging.info("No data found within secondary coverage file")
 
-    return aggregated
+    return aggregated.drop_duplicates()
 
 
 def cli_entry_point() -> None:

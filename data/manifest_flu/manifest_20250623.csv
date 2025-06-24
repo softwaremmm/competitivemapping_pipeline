@@ -1,0 +1,57 @@
+rname,totallength,reference
+NC_026433.1,1701,H1
+NC_002017.1,1778,H1
+NC_007374.1,1773,H2
+NC_007366.1,1762,H3
+NC_007362.1,1760,H5
+NC_026425.1,1708,H7
+NC_004908.1,1714,H9
+NC_026438.1,2280,"Influenza A virus (A/California/07/2009(H1N1)) segment 1 polymerase PB2 (PB2) gene, complete cds"
+NC_026435.1,2274,"Influenza A virus (A/California/07/2009(H1N1)) segment 2 polymerase PB1 (PB1) gene, complete cds; and nonfunctional PB1-F2 protein (PB1-F2) gene, complete sequence"
+NC_026437.1,2151,"Influenza A virus (A/California/07/2009(H1N1)) segment 3 polymerase PA (PA) gene, complete cds"
+NC_026436.1,1497,"Influenza A virus (A/California/07/2009(H1N1)) segment 5 nucleocapsid protein (NP) gene, complete cds"
+NC_026431.1,982,"Influenza A virus (A/California/07/2009(H1N1)) segment 7 matrix protein 2 (M2) and matrix protein 1 (M1) genes, complete cds"
+NC_026432.1,863,"Influenza A virus (A/California/07/2009(H1N1)) segment 8 nuclear export protein (NEP) and nonstructural protein 1 (NS1) genes, complete cds"
+NC_007360.1,1565,"Influenza A virus (A/Goose/Guangdong/1/96(H5N1)) nucleocapsid protein (NP) gene, complete cds"
+NC_007357.1,2341,"Influenza A virus (A/Goose/Guangdong/1/96(H5N1)) polymerase (PB2) gene, complete cds"
+NC_004905.2,1557,"Influenza A virus (A/Hong Kong/1073/99(H9N2)) segment 5, complete sequence"
+NC_004907.1,1025,"Influenza A virus (A/Hong Kong/1073/99(H9N2)) segment 7, complete sequence"
+NC_004906.1,890,"Influenza A virus (A/Hong Kong/1073/99(H9N2)) segment 8, complete sequence"
+NC_007378.1,2341,"Influenza A virus (A/Korea/426/1968(H2N2)) segment 1, complete sequence"
+NC_007375.1,2341,"Influenza A virus (A/Korea/426/1968(H2N2)) segment 2, complete sequence"
+NC_007376.1,2233,"Influenza A virus (A/Korea/426/1968(H2N2)) segment 3, complete sequence"
+NC_007381.1,1497,"Influenza A virus (A/Korea/426/1968(H2N2)) segment 5, complete sequence"
+NC_007377.1,1027,"Influenza A virus (A/Korea/426/1968(H2N2)) segment 7, complete sequence"
+NC_007380.1,838,"Influenza A virus (A/Korea/426/1968(H2N2)) segment 8, complete sequence"
+NC_007373.1,2341,"Influenza A virus (A/New York/392/2004(H3N2)) segment 1, complete sequence"
+NC_007372.1,2341,"Influenza A virus (A/New York/392/2004(H3N2)) segment 2, complete sequence"
+NC_007371.1,2233,"Influenza A virus (A/New York/392/2004(H3N2)) segment 3, complete sequence"
+NC_007369.1,1566,"Influenza A virus (A/New York/392/2004(H3N2)) segment 5, complete sequence"
+NC_007367.1,1027,"Influenza A virus (A/New York/392/2004(H3N2)) segment 7, complete sequence"
+NC_007370.1,890,"Influenza A virus (A/New York/392/2004(H3N2)) segment 8, complete sequence"
+NC_002023.1,2341,"Influenza A virus (A/Puerto Rico/8/1934(H1N1)) segment 1, complete sequence"
+NC_002021.1,2341,"Influenza A virus (A/Puerto Rico/8/1934(H1N1)) segment 2, complete sequence"
+NC_002022.1,2233,"Influenza A virus (A/Puerto Rico/8/1934(H1N1)) segment 3, complete sequence"
+NC_002019.1,1565,"Influenza A virus (A/Puerto Rico/8/1934(H1N1)) segment 5, complete sequence"
+NC_002016.1,1027,"Influenza A virus (A/Puerto Rico/8/1934(H1N1)) segment 7, complete sequence"
+NC_002020.1,890,"Influenza A virus (A/Puerto Rico/8/1934(H1N1)) segment 8, complete sequence"
+NC_026422.1,2280,"Influenza A virus (A/Shanghai/02/2013(H7N9)) segment 1 polymerase PB2 (PB2) gene, complete cds"
+NC_026423.1,2297,"Influenza A virus (A/Shanghai/02/2013(H7N9)) segment 2 polymerase PB1 (PB1) and PB1-F2 protein (PB1-F2) genes, complete cds"
+NC_026424.1,2176,"Influenza A virus (A/Shanghai/02/2013(H7N9)) segment 3 polymerase PA (PA) and PA-X protein (PA-X) genes, complete cds"
+NC_026426.1,1506,"Influenza A virus (A/Shanghai/02/2013(H7N9)) segment 5 nucleocapsid protein (NP) gene, complete cds"
+NC_026427.1,985,"Influenza A virus (A/Shanghai/02/2013(H7N9)) segment 7 matrix protein 2 (M2) and matrix protein 1 (M1) genes, complete cds"
+NC_026428.1,841,"Influenza A virus (A/Shanghai/02/2013(H7N9)) segment 8 nuclear export protein (NEP) and nonstructural protein 1 (NS1) genes, complete cds"
+NC_007359.1,2233,"Influenza A virus (A/goose/Guangdong/1/1996(H5N1)) polymerase (PA) and PA-X protein (PA-X) genes, complete cds"
+NC_007358.1,2341,"Influenza A virus (A/goose/Guangdong/1/1996(H5N1)) polymerase (PB1) and PB1-F2 protein (PB1-F2) genes, complete cds"
+NC_007363.1,1027,"Influenza A virus (A/goose/Guangdong/1/1996(H5N1)) segment 7, complete sequence"
+NC_007364.1,865,"Influenza A virus (A/goose/Guangdong/1/1996(H5N1)) segment 8, complete sequence"
+NC_004912.1,2225,"Influenza A virus pa gene for polymerase PA, genomic RNA, strain A/Hong Kong/1073/99(H9N2)"
+NC_004911.1,2328,"Influenza A virus pb1 gene for polymerase Pb1, genomic RNA, strain A/Hong Kong/1073/99(H9N2)"
+NC_004910.1,2341,"Influenza A virus pb2 gene for polymerase Pb2, genomic RNA, strain A/Hong Kong/1073/99(H9N2)"
+NC_026434.1,1410,N1
+NC_007361.1,1458,N1
+NC_002018.1,1413,N1
+NC_007368.1,1467,N2
+NC_007382.1,1410,N2
+NC_004909.1,1418,N2
+NC_026429.1,1398,N9

@@ -1,3 +1,8 @@
+## 2.2.1
+
+- Remove duplicate mappings (only affects "intermediary file" output, not used in UI)
+- Code to generate flu manifest (and example of output)
+
 ## 2.2.0
 
 ### Feat
