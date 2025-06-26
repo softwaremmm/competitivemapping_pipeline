@@ -1,3 +1,7 @@
+## New
+- add cm_analyzer approach for determining read depth and coverage from bam file
+- group targets by ANI for use in cm_analyzer
+
 ## 2.2.1
 
 - Remove duplicate mappings (only affects "intermediary file" output, not used in UI)
