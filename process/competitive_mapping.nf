@@ -130,6 +130,133 @@ process dynamicCompetitiveMapping {
     """
 }
 
+// WARNING: Experimental process
+process cm_analyzer {
+    publishDir "${params.publish_dir}", enabled: params.publish_dir != "", mode: "copy", saveAs: { filename -> sample_name + "_" + filename }
+    container {
+        params.test_container_cm == "" ? 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:35b25fa' : params.test_container_cm
+    }
+
+    cpus 4
+    memory { 8.GB + (12.GB * task.attempt) }
+
+    pod label: "name", value: "competitive_mapping_pipeline:cm_analyzer"
+    pod label: "sample_id", value: "${params.sample_id}"
+    pod label: "run_id", value: "${params.run_id}"
+
+    input:
+    tuple val(sample_name), path(fqs)
+    path manifest
+    path species_list
+    val seq_platform
+    path cm_analyzer_params
+
+    output:
+    tuple val(sample_name), path(cm_analyzer_report), emit: report_csv
+    tuple val(sample_name), path(cm_analyzer_stats), emit: stats
+    tuple val(sample_name), path("just_alns.bam"), emit: alns
+
+    script:
+    cm_analyzer_report = "cm_analyzer.csv"
+    cm_analyzer_stats = "cm_analyzer_stats.yaml"
+    """
+    manifest_mapper \
+        --seq_platform ${seq_platform} \
+        --manifest ${manifest} \
+        --reads ${fqs} \
+        --cpus ${task.cpus} \
+        --sort_by_name \
+        -o aln.bam
+
+    cm_analyzer \
+        --input-bam aln.bam \
+        --contigs ${species_list} \
+        --threads ${task.cpus} \
+        --parameters ${cm_analyzer_params} \
+        --output-root "out."
+
+    mv out.alignment_summary.csv ${cm_analyzer_report}
+    mv out.stats.yaml ${cm_analyzer_stats}
+
+    # strip read data to make small bam
+    samtools view -h aln.bam | \
+    awk 'BEGIN {OFS="\t"} /^@/ {print; next} { \$10="*"; \$11="*"; print }' | \
+    samtools view -b -o just_alns.bam
+
+    # clean up large intermediate files
+    rm aln.bam
+    """
+}
+
+// WARNING: Experimental process
+process dynamic_cm_analyzer {
+    publishDir "${params.publish_dir}", enabled: params.publish_dir != "", mode: "copy", saveAs: { filename -> sample_name + "_" + filename }
+    container {
+        params.test_container_cm == "" ? 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:35b25fa' : params.test_container_cm
+    }
+
+    cpus 4
+    memory { 8.GB + (12.GB * task.attempt) }
+
+    pod label: "name", value: "competitive_mapping_pipeline:cm_analyzer"
+    pod label: "sample_id", value: "${params.sample_id}"
+    pod label: "run_id", value: "${params.run_id}"
+
+    input:
+    tuple val(sample_name), path(fqs), path(sylph_report)
+    path genomes_dir
+    // Used to go from assembly to species
+    path assembly_metadata
+    val seq_platform
+    val include_whole_genus
+    path cm_analyzer_params
+
+    output:
+    tuple val(sample_name), path(cm_analyzer_report), emit: report_csv
+    tuple val(sample_name), path(cm_analyzer_stats), emit: stats
+    tuple val(sample_name), path("just_alns.bam"), emit: alns
+
+    script:
+    whole_genera_arg = include_whole_genus ? "--include_whole_genus" : ""
+    cm_analyzer_report = "cm_analyzer.csv"
+    cm_analyzer_stats = "cm_analyzer_stats.yaml"
+    """
+    manifest_builder --sylph_report ${sylph_report} \
+        --genome_dirs ${genomes_dir} \
+        --metadata_files ${assembly_metadata} \
+        ${whole_genera_arg} \
+        --cpus ${task.cpus} \
+        --output_root "out."
+
+    manifest_mapper \
+        --seq_platform ${seq_platform} \
+        --manifest out.manifest.fasta.gz \
+        --reads ${fqs} \
+        --cpus ${task.cpus} \
+        --sort_by_name \
+        -o aln.bam
+
+    cm_analyzer \
+        --input-bam aln.bam \
+        --contigs out.contigs.csv \
+        --threads ${task.cpus} \
+        --parameters ${cm_analyzer_params} \
+        --output-root "out."
+
+    mv out.alignment_summary.csv ${cm_analyzer_report}
+    mv out.stats.yaml ${cm_analyzer_stats}
+
+    # strip read data to make small bam
+    samtools view -h aln.bam | \
+    awk 'BEGIN {OFS="\t"} /^@/ {print; next} { \$10="*"; \$11="*"; print }' | \
+    samtools view -b -o just_alns.bam
+
+    # clean up large intermediate files
+    rm aln.bam
+    rm out.manifest.fasta.gz
+    """
+}
+
 process has_enough_reads {
     container {
         params.test_container_cm == "" ? 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:f1e771f' : params.test_container_cm

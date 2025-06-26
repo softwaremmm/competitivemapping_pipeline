@@ -1,6 +1,8 @@
 #!/usr/bin/env nextflow
 include { competitiveMapping } from './process/competitive_mapping.nf'
 include { dynamicCompetitiveMapping } from './process/competitive_mapping.nf'
+include { cm_analyzer } from './process/competitive_mapping.nf'
+include { dynamic_cm_analyzer } from './process/competitive_mapping.nf'
 include { has_enough_reads } from './process/competitive_mapping.nf'
 
 // input parameters
@@ -86,18 +88,16 @@ workflow {
     )
 
     if (params.seq_platform == 'ont') {
-        input_files = Channel
-            .fromPath("${params.input_dir}/${params.input_single_suffix}", checkIfExists: true)
+        input_files = Channel.fromPath("${params.input_dir}/${params.input_single_suffix}", checkIfExists: true)
             .ifEmpty { error("cannot find any reads matching ${params.input_single_suffix} in ${params.input_dir}") }
             .map { it -> tuple(it.simpleName, it) }
     }
     else if (params.seq_platform == 'illumina') {
-        input_files = Channel
-            .fromFilePairs(
+        input_files = Channel.fromFilePairs(
                 "${params.input_dir}/${params.input_paired_suffix}",
                 flat: false,
                 checkIfExists: true,
-                size: -1
+                size: -1,
             )
             .ifEmpty { error("cannot find any reads matching ${params.input_paired_suffix} in ${params.input_dir}") }
     }
@@ -151,12 +151,68 @@ workflow dynamic_competitive_mapping {
         db_genome_path_files,
         db_taxonomy,
         seq_platform,
-        params.use_whole_genera_in_dynamic_cm
+        params.use_whole_genera_in_dynamic_cm,
     )
 
     emit:
     cm_report = competitive_mapping_output.cm_report
     cm_csv = competitive_mapping_output.cm_csv
+}
+
+// WARNING: Experimental process
+workflow cm_analzer_workflow {
+    take:
+    input_files
+    manifest
+    species_list
+    seq_platform
+
+    main:
+    check_seq_platform(seq_platform)
+
+    analyzer_params = Channel.fromPath("${moduleDir}/process/params_${seq_platform}.yml").first()
+
+    cm_analyzer(
+        input_files,
+        manifest,
+        species_list,
+        seq_platform,
+        analyzer_params,
+    )
+
+    emit:
+    analyzer_report_csv = cm_analyzer.out.report_csv
+    stats = cm_analyzer.out.stats
+    alns = cm_analyzer.out.alns
+}
+
+// WARNING: Experimental process
+// currently also runs standard workflow for comparison
+workflow dynamic_cm_analzer_workflow {
+    take:
+    input_files
+    genomes_path
+    assembly_metadata
+    seq_platform
+
+    main:
+    check_seq_platform(seq_platform)
+
+    analyzer_params = Channel.fromPath("${moduleDir}/process/params_${seq_platform}.yml").first()
+
+    dynamic_cm_analyzer(
+        input_files,
+        genomes_path,
+        assembly_metadata,
+        seq_platform,
+        params.use_whole_genera_in_dynamic_cm,
+        analyzer_params,
+    )
+
+    emit:
+    analyzer_report_csv = dynamic_cm_analyzer.out.report_csv
+    stats = dynamic_cm_analyzer.out.stats
+    alns = dynamic_cm_analyzer.out.alns
 }
 
 def check_seq_platform(seq_platform) {
