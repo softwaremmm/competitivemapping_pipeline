@@ -1,0 +1,6 @@
+query_name,target_id,query_length,ref_start,ref_end
+1,1,10,10,20
+2,1,20,30,50
+3,1,10,35,45
+4,1,15,40,55
+5,2,10,1,10

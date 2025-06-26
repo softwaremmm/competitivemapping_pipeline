@@ -1,0 +1,30 @@
+[package]
+name = "cm_analyzer"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+clap = { version = "4.5.26", features = ["derive"] }
+polars = { version = "0.46.0", features = ["lazy", "pivot", "polars-io", "polars-ops", "parquet", "is_in", "dtype-u8", "regex", "round_series", "dtype-categorical","strings", "concat_str"] }
+noodles = { version = "0.93.0", features = ["bam", "bgzf", "core", "sam"], default-features = false }
+rayon = "1.10.0"
+rust-htslib = { version = "0.49.0", default-features = false}
+itertools = "0.14.0"
+rand = "0.9.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_yaml = "0.9"
+indexmap = { version = "2", features = ["serde"] }
+# libz-sys = { version = "1.1.22", default-features = false }
+crossbeam = "0.8.4"
+csv = "1.3.1"
+
+[dev-dependencies]
+pretty_assertions = "1.4.1"
+
+[profile.dev]
+opt-level = 1 # needed to stop a libz conflict
+debug = true
+
+[profile.release]
+debug = true
+opt-level = 3

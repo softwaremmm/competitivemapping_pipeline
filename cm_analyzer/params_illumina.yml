@@ -1,0 +1,22 @@
+
+min_unique_coverage: 0.01
+
+round_1:
+  allow_reads_multiple_alns_per_ref: False
+  min_query_coverage: 0.40
+  min_query_coverage_pc_of_max: null
+  max_divergence: 0.05
+  max_divergence_from_expected: null
+  max_divergence_from_best: 0.02
+  min_score_fraction: 0.6
+  share_threshold: 0.85
+
+round_2:
+  allow_reads_multiple_alns_per_ref: False
+  min_query_coverage: null
+  min_query_coverage_pc_of_max: 0.3
+  max_divergence: 0.2
+  max_divergence_from_expected: null
+  max_divergence_from_best: 0.1
+  min_score_fraction: null
+  share_threshold: 0.85

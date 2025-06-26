@@ -1,0 +1,42 @@
+input_stats:
+  total_reads: 3898
+  total_alns: 10427
+  mapped_reads: 3805
+  unmapped_reads: 93
+  half_mapped_reads: 0
+filter_round1:
+  passed_reads: 3445
+  filter_counts:
+    unmapped: 0
+    low_query_cov: 2007
+    low_query_cov_pc_of_max: 0
+    high_divergence: 293
+    high_divergence_from_expected: 0
+    high_divergence_from_best: 699
+    low_score: 2
+    weak: 192
+    read_has_better_aln_for_ref: 70
+    ref_lost_draw: 0
+    target_excluded: 0
+    passed: 7071
+  signal_counts:
+    shared: 5102
+    unique: 1931
+    winner: 38
+filter_round2:
+  passed_reads: 3647
+  filter_counts:
+    unmapped: 0
+    low_query_cov: 0
+    low_query_cov_pc_of_max: 502
+    high_divergence: 698
+    high_divergence_from_expected: 0
+    high_divergence_from_best: 702
+    low_score: 1
+    weak: 288
+    read_has_better_aln_for_ref: 138
+    ref_lost_draw: 4114
+    target_excluded: 244
+    passed: 3647
+  signal_counts:
+    best: 3647

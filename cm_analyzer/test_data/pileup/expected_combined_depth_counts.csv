@@ -1,0 +1,7 @@
+ref_id,depth_type,depth,count
+11,unique,1,10
+11,winner,1,5
+11,winner,2,5
+12,unique,1,10
+12,winner,1,10
+13,winner,1,10

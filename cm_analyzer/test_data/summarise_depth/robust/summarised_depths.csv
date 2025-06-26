@@ -1,0 +1,5 @@
+ref_id,reference,ani_group,species,ref_length,depth_type,coverage,mean_depth,median_nonzero_depth,simple_expected_coverage,robust_depth_estimate,robust_expected_coverage
+1,ref1,1,ref1,10,unique,90.0,22.0,20.0,100.0,15.0 (NaN-NaN),100.0 (NaN-NaN)
+2,ref2,2,ref2,100,unique,21.0,0.28,1.0,24.42,0.67 (NaN-NaN),48.66 (NaN-NaN)
+3,ref3,3,ref3,100,unique,21.0,0.46,2.0,36.87,1.0 (NaN-NaN),63.21 (NaN-NaN)
+4,ref4,4,ref4,100,unique,17.0,0.34,2.0,28.82,NaN (NaN-NaN),NaN (NaN-NaN)
