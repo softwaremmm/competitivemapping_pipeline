@@ -1,16 +1,16 @@
 # ---- Rust Build Stage ----
-FROM rust:1.86 as chef
+FROM rust:1.86 AS chef
 
 RUN apt-get update && apt-get install -y clang llvm-dev
 RUN cargo install cargo-chef
 WORKDIR /app
 
-FROM chef as planner
+FROM chef AS planner
 COPY cm_analyzer/Cargo.* .
 COPY cm_analyzer/src ./src
 RUN cargo chef prepare --recipe-path recipe.json
 
-FROM chef as builder
+FROM chef AS builder
 COPY --from=planner /app/recipe.json recipe.json
 RUN cargo chef cook --release --recipe-path recipe.json
 
@@ -20,7 +20,7 @@ COPY cm_analyzer/src ./src
 RUN cargo build --release
 
 # ---- Conda Build Stage ----
-FROM continuumio/miniconda3 as conda_builder
+FROM continuumio/miniconda3 AS conda_builder
 WORKDIR /app
 
 COPY env.yml /app/env.yml
@@ -33,10 +33,10 @@ RUN conda-pack -n competitive_mapping -o /app/conda_env.tar.gz
 
 
 # ---- Conda Build Stage ----
-FROM debian:stable-slim as runtime
+FROM debian:stable-slim AS runtime
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y libssl-dev procps && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y git libssl-dev procps && rm -rf /var/lib/apt/lists/*
 
 COPY --from=conda_builder /app/conda_env.tar.gz /app/conda_env.tar.gz
 RUN mkdir -p /opt/conda
