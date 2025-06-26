@@ -55,3 +55,13 @@ In version 20231001 there was a naming issue:
 - saopaulense had the assembly/strains for basiliense
 - saopaolens has the assembly/strains for saopaulense. Indeed saopaolens was likely a typo or older name.
 This was fixed for 20250324
+
+## ANI similarity in manifest
+For finding ANI similarity between references in the manifest use the following.
+```
+skani triangle -t 100 -s 90 --medium reference_genomes/*.fasta -E > manifest_edge_list.tsv
+
+python3 group_similar.py manifest_edge_list.tsv manifest_metadata_20231001.csv manifest_groups.csv --threshold 95
+```
+
+can adjust threshold to group at different cutoffs.
