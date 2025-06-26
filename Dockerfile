@@ -1,22 +1,61 @@
-# Use minconda base image 
-FROM continuumio/miniconda3
+# ---- Rust Build Stage ----
+FROM rust:1.86 as chef
 
-# Set the working directory within the container
+RUN apt-get update && apt-get install -y clang llvm-dev
+RUN cargo install cargo-chef
 WORKDIR /app
 
-# Conda install dependencies
-COPY env.yml /app/env.yml
-RUN conda env update -n base --file env.yml
+FROM chef as planner
+COPY cm_analyzer/Cargo.* .
+COPY cm_analyzer/src ./src
+RUN cargo chef prepare --recipe-path recipe.json
 
-# Install Python code for processing output of minimap and samtools
+FROM chef as builder
+COPY --from=planner /app/recipe.json recipe.json
+RUN cargo chef cook --release --recipe-path recipe.json
+
+# Copy the source code and build
+COPY cm_analyzer/Cargo.* .
+COPY cm_analyzer/src ./src
+RUN cargo build --release
+
+# ---- Conda Build Stage ----
+FROM continuumio/miniconda3 as conda_builder
+WORKDIR /app
+
+COPY env.yml /app/env.yml
+RUN conda env create --file env.yml
+
+
+# Pack conda installation
+RUN conda install -c conda-forge conda-pack
+RUN conda-pack -n competitive_mapping -o /app/conda_env.tar.gz
+
+
+# ---- Conda Build Stage ----
+FROM debian:stable-slim as runtime
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y libssl-dev procps && rm -rf /var/lib/apt/lists/*
+
+COPY --from=conda_builder /app/conda_env.tar.gz /app/conda_env.tar.gz
+RUN mkdir -p /opt/conda
+RUN tar -xzf /app/conda_env.tar.gz -C /opt/conda && rm /app/conda_env.tar.gz
+
+ENV PATH="/opt/conda/bin:$PATH"
+
+
+# Install Python code
 COPY ./src /app/src
 COPY ./pyproject.toml /app/pyproject.toml
-# Set the default value for the TESTING build argument
-ARG TESTING=false
 
-# Install pytest if TESTING is true
+# Install pytest if TESTING is true (default false)
+ARG TESTING=false
 RUN if [ "$TESTING" = "true" ]; then \
         pip install .[dev]; \
     else \
         pip install .; \
     fi
+
+# Copy the cm_analyzer rust build
+COPY --from=builder /app/target/release/cm_analyzer /usr/local/bin/cm_analyzer
