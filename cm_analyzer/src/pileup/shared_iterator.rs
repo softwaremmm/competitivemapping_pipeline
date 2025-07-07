@@ -2,12 +2,15 @@
 //!
 //! Currently set to use alignments in CSV format
 //! But can be adapted to use BAM files fairly easily
+//!
+//! Used to be multithreaded with BAM files,
+//! but that is much slower with csvs due to repeated reading and filtering csv file
+//! And often majority of alignments are to the top target_id anyway
 
 use crate::Result;
 use itertools::merge_join_by;
 use itertools::EitherOrBoth::{Both, Left, Right};
 use polars::prelude::*;
-use rayon::prelude::*;
 use std::collections::HashMap;
 use std::time::SystemTime;
 
@@ -25,43 +28,74 @@ macro_rules! hashmap_to_dataframe {
     }};
 }
 
+fn depth_count_hashmap_to_dataframe(depth_counts: HashMap<(u32, u32), u32>) -> Result<DataFrame> {
+    let (tid_depths, counts): (Vec<_>, Vec<_>) = depth_counts.into_iter().unzip();
+    let (tids, depths): (Vec<_>, Vec<_>) = tid_depths.into_iter().unzip();
+    Ok(DataFrame::new(vec![
+        Series::new("target_id".into(), tids).into(),
+        Series::new("depth".into(), depths).into(),
+        Series::new("count".into(), counts).into(),
+    ])?)
+}
+
 pub fn get_depth_counts_round1(
     reference_df: &DataFrame,
     unique_alns_path: &str,
     winner_alns_path: &str,
 ) -> Result<DataFrame> {
     let now = SystemTime::now();
-    println!(
-        "Rayon is using {} threads to read depth",
-        rayon::current_num_threads()
+
+    let unique_depth_iter = CsvPileupIterator::from_path(unique_alns_path, None)
+        .expect("Failed to create iterator from path");
+    let winner_depth_iter = CsvPileupIterator::from_path(winner_alns_path, None)
+        .expect("Failed to create iterator from path");
+
+    let merged_iter = merge_join_by(
+        unique_depth_iter,
+        winner_depth_iter,
+        |a, b| (a.0, a.1).cmp(&(b.0, b.1)), // Compare by target_id and pos
     );
 
-    let targets = reference_df
-        .column("target_id")?
-        .u32()?
-        .iter()
-        .filter_map(|s| s)
-        .collect::<Vec<u32>>();
+    let mut unique_depth_counts: HashMap<(u32, u32), u32> = HashMap::new();
+    let mut winner_depth_counts: HashMap<(u32, u32), u32> = HashMap::new();
 
-    // NOTE: par_iter leads to stack overflow errors
-    // as each thread ends up being given many tasks in parallel
-    // par_bridge forces thread to complete one task before moving to the next
-    // Matthew has no clue why
-    let depths: Vec<_> = targets
-        .iter()
-        .par_bridge()
-        .map(|region| {
-            let winner_iter = CsvPileupIterator::from_path(winner_alns_path, Some(*region))
-                .expect("Failed to create winner iterator from path");
-            let unique_iter = CsvPileupIterator::from_path(unique_alns_path, Some(*region))
-                .expect("Failed to create unique iterator from path");
-            read_depth_count_for_region(winner_iter, unique_iter, *region)
-                .unwrap()
-                .lazy()
+    merged_iter
+        .map(|item| match item {
+            Both((tid, _, unique_depth), (_, _, winner_depth)) => {
+                (tid, Some(unique_depth), Some(winner_depth + unique_depth))
+            }
+            Left((tid, _, unique_depth)) => (tid, Some(unique_depth), Some(unique_depth)),
+            Right((tid, _, winner_depth)) => (tid, None, Some(winner_depth)),
         })
-        .collect();
+        .for_each(|(tid, unique_depth, winner_depth)| {
+            if let Some(unique_depth) = unique_depth {
+                let count = unique_depth_counts.entry((tid, unique_depth)).or_insert(0);
+                *count += 1;
+            }
+            if let Some(winner_depth) = winner_depth {
+                let count = winner_depth_counts.entry((tid, winner_depth)).or_insert(0);
+                *count += 1;
+            }
+        });
 
-    let final_df = concat(depths, UnionArgs::default())?
+    let unique_df = depth_count_hashmap_to_dataframe(unique_depth_counts)?;
+    let winner_df = depth_count_hashmap_to_dataframe(winner_depth_counts)?;
+    let combined = concat(
+        [
+            unique_df
+                .lazy()
+                .with_column(lit("unique").alias("depth_type")),
+            winner_df
+                .lazy()
+                .with_column(lit("winner").alias("depth_type")),
+        ],
+        UnionArgs::default(),
+    )?
+    .filter(col("depth").gt(0))
+    .collect()?;
+
+    let final_df = combined
+        .lazy()
         .join(
             reference_df
                 .clone()
@@ -233,36 +267,21 @@ where
 
 pub fn get_depth_counts_single(reference_df: &DataFrame, alns_paths: &str) -> Result<DataFrame> {
     let now = SystemTime::now();
-    println!(
-        "Rayon is using {} threads to read depth",
-        rayon::current_num_threads()
-    );
 
-    let targets = reference_df
-        .column("target_id")?
-        .u32()?
-        .iter()
-        .filter_map(|s| s)
-        .collect::<Vec<u32>>();
+    let depth_iter = CsvPileupIterator::from_path(alns_paths, None)
+        .expect("Failed to create iterator from path");
 
-    // NOTE: par_iter leads to stack overflow errors
-    // as each thread ends up being given many tasks in parallel
-    // par_bridge forces thread to complete one task before moving to the next
-    // Matthew has no clue why
-    let depths: Vec<_> = targets
-        .iter()
-        .par_bridge()
-        .map(|target_id| {
-            let depth_iter = CsvPileupIterator::from_path(alns_paths, Some(*target_id))
-                .expect("Failed to create iterator from path");
-            read_depth_count_for_region_single(depth_iter, *target_id)
-                .unwrap()
-                .lazy()
-                .with_column(lit(*target_id).alias("target_id"))
-        })
-        .collect();
+    let mut depth_counts: HashMap<(u32, u32), u32> = HashMap::new();
 
-    let final_df = concat(depths, UnionArgs::default())?
+    for (tid, _pos, depth) in depth_iter {
+        let count = depth_counts.entry((tid, depth)).or_insert(0);
+        *count += 1;
+    }
+
+    let df = depth_count_hashmap_to_dataframe(depth_counts)?;
+
+    let final_df = df
+        .lazy()
         .join(
             reference_df
                 .clone()
@@ -285,28 +304,6 @@ pub fn get_depth_counts_single(reference_df: &DataFrame, alns_paths: &str) -> Re
     println!("Reading took {:?} overall", now.elapsed().unwrap());
     println!("Depth: {:?}", final_df);
     Ok(final_df)
-}
-
-/// Read depth counts for a specific region from a BAM file.
-/// Counts depths rather than reporting the depth at each position.
-fn read_depth_count_for_region_single<I>(depth_iterator: I, target_id: u32) -> Result<DataFrame>
-where
-    I: Iterator<Item = (u32, u32, u32)>,
-{
-    let depth_iterator = depth_iterator
-        .filter(|(tid, _, _)| *tid == target_id)
-        .map(|(_, pos, depth)| (pos, depth));
-
-    let mut depth_counts: HashMap<u32, u32> = HashMap::new();
-
-    for (_pos, depth) in depth_iterator {
-        let count = depth_counts.entry(depth).or_insert(0);
-        *count += 1;
-    }
-
-    let df = hashmap_to_dataframe!(depth_counts, "depth".into(), "count".into())?;
-
-    Ok(df)
 }
 
 #[cfg(test)]
