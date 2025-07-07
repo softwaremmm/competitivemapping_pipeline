@@ -154,7 +154,7 @@ process cm_analyzer {
     output:
     tuple val(sample_name), path(cm_analyzer_report), emit: report_csv
     tuple val(sample_name), path(cm_analyzer_stats), emit: stats
-    tuple val(sample_name), path("just_alns.bam"), emit: alns
+    tuple val(sample_name), path("just_alns.bam"), emit: alns, optional: true
 
     script:
     cm_analyzer_report = "cm_analyzer.csv"
@@ -185,6 +185,7 @@ process cm_analyzer {
 
     # clean up large intermediate files
     rm aln.bam
+    rm out.*alns.csv
     """
 }
 
