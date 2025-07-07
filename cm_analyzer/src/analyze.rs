@@ -83,7 +83,7 @@ pub fn analyze_alignments(args: AnalyzeArgs) -> Result<(), Box<dyn std::error::E
         .ok_or("No winner path found in signal paths")?;
 
     // Depth counts are ref_id, depth_type, depth, count
-    let depth_counts = get_depth_counts_round1(&reference_df, &unique_path, &winner_path)?;
+    let depth_counts = get_depth_counts_round1(&reference_df, unique_path, winner_path)?;
     let round1_summarised_depth = summarise_depth(&depth_counts, &reference_df)?;
 
     let ref_tie_breaker_order =
@@ -134,8 +134,8 @@ pub fn analyze_alignments(args: AnalyzeArgs) -> Result<(), Box<dyn std::error::E
 
     // Get read/alns counts
     let final_read_counts = count_alns(&best_path, &reference_df)?;
-    let unique_read_counts = count_alns(&unique_path, &reference_df)?;
-    let winner_read_counts = count_alns(&winner_path, &reference_df)?;
+    let unique_read_counts = count_alns(unique_path, &reference_df)?;
+    let winner_read_counts = count_alns(winner_path, &reference_df)?;
     let read_counts = concat(
         [
             final_read_counts

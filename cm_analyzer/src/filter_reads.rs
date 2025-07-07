@@ -66,7 +66,7 @@ fn filter_read_alns(
         })
         .filter(|(_, aln)| !aln.is_unmapped)
         .collect();
-    let read_type = match (some_unmapped, alns.len() > 0) {
+    let read_type = match (some_unmapped, !alns.is_empty()) {
         (false, _) => ReadType::Mapped,
         (true, false) => ReadType::Unmapped,
         (true, true) => ReadType::HalfMapped,
@@ -244,7 +244,7 @@ fn filter_read_alns(
         (_, _, _) => "shared".to_string(),
     };
 
-    assert!(signal == "all_fail" || filtered_alns.len() > 0);
+    assert!(signal == "all_fail" || !filtered_alns.is_empty());
 
     return (
         filtered_alns,
@@ -306,7 +306,7 @@ fn write_alns_to_csv(file_paths: &[(String, String)], alns_rx: Receiver<(Alignme
         let mut writer = csv::Writer::from_writer(BufWriter::new(File::create(path).unwrap()));
 
         writer
-            .write_record(&[
+            .write_record([
                 "query_name",
                 "target_id",
                 "query_length",
@@ -393,7 +393,7 @@ fn get_ani_group_order(tie_break_order: Option<DataFrame>) -> Result<Option<Hash
             .collect::<Vec<u32>>();
         let mapping = ani_groups
             .into_iter()
-            .zip(rankings.into_iter())
+            .zip(rankings)
             .collect::<HashMap<i32, u32>>();
         return Ok(Some(mapping));
     }
@@ -601,7 +601,7 @@ mod tests {
         };
         let tid_to_ref_id_and_ani_group = HashMap::from([(0, (0, 0)), (1, (1, 1)), (2, (2, 2))]);
 
-        let sam_lines = vec![
+        let sam_lines = [
             "@HD\tVN:1.6\tSO:queryname",
             "@SQ\tSN:ref1\tLN:1000",
             "@SQ\tSN:ref2\tLN:1000",
@@ -625,7 +625,7 @@ mod tests {
         assert_eq!(filtered_alns.len(), 1);
 
         // Repeat but with two references
-        let sam_lines = vec![
+        let sam_lines = [
             "@HD\tVN:1.6\tSO:queryname",
             "@SQ\tSN:ref1\tLN:1000",
             "@SQ\tSN:ref2\tLN:1000",

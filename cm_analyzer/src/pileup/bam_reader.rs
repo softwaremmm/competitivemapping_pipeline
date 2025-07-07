@@ -9,10 +9,10 @@ pub fn read_from_bam(bam_path: &str, target_id: u32) -> Result<IndexedReader> {
     Ok(bam)
 }
 
-pub fn bam_to_iterator<'a>(
-    bam: &'a mut IndexedReader,
-) -> Result<impl Iterator<Item = (u32, u32, u32)> + 'a> {
-    let iter = bam.pileup().into_iter().map(|pileup| {
+pub fn bam_to_iterator(
+    bam: &mut IndexedReader,
+) -> Result<impl Iterator<Item = (u32, u32, u32)> + '_> {
+    let iter = bam.pileup().map(|pileup| {
         let pileup = pileup.unwrap();
         (pileup.tid(), pileup.pos(), pileup.depth())
     });

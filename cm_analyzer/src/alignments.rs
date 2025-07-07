@@ -22,7 +22,7 @@ pub struct Alignment {
     pub ref_covered: i32,
     pub gap_compressed_seq_divergence: f32,
     pub expected_error_rate: f32,
-    pub ref_id: Option<i32>, // This requires the references_df to set
+    pub ref_id: Option<i32>,    // This requires the references_df to set
     pub ani_group: Option<i32>, // This requires the references_df to set
 }
 
@@ -79,7 +79,7 @@ fn get_i32_tag(tags: &noodles::bam::record::Data, tag: &[u8; 2]) -> i32 {
 fn get_f32_tag(tags: &noodles::bam::record::Data, tag: &[u8; 2]) -> f32 {
     match tags.get(tag) {
         Some(Ok(val)) => match val {
-            Value::Float(inner) => return inner,
+            Value::Float(inner) => inner,
             _ => panic!(
                 "Tag {} is not a float {:?}",
                 std::str::from_utf8(tag).unwrap(),
@@ -179,10 +179,9 @@ fn calculate_expected_error_rate<T: QualityScoresTrait>(quality_scores: T) -> f3
         .iter()
         .map(|q| {
             let q = q.expect("quality scores should be valid");
-            // adjusted needed for raw quality scores
-            // let q = q.saturating_sub(33) as f32;
-            let error_prob = 10.0_f32.powf(-(q as f32) / 10.0);
-            error_prob
+            // calculate error probability from quality score
+
+            10.0_f32.powf(-(q as f32) / 10.0)
         })
         .sum();
 
@@ -208,13 +207,11 @@ pub fn record_to_alignment_info(
     let is_primary = !(flags.is_secondary() || flags.is_supplementary());
     let is_paired = flags.is_segmented();
 
-    if !is_paired {
-        if flags.is_first_segment() && flags.is_last_segment() {
-            panic!(
-                "Unexpected pairing. {} is segmented but is also first and last segment.",
-                read_id
-            );
-        }
+    if !is_paired && flags.is_first_segment() && flags.is_last_segment() {
+        panic!(
+            "Unexpected pairing. {} is segmented but is also first and last segment.",
+            read_id
+        );
     }
     let is_second_in_pair = flags.is_last_segment();
     if !is_paired & is_second_in_pair {
@@ -267,7 +264,6 @@ pub fn record_to_alignment_info(
             chaining_score: get_i32_tag(&tags, b"s1"),
             best_segment_score: get_i32_tag(&tags, b"ms"),
 
-
             cigar_matches: cigar_stats.matches,
             cigar_mismatches: cigar_stats.mismatches,
             cigar_ins_sum: cigar_stats.ins_sum,
@@ -288,13 +284,13 @@ mod tests {
 
     #[test]
     fn test_record_to_alignment_info() {
-        let lines = vec![
+        let lines = [
             "@HD\tVN:1.0\tSO:unsorted",
             "@SQ\tSN:ref\tLN:1000",
-            "1\t0\tref\t101\t60\t20M\t*\t0\t0\tGGTATCCGGTGTCGACCACA\t55555555555555555555\tNM:i:38\tms:i:359\tAS:i:346\tnn:i:0\ttp:A:P\tcm:i:12\ts1:i:113\ts2:i:113\tde:f:0.1\trl:i:30",
-        ].iter().map(|s| s.to_string()).collect::<Vec<_>>();
+            "1\t0\tref\t101\t60\t20M\t*\t0\t0\tGGTATCCGGTGTCGACCACA\t55555555555555555555\tNM:i:38\tms:i:359\tAS:i:346\tnn:i:0\ttp:A:P\tcm:i:12\ts1:i:113\ts2:i:113\tde:f:0.1\trl:i:30"
+            ].iter().map(|s| s.to_string()).collect::<Vec<_>>();
 
-        let expectation = vec![Alignment {
+        let expectation = [Alignment {
             read_id: "1".to_string(),
             is_paired: false,
             is_second_in_pair: false,
@@ -330,7 +326,7 @@ mod tests {
 
     #[test]
     fn test_record_to_alignment_info_flags() {
-        let lines = vec![
+        let lines = [
             "@HD\tVN:1.0\tSO:unsorted",
             "@SQ\tSN:ref\tLN:1000",
             "1\t0\tref\t101\t60\t20M\t*\t0\t0\t*\t*",
@@ -400,13 +396,13 @@ mod tests {
             "@HD\tVN:1.0\tSO:unsorted".to_string(),
             "@SQ\tSN:ref\tLN:1000".to_string(),
         ];
-        let lines = vec!["20M", "10H10M", "10S5M5=", "10X10M", "5M10I5M", "5M10D5M", "5M10N5M"]
-            .iter()
-            .enumerate()
-            .map(|(index, cigar)| {
-                format!("{}\t0\tref\t10\t60\t{}\t*\t0\t0\t*\t*", index + 1, cigar)
-            })
-            .collect::<Vec<String>>();
+        let lines = [
+            "20M", "10H10M", "10S5M5=", "10X10M", "5M10I5M", "5M10D5M", "5M10N5M",
+        ]
+        .iter()
+        .enumerate()
+        .map(|(index, cigar)| format!("{}\t0\tref\t10\t60\t{}\t*\t0\t0\t*\t*", index + 1, cigar))
+        .collect::<Vec<String>>();
         let lines = [header_lines, lines].concat();
 
         let expectation = vec![

@@ -118,66 +118,6 @@ pub fn get_depth_counts_round1(
 }
 
 /// Currently set up to use unique and winner
-fn read_depth_count_for_region<I>(
-    winner_iter: I,
-    unique_iter: I,
-    target_id: u32, // used as a check
-) -> Result<DataFrame>
-where
-    I: Iterator<Item = (u32, u32, u32)>,
-{
-    let mut unique_depth_counts: HashMap<u32, u32> = HashMap::new();
-    let mut winner_depth_counts: HashMap<u32, u32> = HashMap::new();
-
-    let winner_iter = winner_iter
-        .filter(|(tid, _, _)| *tid == target_id)
-        .map(|(_, pos, depth)| (pos, depth));
-    let unique_iter = unique_iter
-        .filter(|(tid, _, _)| *tid == target_id)
-        .map(|(_, pos, depth)| (pos, depth));
-
-    let merged = merge_join_by(unique_iter, winner_iter, |a, b| a.0.cmp(&b.0));
-
-    merged
-        .map(|item| match item {
-            Both((_, unique_depth), (_, winner_depth)) => {
-                (Some(unique_depth), Some(winner_depth + unique_depth))
-            }
-            Left((_, unique_depth)) => (Some(unique_depth), Some(unique_depth)),
-            Right((_, winner_depth)) => (None, Some(winner_depth)),
-        })
-        .for_each(|(unique_depth, winner_depth)| {
-            if let Some(unique_depth) = unique_depth {
-                let count = unique_depth_counts.entry(unique_depth).or_insert(0);
-                *count += 1;
-            }
-            if let Some(winner_depth) = winner_depth {
-                let count = winner_depth_counts.entry(winner_depth).or_insert(0);
-                *count += 1;
-            }
-        });
-
-    let unique_df = hashmap_to_dataframe!(unique_depth_counts, "depth".into(), "count".into())?;
-    let winner_df = hashmap_to_dataframe!(winner_depth_counts, "depth".into(), "count".into())?;
-    let combined = concat(
-        [
-            unique_df
-                .lazy()
-                .with_column(lit("unique").alias("depth_type")),
-            winner_df
-                .lazy()
-                .with_column(lit("winner").alias("depth_type")),
-        ],
-        UnionArgs::default(),
-    )?
-    .with_column(lit(target_id).alias("target_id"))
-    .filter(col("depth").gt(0))
-    .collect()?;
-
-    Ok(combined)
-}
-
-/// Currently set up to use unique and winner
 /// Not in use yet
 /// This function is a more generic version of the above
 #[allow(dead_code)]
@@ -197,7 +137,7 @@ where
     for (_pos, depths) in iterator {
         let combined_depths = combining_logic(depths);
         for (i, depth) in combined_depths.iter().enumerate() {
-            let count = depth_counts[i].entry(depth.clone()).or_insert(0);
+            let count = depth_counts[i].entry(*depth).or_insert(0);
             *count += 1;
         }
     }
@@ -245,9 +185,7 @@ where
         }
 
         // If all iterators are exhausted, return None
-        if min_pos.is_none() {
-            return None;
-        }
+        min_pos?;
         let min_pos = min_pos.unwrap();
 
         let mut depths = vec![];

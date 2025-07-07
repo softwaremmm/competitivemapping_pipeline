@@ -166,21 +166,21 @@ fn columns_to_depth_counts(
     let depths = columns[0]
         .u32()?
         .iter()
-        .filter_map(|s| s)
+        .flatten()
         .collect::<Vec<_>>();
     let counts = columns[1]
         .u32()?
         .iter()
-        .filter_map(|s| s)
+        .flatten()
         .collect::<Vec<_>>();
 
-    Ok(depths.into_iter().zip(counts.into_iter()).collect())
+    Ok(depths.into_iter().zip(counts).collect())
 }
 
 fn agg_get_median(
     depths_counts: &mut [Column],
 ) -> std::result::Result<Option<Column>, PolarsError> {
-    let depth_counts = columns_to_depth_counts(&depths_counts)?;
+    let depth_counts = columns_to_depth_counts(depths_counts)?;
     let median = get_median(&depth_counts);
     Ok(Some(Column::new("median".into(), vec![median])))
 }
@@ -188,7 +188,7 @@ fn agg_get_median(
 fn agg_get_robust_mean(
     depths_counts: &mut [Column],
 ) -> std::result::Result<Option<Column>, PolarsError> {
-    let depth_counts = columns_to_depth_counts(&depths_counts)?;
+    let depth_counts = columns_to_depth_counts(depths_counts)?;
     let robust_mean = robust_mean(&depth_counts);
     Ok(Some(Column::new("robust_mean".into(), vec![robust_mean])))
 }
@@ -196,7 +196,7 @@ fn agg_get_robust_mean(
 fn agg_get_robust_mean_range(
     depths_counts: &mut [Column],
 ) -> std::result::Result<Option<Column>, PolarsError> {
-    let mut depth_counts = columns_to_depth_counts(&depths_counts)?;
+    let mut depth_counts = columns_to_depth_counts(depths_counts)?;
     // sort depth_counts by depth for consistent output
     depth_counts.sort_by(|a, b| a.0.cmp(&b.0));
     let range = robust_mean_bootstrap(&depth_counts);

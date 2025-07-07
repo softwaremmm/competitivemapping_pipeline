@@ -24,3 +24,7 @@ test_local:
 	pytest tests
 	docker build -t test_container_cm .
 	nf-test test tests/nextflow/*.test --profile local_docker
+
+clippy:
+	cd cm_analyzer && \
+	cargo clippy --all --all-features --tests --fix --allow-dirty -- -D warnings

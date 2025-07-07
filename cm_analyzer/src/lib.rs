@@ -66,7 +66,7 @@ pub fn sort_bam(bam_path: &str, output_path: &str, threads: Option<usize>) -> Re
     let now = SystemTime::now();
     let threads = threads.unwrap_or(1);
     let status = Command::new("samtools")
-        .args(&[
+        .args([
             "sort",
             "-@",
             &threads.to_string(),
@@ -136,7 +136,7 @@ pub fn make_reference_df(bam_path: &str, contigs_csv_path: &str) -> Result<DataF
         ])
         .collect()?;
 
-    let header = bam::io::reader::Builder::default()
+    let header = bam::io::reader::Builder
         .build_from_path(bam_path)?
         .read_header()?;
 

@@ -67,14 +67,14 @@ pub fn create_bam_from_lines(file_path: &str, lines: Vec<String>) -> Result<()> 
 
     // Convert SAM to BAM
     Command::new("samtools")
-        .args(&["view", "-bS", &sam_path, "-o", &unsorted_path])
+        .args(["view", "-bS", &sam_path, "-o", &unsorted_path])
         .output()
         .expect("Failed to convert SAM to BAM");
 
     // Sort the BAM file
-    sort_bam(&unsorted_path, &file_path, None)?;
+    sort_bam(&unsorted_path, file_path, None)?;
 
-    make_bam_index(&file_path)?;
+    make_bam_index(file_path)?;
     // Clean up the intermediate files
     std::fs::remove_file(&sam_path)?;
     std::fs::remove_file(&unsorted_path)?;
