@@ -24,6 +24,7 @@ Note: manifest is not gzipped for some reason of history
 
 ## Dependencies
 - ncbi download datasets tool: https://www.ncbi.nlm.nih.gov/datasets/docs/v1/download-and-install/
+`conda install -c conda-forge ncbi-datasets-cli`
 - pandas
 - unzip
 - pyfastx
@@ -61,7 +62,7 @@ For finding ANI similarity between references in the manifest use the following.
 ```
 skani triangle -t 100 -s 90 --medium reference_genomes/*.fasta -E > manifest_edge_list.tsv
 
-python3 group_similar.py manifest_edge_list.tsv manifest_metadata_20231001.csv manifest_groups.csv --threshold 95
+python3 group_similar.py manifest_edge_list.tsv manifest_metadata_20250324.csv manifest_groups.csv --threshold 95
 ```
 
 can adjust threshold to group at different cutoffs.
