@@ -108,7 +108,8 @@ workflow {
     // Using fromPath means they can be provided as relative paths
     manifest = Channel.fromPath(params.manifest, checkIfExists: true).first()
     species_list = Channel.fromPath(params.species_list, checkIfExists: true).first()
-    competitive_mapping(input_files, manifest, species_list, params.seq_platform, params.reference_name)
+    // competitive_mapping(input_files, manifest, species_list, params.seq_platform, params.reference_name)
+    cm_analzer_workflow(input_files, manifest, species_list, params.seq_platform)
 }
 
 
