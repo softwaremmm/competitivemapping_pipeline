@@ -53,9 +53,13 @@ Parameter yml files are used for specifying the actual thresholds here.
 Alignments are filtered based on:
 - Query coverage
 - sequence divergence
-- Alignment score (which is a kind of composite of the previous two)
+- Alignment score (which is a composite of the previous two)
 
 Can use the read quality scores to determine the expected sequence divergence.
+
+In general:
+- Round 1 looks for 95% nucleotide identity (ONT adjusted based on read error rate) with majority of query covered
+- Round 2 only requires 80% nucleotide identity, but ignores alignments 5% under best. It is very relaxed with query coverage.
 
 ---
 ---
