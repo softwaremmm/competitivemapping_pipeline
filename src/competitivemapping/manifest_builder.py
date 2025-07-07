@@ -199,8 +199,8 @@ def make_manifest(
                 "rname",
                 "length",
                 "totallength",
-                "species",
                 "ani_group",
+                "species",
             ]
         )
         return manifest_file, contigs_df
