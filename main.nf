@@ -109,7 +109,7 @@ workflow {
     manifest = Channel.fromPath(params.manifest, checkIfExists: true).first()
     species_list = Channel.fromPath(params.species_list, checkIfExists: true).first()
     // competitive_mapping(input_files, manifest, species_list, params.seq_platform, params.reference_name)
-    cm_analzer_workflow(input_files, manifest, species_list, params.seq_platform)
+    cm_analzer_workflow(input_files, manifest, species_list, params.seq_platform, params.reference_name)
 }
 
 
@@ -167,6 +167,7 @@ workflow cm_analzer_workflow {
     manifest
     species_list
     seq_platform
+    reference_name
 
     main:
     check_seq_platform(seq_platform)
@@ -179,12 +180,13 @@ workflow cm_analzer_workflow {
         species_list,
         seq_platform,
         analyzer_params,
+        reference_name,
     )
 
     emit:
     analyzer_report_csv = cm_analyzer.out.report_csv
     stats = cm_analyzer.out.stats
-    alns = cm_analyzer.out.alns
+    ref_reads = cm_analyzer.out.ref_reads
 }
 
 // WARNING: Experimental process

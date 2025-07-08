@@ -348,6 +348,7 @@ fn write_alns_to_csv(file_paths: &[(String, String)], alns_rx: Receiver<(Alignme
         writer
             .write_record([
                 "query_name",
+                "is_second_in_pair",
                 "target_id",
                 "query_length",
                 "ref_start",
@@ -362,6 +363,7 @@ fn write_alns_to_csv(file_paths: &[(String, String)], alns_rx: Receiver<(Alignme
             writer
                 .write_record(&[
                     aln.read_id,
+                    aln.is_second_in_pair.to_string(),
                     aln.target_id.to_string(),
                     aln.query_length.to_string(),
                     aln.ref_start.to_string(),

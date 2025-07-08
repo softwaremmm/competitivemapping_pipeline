@@ -229,3 +229,15 @@ def sylph_db_B() -> dict:
         "manifest": "test_data/sylph_databases/B/manifest.fasta.gz",
         "contigs": "test_data/sylph_databases/B/contigs.csv",
     }
+
+
+@pytest.fixture
+def extract_read_files() -> dict:
+    prefix = "test_data/extract_reads/"
+    return {
+        "input": [f"{prefix}reads_1.fq", f"{prefix}reads_2.fq"],
+        "alns": f"{prefix}alns.csv",
+        "contigs": f"{prefix}contigs.csv",
+        "reference": "ref1",
+        "expectation": [f"{prefix}output_1.fq", f"{prefix}output_2.fq"],
+    }

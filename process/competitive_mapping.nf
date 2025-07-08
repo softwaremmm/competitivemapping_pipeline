@@ -150,15 +150,17 @@ process cm_analyzer {
     path species_list
     val seq_platform
     path cm_analyzer_params
+    val reference_name
 
     output:
     tuple val(sample_name), path(cm_analyzer_report), emit: report_csv
     tuple val(sample_name), path(cm_analyzer_stats), emit: stats
-    tuple val(sample_name), path("just_alns.bam"), emit: alns, optional: true
+    tuple val(sample_name), path("reads_for_assembly*fastq.gz"), emit: ref_reads, optional: true
 
     script:
     cm_analyzer_report = "cm_analyzer.csv"
     cm_analyzer_stats = "cm_analyzer_stats.yaml"
+    ref_reads_root = "reads_for_assembly"
     """
     manifest_mapper \
         --seq_platform ${seq_platform} \
@@ -178,14 +180,19 @@ process cm_analyzer {
     mv out.alignment_summary.csv ${cm_analyzer_report}
     mv out.stats.yaml ${cm_analyzer_stats}
 
-    # strip read data to make small bam
-    samtools view -h aln.bam | \
-    awk 'BEGIN {OFS="\t"} /^@/ {print; next} { \$10="*"; \$11="*"; print }' | \
-    samtools view -b -o just_alns.bam
+    # If reference_name is provided, filter reads
+    if [ "${reference_name}" != "" ]
+    then
+        extract_reads -f ${fqs} -a out.best_alns.csv \
+            -c out.references.csv \
+            -r ${reference_name} \
+            -o ${ref_reads_root}
+
+        gzip ${ref_reads_root}*
+    fi
 
     # clean up large intermediate files
     rm aln.bam
-    rm out.*alns.csv
     """
 }
 
