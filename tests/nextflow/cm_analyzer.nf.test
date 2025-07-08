@@ -1,0 +1,82 @@
+nextflow_process {
+
+    name "Test Process cm_analyzer"
+    script "process/competitive_mapping.nf"
+    process "cm_analyzer"
+
+    test("Illumina - Process should succeed when sample files and a manifest are provided") {
+        tag "illumina"
+        when {
+            process{
+                """
+                input[0] = ['sample_test', [file("$projectDir/test_data/TB_10k/TB_1.fastq.gz"), file("$projectDir/test_data/TB_10k/TB_2.fastq.gz")]]
+                input[1] = file("$projectDir/data/manifest/manifest_20231001")
+                input[2] = file("$projectDir/test_data/species_list_manifest_20250324_grouped.csv")
+                input[3] = 'illumina'
+                input[4] = file("$projectDir/test_data/TB_10k/cm_analyzer_params_illumina.yml")
+                input[5] = 'M.tuberculosis'
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert process.exitStatus == 0
+
+
+            with(process.out.report_csv) {
+                assert size() == 1
+                assert path(get(0)[1]).md5 == path("$projectDir/test_data/TB_10k/cm_analyzer.csv").md5
+            }
+
+            with(process.out.stats) {
+                assert size() == 1
+                assert path(get(0)[1]).yaml == path("$projectDir/test_data/TB_10k/cm_analyzer_stats.yaml").yaml
+            }
+
+            with(process.out.ref_reads) {
+                assert size() == 1
+                assert get(0)[1][0].contains("reads_for_assembly_1.fastq.gz")
+                assert get(0)[1][1].contains("reads_for_assembly_2.fastq.gz")
+            }
+        }
+    }
+
+    test("ONT - Process should succeed when sample files and a manifest are provided") {
+        tag "ont"
+        when {
+            process{
+                """
+                input[0] = ['sample_test', file("$projectDir/test_data/TB_ont/ont_lineage4_10.fastq.gz")]
+                input[1] = file("$projectDir/data/manifest/manifest_20231001")
+                input[2] = file("$projectDir/test_data/species_list_manifest_20250324.csv")
+                input[3] = 'ont'
+                input[4] = file("$projectDir/test_data/TB_ont/cm_analyzer_params_ont.yml")
+                input[5] = 'M.tuberculosis'
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert process.exitStatus == 0
+
+
+            with(process.out.report_csv) {
+                assert size() == 1
+                assert path(get(0)[1]).md5 == path("$projectDir/test_data/TB_ont/cm_analyzer.csv").md5
+            }
+
+            with(process.out.stats) {
+                assert size() == 1
+                assert path(get(0)[1]).yaml == path("$projectDir/test_data/TB_ont/cm_analyzer_stats.yaml").yaml
+            }
+
+            with(process.out.ref_reads) {
+                assert size() == 1
+                assert get(0)[1].contains("reads_for_assembly.fastq.gz")
+            }
+        }
+    }
+
+}
