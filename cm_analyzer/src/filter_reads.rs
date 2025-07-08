@@ -11,13 +11,13 @@ use noodles::bgzf::MultithreadedReader;
 use polars::prelude::*;
 use std::collections::{HashMap, HashSet};
 use std::fs::File;
+use std::hash::{DefaultHasher, Hash, Hasher};
 use std::io::BufWriter;
 use std::num::NonZero;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Mutex;
 use std::thread;
 use std::time::SystemTime;
-use std::hash::{Hash, Hasher, DefaultHasher};
 
 use crate::alignments::{record_to_alignment_info, Alignment};
 
@@ -42,8 +42,9 @@ fn filter_read_alns(
     tid_to_ref_id_and_ani_group: &HashMap<i32, (i32, i32)>,
     ani_group_ordering: &Option<HashMap<i32, u32>>, // Where a lower score is better
 ) -> (Vec<(bam::Record, Alignment)>, ReadStats) {
-    let mut max_query_coverage = 0.0;
-    let mut min_divergence = 1.0;
+    // For paired reads, each part of the pair will have the filter stats calculated separately.
+    let mut max_query_coverage = (0.0, 0.0); // (first in pair, second in pair)
+    let mut min_divergence = (1.0, 1.0);
     let mut primary_score = (0, 0);
     let mut expected_divergence = (0.0, 0.0);
 
@@ -54,11 +55,12 @@ fn filter_read_alns(
             let (mut aln, _aln_extra) = record_to_alignment_info(&record, false);
             if aln.is_unmapped {
                 some_unmapped = true;
-            }
-            else {
+            } else {
                 let (ref_id, ani_group) = tid_to_ref_id_and_ani_group
                     .get(&aln.target_id)
-                    .unwrap_or_else(|| panic!("ANI group not found for target_id {}", aln.target_id));
+                    .unwrap_or_else(|| {
+                        panic!("ANI group not found for target_id {}", aln.target_id)
+                    });
                 aln.ref_id = Some(*ref_id);
                 aln.ani_group = Some(*ani_group);
             }
@@ -74,11 +76,13 @@ fn filter_read_alns(
 
     for (_record, aln) in alns.iter() {
         let query_coverage = (aln.query_covered as f32) / (aln.query_length as f32);
-        if query_coverage > max_query_coverage {
-            max_query_coverage = query_coverage;
-        }
-        if aln.gap_compressed_seq_divergence < min_divergence {
-            min_divergence = aln.gap_compressed_seq_divergence;
+
+        if aln.is_second_in_pair {
+            max_query_coverage.1 = f32::max(max_query_coverage.1, query_coverage);
+            min_divergence.1 = f32::min(min_divergence.1, aln.gap_compressed_seq_divergence);
+        } else {
+            max_query_coverage.0 = f32::max(max_query_coverage.0, query_coverage);
+            min_divergence.0 = f32::min(min_divergence.0, aln.gap_compressed_seq_divergence);
         }
 
         if aln.is_primary {
@@ -92,17 +96,38 @@ fn filter_read_alns(
         }
     }
 
-    // Use params to set thresholds
+    fn scale_pair<I>(pair: (I, I), scale: I) -> (I, I)
+    where
+        I: std::ops::Mul<Output = I> + Copy,
+    {
+        (pair.0 * scale, pair.1 * scale)
+    }
+    fn add_to_pair<I>(pair: (I, I), scale: I) -> (I, I)
+    where
+        I: std::ops::Add<Output = I> + Copy,
+    {
+        (pair.0 + scale, pair.1 + scale)
+    }
+
+    // Query coverage filters
     let min_query_coverage = params.min_query_coverage.unwrap_or(0.0);
-    let min_query_coverage_pc_of_max =
-        params.min_query_coverage_pc_of_max.unwrap_or(0.0) * max_query_coverage;
-    let max_divergence = params.max_divergence.unwrap_or(1.0);
-    let max_divergence_from_expected = params.max_divergence_from_expected.unwrap_or(1.0);
-    let max_divergence_from_expected = (
-        max_divergence_from_expected + expected_divergence.0,
-        max_divergence_from_expected + expected_divergence.1,
+    let min_query_coverage_pc_of_max = scale_pair(
+        max_query_coverage,
+        params.min_query_coverage_pc_of_max.unwrap_or(0.0),
     );
-    let max_divergence_from_best = params.max_divergence_from_best.unwrap_or(1.0) + min_divergence;
+
+    // Divergence filters
+    let max_divergence = params.max_divergence.unwrap_or(1.0);
+    let max_divergence_from_expected = add_to_pair(
+        expected_divergence,
+        params.max_divergence_from_expected.unwrap_or(1.0),
+    );
+    let max_divergence_from_best = add_to_pair(
+        min_divergence,
+        params.max_divergence_from_best.unwrap_or(1.0),
+    );
+
+    // Score filters
     let min_score_fraction = params.min_score_fraction.unwrap_or(0.0);
 
     // Also need to consider sharing
@@ -115,6 +140,18 @@ fn filter_read_alns(
         .into_iter()
         .filter(|(_rec, aln)| {
             let query_coverage = (aln.query_covered as f32) / (aln.query_length as f32);
+            let (min_query_coverage_pc_of_max, max_divergence_from_expected, max_divergence_from_best) = match aln.is_second_in_pair {
+                true => (
+                    min_query_coverage_pc_of_max.1,
+                    max_divergence_from_expected.1,
+                    max_divergence_from_best.1,
+                ),
+                false => (
+                    min_query_coverage_pc_of_max.0,
+                    max_divergence_from_expected.0,
+                    max_divergence_from_best.0,
+                ),
+            };
 
             if query_coverage < min_query_coverage {
                 filter_counts.low_query_cov += 1;
@@ -128,11 +165,6 @@ fn filter_read_alns(
                 filter_counts.high_divergence += 1;
                 return false;
             }
-
-            let max_divergence_from_expected = match aln.is_second_in_pair {
-                true => max_divergence_from_expected.1,
-                false => max_divergence_from_expected.0,
-            };
             if aln.gap_compressed_seq_divergence > max_divergence_from_expected {
                 filter_counts.high_divergence_from_expected += 1;
                 return false;
@@ -163,8 +195,7 @@ fn filter_read_alns(
         })
         .collect();
 
-
-    if ! params.allow_reads_multiple_alns_per_ref {
+    if !params.allow_reads_multiple_alns_per_ref {
         fn calculate_hash<T: Hash>(t: &T) -> u64 {
             let mut s = DefaultHasher::new();
             t.hash(&mut s);
@@ -182,9 +213,14 @@ fn filter_read_alns(
         // sorting by target_id and ref_start to ensure stable sorting
         // but using hash to avoid bias
 
-        let mut seen_refs = HashSet::new();
+        let mut seen_refs = (HashSet::new(), HashSet::new());
         filtered_alns.retain(|(_rec, aln)| {
             let ref_id = aln.ref_id.expect("Ref ID should be set");
+            let seen_refs = if aln.is_second_in_pair {
+                &mut seen_refs.1
+            } else {
+                &mut seen_refs.0
+            };
             if seen_refs.contains(&ref_id) {
                 filter_counts.read_has_better_aln_for_ref += 1;
                 return false;
@@ -279,8 +315,12 @@ fn process_read_aln_groups(
         let tid_to_ref_id_and_ani_group = tid_to_ref_id_and_ani_group.clone();
         let tie_break_order = tie_break_order.clone();
         thread_pool.spawn(move || {
-            let (records, read_stats) =
-                filter_read_alns(group, &params, &tid_to_ref_id_and_ani_group, &tie_break_order);
+            let (records, read_stats) = filter_read_alns(
+                group,
+                &params,
+                &tid_to_ref_id_and_ani_group,
+                &tie_break_order,
+            );
 
             let signal = read_stats.signal.clone();
             stats_tx.send(read_stats).expect("Stats thread crashed");

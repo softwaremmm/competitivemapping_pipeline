@@ -51,6 +51,20 @@ const TEST_SETS: &[TestSet] = &[
         expected_summary_file:
             "test_data/tb_intracellulare/with_ani_grouping/alignment_summary.csv",
     },
+    TestSet {
+        name: "fortuitum",
+        input_bam: "test_data/fortuitum/aln.bam",
+        contigs: "test_data/fortuitum/contigs.csv",
+        output_root: "tests/test_produced_files/fortuitum/",
+        parameters: "test_data/fortuitum/params.yaml",
+        depth_counts_file:
+            "test_data/fortuitum/depth_counts.csv",
+        expected_ref_tie_breaker_order_file:
+            "test_data/fortuitum/ref_tie_breaker_order.csv",
+        expected_stats_file: "test_data/fortuitum/stats.yaml",
+        expected_summary_file:
+            "test_data/fortuitum/alignment_summary.csv",
+    },
 ];
 
 const THREADS: Option<usize> = Some(20);

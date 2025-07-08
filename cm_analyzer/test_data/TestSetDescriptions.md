@@ -12,3 +12,8 @@ Made from a mix of two samples so as to contain reads from both TB and intracell
 
 ### with ani grouping
 This just changes the contigs file so as to group the intracellulare complex to all be group 77
+
+## Fortuitum (Illumina)
+A fortuitum sample from the Tim walker set (ebdf7096-03ed-4c18-893b-abc61b4163fb, SRR32024568).
+
+Key thing is that illumina reads are paired and so making sure that filters are applied to each part of read independently.
