@@ -7,30 +7,30 @@
 - unzip
 - pyfastx
 
+Note: original manifest is not gzipped for some reason of history.
 
-## Downloading manifest
+## Downloading manifest from metadata
 
 The metadata for the manifest is provided in manifest_metadata files.
+Note: Beware that this may still be different to the manifest in the knowledge bucket.
 
 Download files with:
 ```
 python3 download_manifest.py manifest_metadata_20250709.csv reference_genomes
 ```
 
-Can then join all the references to make a manifest
-```
-cat reference_genomes/* > all_refs.fasta
-```
-
-Lastly need to remove plasmids:
-```
-python3 remove_plasmids.py all_refs.fasta new_manifest.fasta
+If wanted can remove plasmids:
+```bash
+python3 remove_plasmids.py reference_genomes/*
 ```
 
-Beware that this will still be different to the manifest in the knowledge bucket.
-
-
-Note: manifest is not gzipped for some reason of history
+Can then join all the references to make a manifest using
+```bash
+# Need to gzip all first
+pigz reference_genomes/*
+manifest_builder_manual reference_genomes manifest_metadata_20250709.csv \
+    --output_root new --cpus 20 --ani_threshold 97
+```
 
 ## metadata
 
