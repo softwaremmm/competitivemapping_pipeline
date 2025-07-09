@@ -1,6 +1,6 @@
 nextflow_process {
 
-    name "Test Process competitiveMapping"
+    name "Test Process competitiveMapping with Flu"
     script "process/competitive_mapping.nf"
     process "competitiveMapping"
 
@@ -23,17 +23,17 @@ nextflow_process {
             assert process.success
             assert process.exitStatus == 0
 
-            with(process.out.cm_report) {
+            with(process.out.report_json) {
                 assert size() == 1
                 assert get(0)[1].contains("species_comparison_report.json")
             }
 
-            with(process.out.cm_csv) {
+            with(process.out.report_csv) {
                 assert size() == 1
                 assert get(0)[1].contains("species_comparison.csv")
             }
 
-            with(process.out.cm_tb_reads) {
+            with(process.out.ref_reads) {
                 assert size() == 0
             }
         }

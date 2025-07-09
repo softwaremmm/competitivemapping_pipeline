@@ -20,12 +20,12 @@ nextflow_workflow {
         then {
             assert workflow.success
 
-            with(workflow.out.cm_report) {
+            with(workflow.out.report_json) {
                 assert size() == 1
                 assert get(0)[1].contains("species_comparison_report.json")
             }
 
-            with(workflow.out.cm_csv) {
+            with(workflow.out.report_csv) {
                 assert size() == 1
                 assert get(0)[1].contains("species_comparison.csv")
             }
@@ -48,12 +48,12 @@ nextflow_workflow {
         then {
             assert workflow.success
 
-            with(workflow.out.cm_report) {
+            with(workflow.out.report_json) {
                 assert size() == 1
                 assert get(0)[1].contains("species_comparison_report.json")
             }
 
-            with(workflow.out.cm_csv) {
+            with(workflow.out.report_csv) {
                 assert size() == 1
                 assert get(0)[1].contains("species_comparison.csv")
             }

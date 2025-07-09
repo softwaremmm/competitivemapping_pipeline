@@ -23,13 +23,13 @@ nextflow_process {
             assert process.exitStatus == 0
 
 
-            with(process.out.cm_report) {
+            with(process.out.report_json) {
                 assert size() == 1
                 assert get(0)[1].contains("species_comparison_report.json")
                 assert path(get(0)[1]).json == path("$projectDir/test_data/TB_10k/sylph_species_comparison_all_genera.json").json
             }
 
-            with(process.out.cm_csv) {
+            with(process.out.report_csv) {
                 assert size() == 1
                 assert get(0)[1].contains("species_comparison.csv")
             }
@@ -55,13 +55,13 @@ nextflow_process {
             assert process.exitStatus == 0
 
 
-            with(process.out.cm_report) {
+            with(process.out.report_json) {
                 assert size() == 1
                 assert get(0)[1].contains("species_comparison_report.json")
                 assert path(get(0)[1]).json == path("$projectDir/test_data/TB_ont/sylph_species_comparison_all_genera.json").json
             }
 
-            with(process.out.cm_csv) {
+            with(process.out.report_csv) {
                 assert size() == 1
                 assert get(0)[1].contains("species_comparison.csv")
             }
@@ -87,12 +87,12 @@ nextflow_process {
             assert process.exitStatus == 0
 
 
-            with(process.out.cm_report) {
+            with(process.out.report_json) {
                 assert size() == 1
                 assert get(0)[1].contains("species_comparison_report.json")
             }
 
-            with(process.out.cm_csv) {
+            with(process.out.report_csv) {
                 assert size() == 1
                 assert get(0)[1].contains("species_comparison.csv")
             }

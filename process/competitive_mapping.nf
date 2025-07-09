@@ -19,14 +19,14 @@ process competitiveMapping {
     val reference_name
 
     output:
-    tuple val(sample_name), path("reads_for_assembly*fastq.gz"), emit: cm_tb_reads, optional: true
-    tuple val(sample_name), path(competitive_mapping_report), emit: cm_report
-    tuple val(sample_name), path(competitive_mapping_csv), emit: cm_csv
+    tuple val(sample_name), path("reads_for_assembly*fastq.gz"), emit: ref_reads, optional: true
+    tuple val(sample_name), path(competitive_mapping_report), emit: report_json
+    tuple val(sample_name), path(competitive_mapping_csv), emit: report_csv
 
     script:
     tb_reads = "reads_for_assembly.fastq.gz"
-    tb_reads_1 = "reads_for_assembly_1.fastq.gz"
-    tb_reads_2 = "reads_for_assembly_2.fastq.gz"
+    ref_reads_1 = "reads_for_assembly_1.fastq.gz"
+    ref_reads_2 = "reads_for_assembly_2.fastq.gz"
     competitive_mapping_report = "species_comparison_report.json"
     competitive_mapping_csv = "species_comparison.csv"
     ref_for_fastq = reference_name == "" ? "" : "--ref_for_fastq " + reference_name
@@ -57,8 +57,8 @@ process competitiveMapping {
             mv out.reads.fastq.gz ${tb_reads}
         elif [ ${seq_platform} == 'illumina' ]
         then
-            mv out.reads_1.fastq.gz ${tb_reads_1}
-            mv out.reads_2.fastq.gz ${tb_reads_2}
+            mv out.reads_1.fastq.gz ${ref_reads_1}
+            mv out.reads_2.fastq.gz ${ref_reads_2}
         fi
     fi
 
@@ -91,8 +91,8 @@ process dynamicCompetitiveMapping {
     val include_whole_genus
 
     output:
-    tuple val(sample_name), path(competitive_mapping_report), emit: cm_report
-    tuple val(sample_name), path(competitive_mapping_csv), emit: cm_csv
+    tuple val(sample_name), path(competitive_mapping_report), emit: report_json
+    tuple val(sample_name), path(competitive_mapping_csv), emit: report_csv
 
     script:
     competitive_mapping_report = "species_comparison_report.json"
@@ -206,7 +206,7 @@ process dynamic_cm_analyzer {
     cpus 4
     memory { 8.GB + (12.GB * task.attempt) }
 
-    pod label: "name", value: "competitive_mapping_pipeline:cm_analyzer"
+    pod label: "name", value: "competitive_mapping_pipeline:dynamic_cm_analyzer"
     pod label: "sample_id", value: "${params.sample_id}"
     pod label: "run_id", value: "${params.run_id}"
 
@@ -222,7 +222,6 @@ process dynamic_cm_analyzer {
     output:
     tuple val(sample_name), path(cm_analyzer_report), emit: report_csv
     tuple val(sample_name), path(cm_analyzer_stats), emit: stats
-    tuple val(sample_name), path("just_alns.bam"), emit: alns
 
     script:
     whole_genera_arg = include_whole_genus ? "--include_whole_genus" : ""
@@ -253,11 +252,6 @@ process dynamic_cm_analyzer {
 
     mv out.alignment_summary.csv ${cm_analyzer_report}
     mv out.stats.yaml ${cm_analyzer_stats}
-
-    # strip read data to make small bam
-    samtools view -h aln.bam | \
-    awk 'BEGIN {OFS="\t"} /^@/ {print; next} { \$10="*"; \$11="*"; print }' | \
-    samtools view -b -o just_alns.bam
 
     # clean up large intermediate files
     rm aln.bam

@@ -127,12 +127,12 @@ workflow competitive_mapping {
 
     competitive_mapping_output = competitiveMapping(input_files, manifest, species_list, seq_platform, reference_name)
     threshold = seq_platform == 'illumina' ? params.illumina_threshold : params.ont_threshold
-    has_enough_reads(competitive_mapping_output.cm_report, threshold)
+    has_enough_reads(competitive_mapping_output.report_json, threshold)
 
     emit:
-    cm_tb_reads = competitive_mapping_output.cm_tb_reads
-    cm_report = competitive_mapping_output.cm_report
-    cm_csv = competitive_mapping_output.cm_csv
+    ref_reads = competitive_mapping_output.ref_reads
+    report_json = competitive_mapping_output.report_json
+    report_csv = competitive_mapping_output.report_csv
     cm_enough_reads = has_enough_reads.out
 }
 
@@ -156,8 +156,8 @@ workflow dynamic_competitive_mapping {
     )
 
     emit:
-    cm_report = competitive_mapping_output.cm_report
-    cm_csv = competitive_mapping_output.cm_csv
+    report_json = competitive_mapping_output.report_json
+    report_csv = competitive_mapping_output.report_csv
 }
 
 // WARNING: Experimental process
@@ -184,7 +184,7 @@ workflow cm_analzer_workflow {
     )
 
     emit:
-    analyzer_report_csv = cm_analyzer.out.report_csv
+    report_csv = cm_analyzer.out.report_csv
     stats = cm_analyzer.out.stats
     ref_reads = cm_analyzer.out.ref_reads
 }
@@ -213,9 +213,8 @@ workflow dynamic_cm_analzer_workflow {
     )
 
     emit:
-    analyzer_report_csv = dynamic_cm_analyzer.out.report_csv
+    report_csv = dynamic_cm_analyzer.out.report_csv
     stats = dynamic_cm_analyzer.out.stats
-    alns = dynamic_cm_analyzer.out.alns
 }
 
 def check_seq_platform(seq_platform) {
