@@ -1,3 +1,9 @@
+## 2.2.2
+
+- Rename flu manifest (doesn't affect myco)
+- Improve H7 reference for flu (doesn't affect myco)
+- Parameterise container prefix
+
 ## 2.2.1
 
 - Remove duplicate mappings (only affects "intermediary file" output, not used in UI)
