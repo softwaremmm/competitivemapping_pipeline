@@ -3,7 +3,7 @@
 - python script extract_reads for selecting reads for reference with cm_analyzer
 - group targets by ANI for use in cm_analyzer
 - rename output channels to be more consistent/descriptive
-
+- code to produce new manifest from RefSeq in reproducible way
 
 ## 2.2.2
 
