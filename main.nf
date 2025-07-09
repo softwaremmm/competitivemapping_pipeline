@@ -1,8 +1,8 @@
 #!/usr/bin/env nextflow
 include { competitiveMapping } from './process/competitive_mapping.nf'
 include { dynamicCompetitiveMapping } from './process/competitive_mapping.nf'
-include { cm_analyzer } from './process/competitive_mapping.nf'
-include { dynamic_cm_analyzer } from './process/competitive_mapping.nf'
+include { tie_break } from './process/competitive_mapping.nf'
+include { dynamic_tie_break } from './process/competitive_mapping.nf'
 include { has_enough_reads } from './process/competitive_mapping.nf'
 
 // input parameters
@@ -174,7 +174,7 @@ workflow cm_analzer_workflow {
 
     analyzer_params = Channel.fromPath("${moduleDir}/process/params_${seq_platform}.yml").first()
 
-    cm_analyzer(
+    tie_break(
         input_files,
         manifest,
         species_list,
@@ -184,9 +184,9 @@ workflow cm_analzer_workflow {
     )
 
     emit:
-    report_csv = cm_analyzer.out.report_csv
-    stats = cm_analyzer.out.stats
-    ref_reads = cm_analyzer.out.ref_reads
+    report_csv = tie_break.out.report_csv
+    stats = tie_break.out.stats
+    ref_reads = tie_break.out.ref_reads
 }
 
 // WARNING: Experimental process
@@ -203,7 +203,7 @@ workflow dynamic_cm_analzer_workflow {
 
     analyzer_params = Channel.fromPath("${moduleDir}/process/params_${seq_platform}.yml").first()
 
-    dynamic_cm_analyzer(
+    dynamic_tie_break(
         input_files,
         genomes_path,
         assembly_metadata,
@@ -213,8 +213,8 @@ workflow dynamic_cm_analzer_workflow {
     )
 
     emit:
-    report_csv = dynamic_cm_analyzer.out.report_csv
-    stats = dynamic_cm_analyzer.out.stats
+    report_csv = dynamic_tie_break.out.report_csv
+    stats = dynamic_tie_break.out.stats
 }
 
 def check_seq_platform(seq_platform) {

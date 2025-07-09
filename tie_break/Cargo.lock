@@ -452,25 +452,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b94f61472cee1439c0b966b47e3aca9ae07e45d070759512cd390ea2bebc6675"
 
 [[package]]
-name = "cm_analyzer"
-version = "0.1.0"
-dependencies = [
- "clap",
- "crossbeam",
- "csv",
- "indexmap",
- "itertools 0.14.0",
- "noodles",
- "polars",
- "pretty_assertions",
- "rand 0.9.1",
- "rayon",
- "rust-htslib",
- "serde",
- "serde_yaml",
-]
-
-[[package]]
 name = "cmake"
 version = "0.1.54"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2647,6 +2628,25 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
+]
+
+[[package]]
+name = "tie_break"
+version = "0.1.0"
+dependencies = [
+ "clap",
+ "crossbeam",
+ "csv",
+ "indexmap",
+ "itertools 0.14.0",
+ "noodles",
+ "polars",
+ "pretty_assertions",
+ "rand 0.9.1",
+ "rayon",
+ "rust-htslib",
+ "serde",
+ "serde_yaml",
 ]
 
 [[package]]

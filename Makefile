@@ -31,11 +31,11 @@ test:
 	nf-test test tests/nextflow/*.test
 
 test_local:
-	cd cm_analyzer && cargo test
+	cd tie_break && cargo test
 	pytest tests
 	docker build -t test_container_cm .
 	nf-test test tests/nextflow/*.test --profile local_docker
 
 clippy:
-	cd cm_analyzer && \
+	cd tie_break && \
 	cargo clippy --all --all-features --tests --fix --allow-dirty -- -D warnings

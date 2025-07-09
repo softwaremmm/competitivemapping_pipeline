@@ -6,8 +6,8 @@ RUN cargo install cargo-chef
 WORKDIR /app
 
 FROM chef AS planner
-COPY cm_analyzer/Cargo.* .
-COPY cm_analyzer/src ./src
+COPY tie_break/Cargo.* .
+COPY tie_break/src ./src
 RUN cargo chef prepare --recipe-path recipe.json
 
 FROM chef AS builder
@@ -15,8 +15,8 @@ COPY --from=planner /app/recipe.json recipe.json
 RUN cargo chef cook --release --recipe-path recipe.json
 
 # Copy the source code and build
-COPY cm_analyzer/Cargo.* .
-COPY cm_analyzer/src ./src
+COPY tie_break/Cargo.* .
+COPY tie_break/src ./src
 RUN cargo build --release
 
 # ---- Conda Build Stage ----
@@ -57,5 +57,5 @@ RUN if [ "$TESTING" = "true" ]; then \
         pip install .; \
     fi
 
-# Copy the cm_analyzer rust build
-COPY --from=builder /app/target/release/cm_analyzer /usr/local/bin/cm_analyzer
+# Copy the tie_break rust build
+COPY --from=builder /app/target/release/tie_break /usr/local/bin/tie_break

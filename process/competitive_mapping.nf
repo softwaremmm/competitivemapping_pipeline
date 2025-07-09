@@ -131,7 +131,7 @@ process dynamicCompetitiveMapping {
 }
 
 // WARNING: Experimental process
-process cm_analyzer {
+process tie_break {
     publishDir "${params.publish_dir}", enabled: params.publish_dir != "", mode: "copy", saveAs: { filename -> sample_name + "_" + filename }
     container {
         params.test_container_cm == "" ? 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:35b25fa' : params.test_container_cm
@@ -140,7 +140,7 @@ process cm_analyzer {
     cpus 4
     memory { 8.GB + (12.GB * task.attempt) }
 
-    pod label: "name", value: "competitive_mapping_pipeline:cm_analyzer"
+    pod label: "name", value: "competitive_mapping_pipeline:tie_break"
     pod label: "sample_id", value: "${params.sample_id}"
     pod label: "run_id", value: "${params.run_id}"
 
@@ -149,17 +149,17 @@ process cm_analyzer {
     path manifest
     path species_list
     val seq_platform
-    path cm_analyzer_params
+    path tie_break_params
     val reference_name
 
     output:
-    tuple val(sample_name), path(cm_analyzer_report), emit: report_csv
-    tuple val(sample_name), path(cm_analyzer_stats), emit: stats
+    tuple val(sample_name), path(tie_break_report), emit: report_csv
+    tuple val(sample_name), path(tie_break_stats), emit: stats
     tuple val(sample_name), path("reads_for_assembly*fastq.gz"), emit: ref_reads, optional: true
 
     script:
-    cm_analyzer_report = "cm_analyzer.csv"
-    cm_analyzer_stats = "cm_analyzer_stats.yaml"
+    tie_break_report = "species_comparison.csv"
+    tie_break_stats = "tie_break_stats.yaml"
     ref_reads_root = "reads_for_assembly"
     """
     manifest_mapper \
@@ -170,15 +170,15 @@ process cm_analyzer {
         --sort_by_name \
         -o aln.bam
 
-    cm_analyzer \
+    tie_break \
         --input-bam aln.bam \
         --contigs ${species_list} \
         --threads ${task.cpus} \
-        --parameters ${cm_analyzer_params} \
+        --parameters ${tie_break_params} \
         --output-root "out."
 
-    mv out.alignment_summary.csv ${cm_analyzer_report}
-    mv out.stats.yaml ${cm_analyzer_stats}
+    mv out.alignment_summary.csv ${tie_break_report}
+    mv out.stats.yaml ${tie_break_stats}
 
     # If reference_name is provided, filter reads
     if [ "${reference_name}" != "" ]
@@ -197,7 +197,7 @@ process cm_analyzer {
 }
 
 // WARNING: Experimental process
-process dynamic_cm_analyzer {
+process dynamic_tie_break {
     publishDir "${params.publish_dir}", enabled: params.publish_dir != "", mode: "copy", saveAs: { filename -> sample_name + "_" + filename }
     container {
         params.test_container_cm == "" ? 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:35b25fa' : params.test_container_cm
@@ -206,7 +206,7 @@ process dynamic_cm_analyzer {
     cpus 4
     memory { 8.GB + (12.GB * task.attempt) }
 
-    pod label: "name", value: "competitive_mapping_pipeline:dynamic_cm_analyzer"
+    pod label: "name", value: "competitive_mapping_pipeline:dynamic_tie_break"
     pod label: "sample_id", value: "${params.sample_id}"
     pod label: "run_id", value: "${params.run_id}"
 
@@ -217,16 +217,16 @@ process dynamic_cm_analyzer {
     path assembly_metadata
     val seq_platform
     val include_whole_genus
-    path cm_analyzer_params
+    path tie_break_params
 
     output:
-    tuple val(sample_name), path(cm_analyzer_report), emit: report_csv
-    tuple val(sample_name), path(cm_analyzer_stats), emit: stats
+    tuple val(sample_name), path(tie_break_report), emit: report_csv
+    tuple val(sample_name), path(tie_break_stats), emit: stats
 
     script:
     whole_genera_arg = include_whole_genus ? "--include_whole_genus" : ""
-    cm_analyzer_report = "cm_analyzer.csv"
-    cm_analyzer_stats = "cm_analyzer_stats.yaml"
+    tie_break_report = "species_comparison.csv"
+    tie_break_stats = "tie_break_stats.yaml"
     """
     manifest_builder --sylph_report ${sylph_report} \
         --genome_dirs ${genomes_dir} \
@@ -243,15 +243,15 @@ process dynamic_cm_analyzer {
         --sort_by_name \
         -o aln.bam
 
-    cm_analyzer \
+    tie_break \
         --input-bam aln.bam \
         --contigs out.contigs.csv \
         --threads ${task.cpus} \
-        --parameters ${cm_analyzer_params} \
+        --parameters ${tie_break_params} \
         --output-root "out."
 
-    mv out.alignment_summary.csv ${cm_analyzer_report}
-    mv out.stats.yaml ${cm_analyzer_stats}
+    mv out.alignment_summary.csv ${tie_break_report}
+    mv out.stats.yaml ${tie_break_stats}
 
     # clean up large intermediate files
     rm aln.bam

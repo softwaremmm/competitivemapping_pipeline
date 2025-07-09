@@ -1,4 +1,4 @@
-use cm_analyzer::analyze::{analyze_alignments, AnalyzeArgs};
+use tie_break::analyze::{analyze_alignments, AnalyzeArgs};
 use std::fs::{create_dir_all, read_to_string};
 
 struct TestSet {
