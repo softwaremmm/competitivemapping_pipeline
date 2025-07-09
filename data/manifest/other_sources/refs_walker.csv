@@ -1,0 +1,222 @@
+reference,species_taxid,walker_taxid,walker_taxon,walker_strain,walker_run_accession
+M.setense,431269,431269,Mycobacterium setense,JCM_15660,SRR30899405
+M.salmoniphilum,404941,404941,Mycobacterium salmoniphilum,DSMZ43276,SRR30899406
+M.canetti,78331,78331,Mycobacterium tuberculosis subsp. canettii,CIP_106416,SRR30899410
+M.brisbanense,146020,146020,Mycobacterium brisbanense,JCM_15654,SRR30899412
+M.hiberniae,29314,29314,Mycobacterium hiberniae,JCM_13571,SRR30899423
+M.frederiksbergense,117567,117567,Mycobacterium frederiksbergense,DSM_44346,SRR30899424
+M.fallax,1793,1793,Mycobacterium fallax,JCM_6405,SRR30899426
+M.phocaicum,319706,319706,Mycobacterium phocaicum,JCM_15301,SRR30899427
+M.porcinum,39693,39693,Mycobacterium porcinum,JCM_6378,SRR30899431
+M.monacense,85693,85693,Mycobacterium monacense,JCM_15658,SRR30899433
+M.moriokaense,39691,39691,Mycobacterium moriokaense,JCM_6375,SRR30899434
+M.saskatchewanense,220927,220927,Mycobacterium saskatchewanense,JCM_13016,SRR30899435
+M.litorale,758802,758802,Mycobacterium litorale,JCM_17423,SRR30899443
+M.branderi,43348,43348,Mycobacterium branderi,JCM_12687,SRR30899444
+M.simiae,1784,1784,Mycobacterium simiae,JCM_12377,SRR30899445
+M.celatum,28045,28045,Mycobacterium celatum,NCTC_12882,SRR30899446
+M.minnesotensis,1118379,1118379,Mycobacterium minnesotense,JCM_17932,SRR30899449
+M.pulveris,36813,36813,Mycobacterium pulveris,DSM_44222,SRR30899450
+M.aurum,1791,1791,Mycobacterium aurum,NCTC_10437,SRR30899451
+M.poriferae,39694,39694,Mycobacterium poriferae,JCM_12603,SRR30899455
+M.rutilum,370526,370526,Mycobacterium rutilum,JCM_16371,SRR30899458
+M.phlei,1771,1771,Mycobacterium smegmatis,NCTC_00525,SRR30899462
+M.psychrotolerans,216929,216929,Mycobacterium psychrotolerans,JCM_13323,SRR30899463
+M.xenopi,1789,1789,Mycobacterium xenopi,NCTC_10042,SRR30899465
+M.doricum,126673,126673,Mycobacterium doricum,JCM_12405,SRR30899466
+M.agri,36811,36811,Mycobacterium agri,JCM_6377,SRR30899474
+M.canariasense,228230,228230,Mycobacterium canariasense,JCM_15298,SRR30899479
+M.malmoense,1780,1780,Mycobacterium malmoense,NCTC_11298,SRR30899480
+M.intermedium,28445,28445,Mycobacterium intermedium,JCM_13572,SRR30899482
+M.koreensis,1069220,1069220,Mycobacterium koreense,DSM_45576,SRR30899484
+M.wolinskyi,59750,59750,Mycobacterium wolinskyi,JCM_13393,SRR30899486
+M.gadium,1794,1794,Mycobacterium gadium,NCTC_10942,SRR30899490
+M.peregrinum,43304,43304,Mycobacterium peregrinum,NCTC_10264,SRR30899493
+M.immunogenum,83262,83262,Mycobacterium immunogenum,DSM_45595,SRR30899494
+M.sherrisii,243061,243061,Mycobacterium sherrisii,DSM_45441,SRR30899496
+M.gordonae,1778,1778,Mycobacterium gordonae,NCTC_10267,SRR30899498
+M.kumamotonensis,354243,354243,Mycobacterium kumamotonense,JCM_13453,SRR30899502
+M.tusciae,75922,75922,Mycobacterium tusciae,JCM_12692,SRR30899506
+M.abscessus,36809,1962118,Mycobacterium abscessus subsp. massiliense,JCM_15300,SRR30899509
+M.avium,1764,44454,Mycobacterium avium subsp. avium,NCTC_08562,SRR30899512
+M.sphagni,1786,1786,Mycobacterium sphagni,DSM_44076,SRR30899513
+M.parafortuitum,39692,39692,Mycobacterium parafortuitum,NCTC_10411,SRR30899514
+M.fortuitum,1766,144550,Mycobacterium fortuitum subsp. acetamidolyticum,JCM_6368,SRR30899516
+M.palustre,153971,153971,Mycobacterium palustre,DSM_44572,SRR30899519
+M.fortuitum,1766,144549,Mycobacterium fortuitum subsp. fortuitum,NCTC_8573,SRR32024525
+M.smegmatis,1772,1772,Mycobacterium smegmatis,NCTC_8152,SRR32024526
+M.fortuitum,1766,144549,Mycobacterium fortuitum subsp. fortuitum,NCTC_1542,SRR32024531
+M.sp. NCTC 13472,3393522,3393522,Mycobacterium sp.,NCTC_13472,SRR32024532
+M.tuberculosis,1773,194542,Mycobacterium pinnipedii,NCTC_13288,SRR32024534
+M.avium,1764,44454,Mycobacterium avium subsp. avium,NCTC_13034,SRR32024535
+M.malmoense,1780,1780,Mycobacterium malmoense,NCTC_11299,SRR32024539
+M.asteroides,1824,1824,Nocardia asteroides,NCTC_11293,SRR32024540
+M.haemophilum,29311,29311,Mycobacterium haemophilum,NCTC_11185,SRR32024541
+M.neolactis,3393513,3393513,Mycobacterium neolactis,NCTC_11057,SRR32024543
+M.intracellulare,1767,1203599,Mycobacterium yongonense,DSM_45126,SRR32024544
+M.selandiae,3393511,3393511,Mycobacterium selandiae,NCTC_11054,SRR32024547
+M.selandiae,3393511,3393511,Mycobacterium selandiae,NCTC_11053,SRR32024548
+M.abscessus,36809,36809,Mycobacterium abscessus,NCTC_10882,SRR32024550
+M.intracellulare,1767,3393505,Mycobacterium brunense,NCTC_10574,SRR32024557
+M.novum,2492438,2492438,Mycobacterium novum,NCTC_10496,SRR32024559
+M.ulcerans,1809,1809,Mycobacterium ulcerans,NCTC_10468,SRR32024561
+M.aurum,1791,1791,Mycobacterium aurum,NCTC_10439,SRR32024563
+M.aurum,1791,1791,Mycobacterium aurum,NCTC_10438,SRR32024564
+M.neoaurum,1795,3393504,Mycobacterium tomidae,NCTC_10428,SRR32024565
+M.phlei,1771,1771,Mycobacterium phlei,NCTC_10266,SRR32024571
+M.marinum,1781,1781,Mycobacterium marinum,NCTC_10010,SRR32024575
+M.neglectum,242737,242737,Mycobacterium neglectum,DSM_44756,SRR32024577
+M.avium,1764,44454,Mycobacterium avium subsp. avium,NCTC_08559,SRR32024578
+M.avium,1764,44454,Mycobacterium avium subsp. avium,NCTC_08553,SRR32024579
+M.avium,1764,44454,Mycobacterium avium subsp. avium,NCTC_08552,SRR32024580
+M.avium,1764,44454,Mycobacterium avium subsp. avium,NCTC_08551,SRR32024581
+M.phlei,1771,1771,Mycobacterium phlei,NCTC_08151,SRR32024587
+M.goodii,134601,134601,Mycobacterium goodii,DSM_44492,SRR32024588
+M.smegmatis,1772,1772,Mycobacterium smegmatis,NCTC_03821,SRR32024591
+M.pseudotuberculosis,1719,1719,Corynebacterium pseudotuberculosis,NCTC_03450,SRR32024593
+M.duvalii,39688,39688,Mycobacterium duvalii,NCTC00358,SRR32024598
+M.bouchedurhonense,701041,701041,Mycobacterium bouchedurhonense,JCM_17323,SRR32024605
+M.celatum,28045,28045,Mycobacterium celatum,JCM_12373,SRR32024616
+M.hodleri,49897,49897,Mycobacterium hodleri,JCM_12141,SRR32024618
+M.avium,1764,44282,Mycobacterium avium subsp. silvaticum,DSM_44175,SRR32024621
+M.parascrofulaceum,240125,240125,Mycobacterium parascrofulaceum,JCM_13015,SRR30899407
+M.szulgai,1787,1787,Mycobacterium szulgai,NCTC_10830,SRR30899408
+M.angelicum,470074,470074,Mycobacterium angelicum,DSM_45057,SRR30899411
+M.aromaticivorans,318425,318425,Mycobacterium aromaticivorans,JCM_16368,SRR30899414
+M.novum,2492438,2492438,Mycobacterium novum,NCTC_10486,SRR30899415
+M.alvei,67081,67081,Mycobacterium alvei,JCM_12272,SRR30899419
+M.mageritense,53462,53462,Mycobacterium mageritense,JCM_12375,SRR30899420
+M.insubricum,444597,444597,Mycobacterium insubricum,JCM_16366,SRR30899425
+M.thermoresistibile,1797,1797,Mycobacterium thermoresistibile,NCTC_10409,SRR30899429
+M.houstonense,146021,146021,Mycobacterium houstonense,JCM_15656,SRR30899432
+M.mantenii,560555,560555,Mycobacterium mantenii,JCM_18113,SRR30899441
+M.arupensis,342002,342002,Mycobacterium arupense,DSM_44942,SRR30899452
+M.europaeum,761804,761804,Mycobacterium europaeum,DSM_45397,SRR30899457
+M.lentiflavum,141349,141349,Mycobacterium lentiflavum,JCM_13390,SRR30899459
+M.paraterrae,577492,577492,Mycobacterium paraterrae,DSM_45127,SRR30899461
+M.genavense,36812,36812,Mycobacterium genavense,ATCC51234(a),SRR30899464
+M.nebraskense,244292,244292,Mycobacterium nebraskense,DSM_44803,SRR30899468
+M.intracellulare,1767,222805,Mycobacterium chimaera,JCM_14737,SRR30899470
+M.marinum,1781,1781,Mycobacterium marinum,NCTC_10009,SRR30899471
+M.manitobense,190147,190147,Mycobacterium manitobense,DSM_44615,SRR30899472
+M.arosiense,425468,425468,Mycobacterium arosiense,DSM_45069,SRR30899473
+M.asiaticum,1790,1790,Mycobacterium asiaticum,JCM_6409,SRR30899475
+M.neworleansense,146018,146018,Mycobacterium neworleansense,JCM_15659,SRR30899476
+M.cosmeticum,258533,258533,Mycobacterium cosmeticum,JCM_14739,SRR30899478
+M.shinjukuense,398694,398694,Mycobacterium shinjukuense,JCM_14233,SRR30899481
+M.chlorophenolicum,37916,37916,Mycobacterium chlorophenolicum,JCM_7439,SRR30899483
+M.aubagnense,319707,319707,Mycobacterium aubagnense,JCM_15296,SRR30899487
+M.brumae,85968,85968,Mycobacterium brumae,DSM_44177,SRR30899489
+M.phlei,1771,1771,Mycobacterium phlei,NCTC_10008,SRR30899491
+M.bacteremicum,564198,564198,Mycobacterium bacteremicum,DSM_45578,SRR30899495
+M.gallinarum,39689,39689,Mycobacterium gallinarum,JCM_6399,SRR30899499
+M.interjectum,33895,33895,Mycobacterium interjectum,DSMZ44064,SRR30899500
+M.novocastrense,59813,59813,Mycobacterium novocastrense,JCM_18114,SRR30899501
+M.intracellulare,1767,1767,Mycobacterium intracellulare,NCTC_10425,SRR30899504
+M.smegmatis,1772,1772,Mycobacterium smegmatis,NCTC_00523,SRR30899403
+M.elephantis,81858,81858,Mycobacterium elephantis,JCM_12406,SRR30899505
+M.marseillense,701042,701042,Mycobacterium marseillense,JCM_17324,SRR30899404
+M.neoaurum,1795,1795,Mycobacterium neoaurum,NCTC_10818,SRR30899507
+M.tuberculosis,1773,33894,Mycobacterium africanum,CIP105147,SRR30899409
+M.hackensackense,228909,228909,Mycobacterium hackensackense,DSM_44833,SRR30899413
+M.chelonae,1774,2099321,Mycobacterium chelonae subsp. chelonae,DSM_44159,SRR30899508
+M.duvalii,39688,39688,Mycobacterium duvalii,JCM_6396,SRR30899416
+M.holsaticum,152142,152142,Mycobacterium holsaticum,JCM_12374,SRR30899510
+M.tuberculosis,1773,115862,Mycobacterium caprae,CIP_105776,SRR30899417
+M.crocinum,388459,388459,Mycobacterium crocinum,JCM_16369,SRR30899418
+M.montefiorense,154654,154654,Mycobacterium montefiorense,DSM_44602,SRR30899518
+M.tuberculosis,1773,1765,Mycobacterium bovis subsp. bovis,CIP_105234,SRR30899421
+M.rhodesiae,36814,36814,Mycobacterium rhodesiae,NCTC_10779,SRR30899422
+M.rufum,318424,318424,Mycobacterium rufum,JCM_16372,SRR30899428
+M.paraseoulense,590652,590652,Mycobacterium paraseoulense,JCM_16952,SRR30899430
+M.heidelbergense,53376,53376,Mycobacterium heidelbergense,JCM_14842,SRR30899436
+M.triplex,47839,47839,Mycobacterium triplex,JCM_14744,SRR30899437
+M.madagascariense,212765,212765,Mycobacterium madagascariense,JCM_13574,SRR30899438
+M.kansasii,1768,1768,Mycobacterium kansasii,NCTC_10268,SRR30899439
+M.diernhoferi,1801,1801,Mycobacterium diernhoferi,JCM_6371,SRR30899440
+M.florentinum,292462,292462,Mycobacterium florentinum,JCM_14740,SRR30899442
+M.aichiense,1799,1799,Mycobacterium aichiense,NCTC_10820,SRR30899447
+M.tuberculosis,1773,1806,Mycobacterium microti,NCTC_08710,SRR30899448
+M.heraklionensis,512402,512402,Mycobacterium heraklionense,NCTC_13432,SRR30899453
+M.terrae,1788,1788,Mycobacterium terrae,NCTC_10856,SRR30899454
+M.nonchromogenicus,1782,1782,Mycobacterium nonchromogenicum,NCTC_10424,SRR30899456
+M.vanbaalenii,110539,110539,Mycobacterium vanbaalenii,JCM_13017,SRR30899460
+M.chitae,1792,1792,Mycobacterium chitae,NCTC_10495,SRR30899467
+M.farcinogenes,1802,1802,Mycobacterium farcinogenes,NCTC_4524,SRR32024527
+M.colombiense,339268,339268,Mycobacterium colombiense,JCM_16228,SRR30899469
+M.kubicae,120959,120959,Mycobacterium kubicae,JCM_13573,SRR30899477
+M.vulneris,547163,547163,Mycobacterium vulneris,JCM_18115,SRR30899485
+M.flavescens,1776,1776,Mycobacterium flavescens,NCTC_10271,SRR30899488
+M.lacus,169765,169765,Mycobacterium lacus,JCM_15657,SRR30899492
+M.confluentis,28047,28047,Mycobacterium confluentis,JCM_13671,SRR30899497
+M.fortuitum,1766,144549,Mycobacterium fortuitum subsp. fortuitum,NCTC_3631,SRR32024528
+M.llatzerense,280871,280871,Mycobacterium llatzerense,JCM_16229,SRR30899503
+M.septicum,98668,98668,Mycobacterium septicum,JCM_14743,SRR30899511
+M.heckeshornense,110505,110505,Mycobacterium heckeshornense,JCM_15655,SRR30899515
+M.shimoidei,29313,29313,Mycobacterium shimoidei,JCM_12376,SRR30899517
+M.bohemicum,56425,56425,Mycobacterium bohemicum,JCM_12402,SRR30899520
+M.pallens,370524,370524,Mycobacterium pallens,JCM_16370,SRR30899521
+M.vaccae,1810,1810,Mycobacterium vaccae,NCTC_10916,SRR30899522
+M.hassiacum,46351,46351,Mycobacterium hassiacum,JCM_12690,SRR30899523
+M.chelonae,1774,2099321,Mycobacterium chelonae subsp. chelonae,NCTC_946,SRR32024523
+M.fortuitum,1766,144549,Mycobacterium fortuitum subsp. fortuitum,NCTC_8697,SRR32024524
+M.intracellulare,1767,1767,Mycobacterium intracellulare,NCTC_13025,SRR32024536
+M.kansasii,1768,1768,Mycobacterium kansasii,NCTC_13024,SRR32024537
+M.fortuitum,1766,144549,Mycobacterium fortuitum subsp. fortuitum,NCTC_2891,SRR32024529
+M.erythropolis,1833,1833,Rhodococcus erythropolis,NCTC_13021,SRR32024538
+M.farcinogenes,1802,1802,Mycobacterium farcinogenes,NCTC_10955,SRR32024549
+M.fortuitum,1766,144549,Mycobacterium fortuitum subsp. fortuitum,NCTC_2291,SRR32024530
+M.szulgai,1787,1787,Mycobacterium szulgai,NCTC_10831,SRR32024551
+M.riyadhense,486698,486698,Mycobacterium riyadhense,DSM_45176,SRR32024533
+M.szulgai,1787,1787,Mycobacterium szulgai,NCTC_10829,SRR32024552
+M.scrofulaceum,1783,1783,Mycobacterium scrofulaceum,NCTC_10803,SRR32024553
+M.neolactis,3393513,3393513,Mycobacterium neolactis,NCTC_11058,SRR32024542
+M.intracellulare,1767,1767,Mycobacterium intracellulare,NCTC_10682,SRR32024556
+M.yunnanensis,368477,368477,Mycobacterium yunnanensis,DSM_44838,SRR32024566
+M.hafniae,3393512,3393512,Mycobacterium hafniae,NCTC_11056,SRR32024545
+M.fortuitum,1766,144549,Mycobacterium fortuitum subsp. fortuitum,NCTC_10395,SRR32024568
+M.hafniae,3393512,3393512,Mycobacterium hafniae,NCTC_11055,SRR32024546
+M.smegmatis,1772,1772,Mycobacterium smegmatis,NCTC_10265,SRR32024572
+M.ulcerans,1809,1809,Mycobacterium ulcerans,NCTC_10013,SRR32024573
+M.marinum,1781,1781,Mycobacterium marinum,NCTC_10011,SRR32024574
+M.smegmatis,1772,1772,Mycobacterium smegmatis,NCTC_08159,SRR32024582
+M.phlei,1771,1771,Mycobacterium phlei,NCTC_08157,SRR32024584
+M.obuense,1807,1807,Mycobacterium obuense,NCTC_10778,SRR32024554
+M.phlei,1771,1771,Mycobacterium phlei,NCTC_08156,SRR32024585
+M.smegmatis,1772,1772,Mycobacterium smegmatis,NCTC_08153,SRR32024586
+M.smegmatis,1772,1772,Mycobacterium smegmatis,NCTC_07017,SRR32024589
+M.smegmatis,1772,1772,Mycobacterium smegmatis,NCTC_03820,SRR32024592
+M.marinum,1781,1781,Mycobacterium marinum,NCTC_02275,SRR32024594
+M.smegmatis,1772,1772,Mycobacterium smegmatis,NCTC_00334,SRR32024595
+M.runyonii,3393498,405840,Mycobacterium runyonii,JCM_6390,SRR32024600
+M.austroafricanum,39687,39687,Mycobacterium austroafricanum,JCM_6369,SRR32024602
+M.aemonae,470075,470075,Mycobacterium aemonae,DSM_45058,SRR32024555
+M.timonense,701043,701043,Mycobacterium timonense,JCM_17325,SRR32024604
+M.seoulense,386911,386911,Mycobacterium seoulense,JCM_16018,SRR32024606
+M.nonchromogenicus,1782,1782,Mycobacterium nonchromogenicum,NCTC_10497,SRR32024558
+M.senuensis,386913,386913,Mycobacterium senuense,JCM_16017,SRR32024607
+M.conceptionense,451644,451644,Mycobacterium conceptionense,JCM_15299,SRR32024611
+M.abscessus,36809,319705,Mycobacterium abscessus subsp. bolletii,JCM_15297,SRR32024612
+M.kyorinense,487514,487514,Mycobacterium kyorinense,JCM_15038,SRR32024613
+M.fluoranthenivorans,258505,258505,Mycobacterium fluoranthenivorans,JCM_14741,SRR32024614
+M.murale,182220,182220,Mycobacterium murale,JCM_13392,SRR32024615
+M.flavescens,1776,1776,Mycobacterium flavescens,DSM_43991,SRR32024622
+M.chitae,1792,1792,Mycobacterium chitae,NCTC_10485,SRR32024560
+M.aurum,1791,1791,Mycobacterium aurum,NCTC_10440,SRR32024562
+M.ulcerans,1809,1809,Mycobacterium ulcerans,NCTC_10417,SRR32024567
+M.fortuitum,1766,144549,Mycobacterium fortuitum subsp. fortuitum,NCTC_10394,SRR32024569
+M.acapulense,114977,114977,Mycobacterium acapulcensis,NCTC_10270,SRR32024570
+M.gordonae,1778,1778,Mycobacterium gordonae,NCTC_09822,SRR32024576
+M.smegmatis,1772,1772,Mycobacterium smegmatis,NCTC_08158,SRR32024583
+M.marinum,1781,1781,Mycobacterium marinum,NCTC_07010,SRR32024590
+M.smegmatis,1772,1772,Mycobacterium smegmatis,NCTC_00333,SRR32024596
+M.pseudoshottsii,265949,265949,Mycobacterium pseudoshottsii,NCTC13318,SRR32024597
+M.sp. 'ratisbonense',75920,75920,Mycobacterium ratisbonense,DSM_44364,SRR32024599
+M.scrofulaceum,1783,1783,Mycobacterium scrofulaceum,JCM_6381,SRR32024601
+M.paraffinicum,53378,53378,Mycobacterium paraffinicum,JCM_17782,SRR32024603
+M.pyrenivorans,187102,187102,Mycobacterium pyrenivorans,JCM_15927,SRR32024608
+M.boenickei,146017,146017,Mycobacterium boenickei,JCM_15653,SRR32024609
+M.petroleophilum,188917,188917,Mycobacterium petroleophilum,DSM_44182,SRR32024610
+M.terrae,1788,1788,Mycobacterium terrae,JCM_12143,SRR32024617
+M.algericus,1288388,1288388,Mycobacterium algericum,DSM_45454,SRR32024619
+M.hippocampi,659824,659824,Mycobacterium hippocampi,DSM_45391,SRR32024620
