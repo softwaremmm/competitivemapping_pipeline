@@ -47,11 +47,12 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     fasta_in = parse_multi_fasta(args.fasta_in)
-    subtype_regex = re.compile(r"H(.)N(.)")
+    subtype_regex = re.compile(r"H(\d+)N(\d+)")
     manifest = []
     for fasta in fasta_in:
         subtype_match = subtype_regex.search(fasta.header)
-        H, N = subtype_match.groups()
+        if subtype_match:
+            H, N = subtype_match.groups()
         segment = None
 
         if "segment 4" in fasta.header or "hemagglutinin" in fasta.header.lower():
