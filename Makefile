@@ -31,6 +31,7 @@ test:
 	nf-test test tests/nextflow/*.test
 
 test_local:
+	cd cm_analyzer && cargo test
 	pytest tests
 	docker build -t test_container_cm .
 	nf-test test tests/nextflow/*.test --profile local_docker
