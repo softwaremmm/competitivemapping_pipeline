@@ -1,7 +1,7 @@
 ## New
-- add cm_analyzer approach for determining read depth and coverage from bam file
-- python script extract_reads for selecting reads for reference with cm_analyzer
-- group targets by ANI for use in cm_analyzer
+- add tie_break approach for determining read depth and coverage from bam file
+- python script extract_reads for selecting reads for reference with tie_break
+- group targets by ANI for use in tie_break
 - rename output channels to be more consistent/descriptive
 - code to produce new manifest from RefSeq in reproducible way
 

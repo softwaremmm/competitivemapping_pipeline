@@ -1,4 +1,4 @@
-use cm_analyzer::analyze::{analyze_alignments, AnalyzeArgs};
+use tie_break::analyze::{analyze_alignments, AnalyzeArgs};
 use clap::Parser;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
