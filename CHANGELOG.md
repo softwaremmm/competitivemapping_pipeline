@@ -1,3 +1,7 @@
+### 2.2.3
+
+- Same container image name on both tenancies
+
 ## 2.2.2
 
 - Rename flu manifest (doesn't affect myco)
