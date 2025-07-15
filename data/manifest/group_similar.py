@@ -12,10 +12,12 @@ def find_groups(edge_list, ref_file, ani_threshold, output):
 
     df = df[df["ANI"] >= ani_threshold]
 
-    df["Ref_file"] = df["Ref_file"].str.split("/").str[-1].str.replace(".fasta", "")
-    df["Query_file"] = df["Query_file"].str.split("/").str[-1].str.replace(".fasta", "")
+    df["Ref_file"] = df["Ref_file"].str.split("/").str[-1].str.replace(".fasta.gz", "")
+    df["Query_file"] = (
+        df["Query_file"].str.split("/").str[-1].str.replace(".fasta.gz", "")
+    )
 
-    name_lookup = refs.set_index("assembly")["reference"].to_dict()
+    name_lookup = refs.set_index("assembly_accession")["reference"].to_dict()
 
     df.sort_values(["Ref_file", "Query_file"], inplace=True)
 

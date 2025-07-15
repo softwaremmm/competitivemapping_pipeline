@@ -15,7 +15,7 @@ The metadata for the manifest is provided in manifest_metadata files.
 Note: Beware that this may still be different to the manifest in the knowledge bucket.
 
 Download files with:
-```
+```bash
 python3 download_manifest.py manifest_metadata_20250709.csv reference_genomes
 ```
 
@@ -132,7 +132,7 @@ For finding ANI similarity between references in the manifest use the following.
 ```
 skani triangle -t 100 -s 90 --medium reference_genomes/*.fasta -E > manifest_edge_list.tsv
 
-python3 group_similar.py manifest_edge_list.tsv manifest_metadata_20250324.csv manifest_groups.csv --threshold 95
+python3 group_similar.py manifest_edge_list.tsv manifest_metadata_20250709.csv manifest_groups.csv --threshold 97
 ```
 
 can adjust threshold to group at different cutoffs.
