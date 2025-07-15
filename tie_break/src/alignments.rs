@@ -43,6 +43,16 @@ impl PartialEq for Alignment {
     }
 }
 
+impl Alignment {
+    pub fn pair_index(&self) -> usize {
+        if self.is_second_in_pair {
+            1
+        } else {
+            0
+        }
+    }
+}
+
 /// Extra fields for debugging
 ///
 /// Not needed for analysis

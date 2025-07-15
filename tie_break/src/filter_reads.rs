@@ -1,7 +1,7 @@
 //! This module reads alignments from a BAM file, filters them and then writes to output BAM files.
 //!
 //! It has some complexity due to the multithreaded nature.
-//! The noodles reader and writers are multithreaded already.
+//! The noodles is multithreaded already.
 //! Rayon threadpool is used to manage the main filtering step
 //! Other threads which mainly wait on crossbeam channels are spawned directly
 //! as they are not CPU bound.
@@ -43,10 +43,10 @@ fn filter_read_alns(
     ani_group_ordering: &Option<HashMap<i32, u32>>, // Where a lower score is better
 ) -> (Vec<(bam::Record, Alignment)>, ReadStats) {
     // For paired reads, each part of the pair will have the filter stats calculated separately.
-    let mut max_query_coverage = (0.0, 0.0); // (first in pair, second in pair)
-    let mut min_divergence = (1.0, 1.0);
-    let mut primary_score = (0, 0);
-    let mut expected_divergence = (0.0, 0.0);
+    let mut max_query_coverage = [0.0, 0.0]; // (first in pair, second in pair)
+    let mut min_divergence = [1.0, 1.0];
+    let mut primary_score = [0, 0];
+    let mut expected_divergence = [0.0, 0.0];
 
     let mut some_unmapped = false;
     let alns: Vec<(bam::Record, Alignment)> = aln_group
@@ -77,55 +77,24 @@ fn filter_read_alns(
     for (_record, aln) in alns.iter() {
         let query_coverage = (aln.query_covered as f32) / (aln.query_length as f32);
 
-        if aln.is_second_in_pair {
-            max_query_coverage.1 = f32::max(max_query_coverage.1, query_coverage);
-            min_divergence.1 = f32::min(min_divergence.1, aln.gap_compressed_seq_divergence);
-        } else {
-            max_query_coverage.0 = f32::max(max_query_coverage.0, query_coverage);
-            min_divergence.0 = f32::min(min_divergence.0, aln.gap_compressed_seq_divergence);
-        }
+        let pair_index = aln.pair_index();
+        max_query_coverage[pair_index] = f32::max(max_query_coverage[pair_index], query_coverage);
+        min_divergence[pair_index] = f32::min(min_divergence[pair_index], aln.gap_compressed_seq_divergence);
 
         if aln.is_primary {
-            if aln.is_second_in_pair {
-                primary_score.1 = aln.alignment_score;
-                expected_divergence.1 = aln.expected_error_rate;
-            } else {
-                primary_score.0 = aln.alignment_score;
-                expected_divergence.0 = aln.expected_error_rate;
-            }
+            primary_score[pair_index] = aln.alignment_score;
+            expected_divergence[pair_index] = aln.expected_error_rate;
         }
-    }
-
-    fn scale_pair<I>(pair: (I, I), scale: I) -> (I, I)
-    where
-        I: std::ops::Mul<Output = I> + Copy,
-    {
-        (pair.0 * scale, pair.1 * scale)
-    }
-    fn add_to_pair<I>(pair: (I, I), scale: I) -> (I, I)
-    where
-        I: std::ops::Add<Output = I> + Copy,
-    {
-        (pair.0 + scale, pair.1 + scale)
     }
 
     // Query coverage filters
     let min_query_coverage = params.min_query_coverage.unwrap_or(0.0);
-    let min_query_coverage_pc_of_max = scale_pair(
-        max_query_coverage,
-        params.min_query_coverage_pc_of_max.unwrap_or(0.0),
-    );
+    let min_query_coverage_pc_of_max = max_query_coverage.map(|x| x * params.min_query_coverage_pc_of_max.unwrap_or(0.0));
 
     // Divergence filters
     let max_divergence = params.max_divergence.unwrap_or(1.0);
-    let max_divergence_from_expected = add_to_pair(
-        expected_divergence,
-        params.max_divergence_from_expected.unwrap_or(1.0),
-    );
-    let max_divergence_from_best = add_to_pair(
-        min_divergence,
-        params.max_divergence_from_best.unwrap_or(1.0),
-    );
+    let max_divergence_from_expected = expected_divergence.map(|x| x + params.max_divergence_from_expected.unwrap_or(1.0));
+    let max_divergence_from_best = min_divergence.map(|x| x + params.max_divergence_from_best.unwrap_or(1.0));
 
     // Score filters
     let min_score_fraction = params.min_score_fraction.unwrap_or(0.0);
@@ -140,24 +109,13 @@ fn filter_read_alns(
         .into_iter()
         .filter(|(_rec, aln)| {
             let query_coverage = (aln.query_covered as f32) / (aln.query_length as f32);
-            let (min_query_coverage_pc_of_max, max_divergence_from_expected, max_divergence_from_best) = match aln.is_second_in_pair {
-                true => (
-                    min_query_coverage_pc_of_max.1,
-                    max_divergence_from_expected.1,
-                    max_divergence_from_best.1,
-                ),
-                false => (
-                    min_query_coverage_pc_of_max.0,
-                    max_divergence_from_expected.0,
-                    max_divergence_from_best.0,
-                ),
-            };
+            let pair_index = aln.pair_index();
 
             if query_coverage < min_query_coverage {
                 filter_counts.low_query_cov += 1;
                 return false;
             }
-            if query_coverage < min_query_coverage_pc_of_max {
+            if query_coverage < min_query_coverage_pc_of_max[pair_index] {
                 filter_counts.low_query_cov_pc_of_max += 1;
                 return false;
             }
@@ -165,20 +123,16 @@ fn filter_read_alns(
                 filter_counts.high_divergence += 1;
                 return false;
             }
-            if aln.gap_compressed_seq_divergence > max_divergence_from_expected {
+            if aln.gap_compressed_seq_divergence > max_divergence_from_expected[pair_index] {
                 filter_counts.high_divergence_from_expected += 1;
                 return false;
             }
-            if aln.gap_compressed_seq_divergence > max_divergence_from_best {
+            if aln.gap_compressed_seq_divergence > max_divergence_from_best[pair_index] {
                 filter_counts.high_divergence_from_best += 1;
                 return false;
             }
 
-            let primary_score = match aln.is_second_in_pair {
-                true => primary_score.1,
-                false => primary_score.0,
-            };
-            let score_fraction = aln.alignment_score as f32 / primary_score as f32;
+            let score_fraction = aln.alignment_score as f32 / primary_score[pair_index] as f32;
             if score_fraction < min_score_fraction {
                 filter_counts.low_score += 1;
                 return false;
