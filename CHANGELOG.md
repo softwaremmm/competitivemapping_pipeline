@@ -1,3 +1,7 @@
+## 3.0.1
+
+- Correct file extension for build system
+
 ## 3.0.0
 
 - add tie_break approach for determining read depth and coverage from bam file
