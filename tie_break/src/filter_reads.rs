@@ -31,6 +31,8 @@ use filter_counts::{
     FilterCounts, FilterResult, FilterRoundStats, InputStats, ReadStats, ReadType,
 };
 
+type SignalFiles = Vec<(String, String)>;
+
 /// Take all the alignments for a single read (or read pair) and filter them based on the provided parameters.
 ///
 /// This function will return a tuple containing:
@@ -269,6 +271,7 @@ fn filter_read_alns(
     );
 }
 
+#[allow(clippy::too_many_arguments)]
 fn process_read_aln_groups(
     aln_group_rx: Receiver<Vec<bam::Record>>,
     thread_pool: &rayon::ThreadPool,
@@ -474,7 +477,7 @@ pub fn filter_bam(
     threads: Option<usize>,
     tie_break_order: Option<DataFrame>,
     debug: bool,
-) -> Result<(Vec<(String, String)>, InputStats, FilterRoundStats)> {
+) -> Result<(SignalFiles, InputStats, FilterRoundStats)> {
     let now = SystemTime::now();
 
     let is_round_2 = tie_break_order.is_some();
@@ -520,7 +523,7 @@ pub fn filter_bam(
     } else {
         vec!["unique", "winner", "shared"]
     };
-    let signal_paths: Vec<(String, String)> = signals
+    let signal_paths: SignalFiles = signals
         .iter()
         .map(|signal| {
             let path = format!("{output_root}{signal}_alns.csv");
