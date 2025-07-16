@@ -1,4 +1,5 @@
-## New
+## 2.2.4
+
 - add tie_break approach for determining read depth and coverage from bam file
 - python script extract_reads for selecting reads for reference with tie_break
 - group targets by ANI for use in tie_break
