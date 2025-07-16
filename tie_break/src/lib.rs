@@ -57,7 +57,7 @@ where
 
 pub fn make_bam_index(bam_path: &str) -> Result<()> {
     let index = bam::fs::index(bam_path).unwrap();
-    bai::fs::write(format!("{}.bai", bam_path), &index).unwrap();
+    bai::fs::write(format!("{bam_path}.bai"), &index).unwrap();
     Ok(())
 }
 
@@ -83,7 +83,7 @@ pub fn sort_bam(bam_path: &str, output_path: &str, threads: Option<usize>) -> Re
             now.elapsed()?
         );
     } else {
-        eprintln!("samtools sort failed with exit code: {}", status);
+        eprintln!("samtools sort failed with exit code: {status}");
     }
     Ok(())
 }

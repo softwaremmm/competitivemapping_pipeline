@@ -40,7 +40,7 @@ pub fn analyze_alignments(args: AnalyzeArgs) -> Result<(), Box<dyn std::error::E
 
     let params: Params = serde_yaml::from_reader(
         File::open(args.parameters)
-            .map_err(|e| format!("Failed to read params file. Error: {}", e))?,
+            .map_err(|e| format!("Failed to read params file. Error: {e}"))?,
     )?;
 
     let reference_df = make_reference_df(&args.input_bam, &args.contigs)?;
@@ -49,7 +49,7 @@ pub fn analyze_alignments(args: AnalyzeArgs) -> Result<(), Box<dyn std::error::E
         format!("{}{}", args.output_root, "references.csv"),
     )?;
     if args.debug {
-        println!("Reference DataFrame: {:?}", reference_df);
+        println!("Reference DataFrame: {reference_df:?}");
     }
 
     let (signal_paths, input_stats, round1_stats) = filter_bam(
@@ -82,7 +82,7 @@ pub fn analyze_alignments(args: AnalyzeArgs) -> Result<(), Box<dyn std::error::E
     let ref_tie_breaker_order =
         order_best_refs(&round1_summarised_depth, params.min_unique_coverage)?;
     if args.debug {
-        println!("Ref tie breaker order: {:?}", ref_tie_breaker_order);
+        println!("Ref tie breaker order: {ref_tie_breaker_order:?}");
     }
     save_csv(
         &ref_tie_breaker_order,

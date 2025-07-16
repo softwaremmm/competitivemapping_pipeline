@@ -44,7 +44,7 @@ impl CsvPileupIterator<std::vec::IntoIter<Aln>> {
         let mut aln_vec: Vec<Aln> = rdr
             .deserialize::<Aln>()
             .filter_map(|res| res.ok()) // Skip invalid rows
-            .filter(|aln| target_id.map_or(true, |tid| aln.target_id == tid))
+            .filter(|aln| target_id.is_none_or(|tid| aln.target_id == tid))
             .collect();
         // sort by target_id and ref_start
         aln_vec.sort_by_key(|aln| (aln.target_id, aln.ref_start));

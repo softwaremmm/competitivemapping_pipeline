@@ -240,7 +240,7 @@ pub fn get_depth_counts_single(reference_df: &DataFrame, alns_paths: &str) -> Re
         .collect()?;
 
     println!("Reading took {:?} overall", now.elapsed().unwrap());
-    println!("Depth: {:?}", final_df);
+    println!("Depth: {final_df:?}");
     Ok(final_df)
 }
 
@@ -282,7 +282,7 @@ mod tests {
 
         let df = hashmap_to_dataframe!(hashmap, "key".into(), "value".into()).unwrap();
 
-        println!("{:?}", df);
+        println!("{df:?}");
 
         assert_eq!(df.shape(), (3, 2));
         let key: u32 = df.column("key").unwrap().u32().unwrap().get(0).unwrap();

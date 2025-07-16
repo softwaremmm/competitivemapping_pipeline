@@ -31,3 +31,5 @@ opt-level = 3
 
 [lints.clippy]
 needless_return = "allow"
+too_many_arguments = "allow"
+type_complexity = "allow"

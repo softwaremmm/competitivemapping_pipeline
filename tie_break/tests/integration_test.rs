@@ -76,7 +76,7 @@ fn compare_files(expected: &str, result: &str) -> bool {
     let expected_content = match read_to_string(expected) {
         Ok(content) => content,
         Err(_) => {
-            println!("Failed to read expected file '{}'", expected);
+            println!("Failed to read expected file '{expected}'");
             "".to_string()
         }
     };
@@ -84,11 +84,11 @@ fn compare_files(expected: &str, result: &str) -> bool {
     let equal = expected_content == result_content;
 
     if !equal {
-        println!("Files differ:\nExpected: {}\nResult: {}", expected, result);
+        println!("Files differ:\nExpected: {expected}\nResult: {result}");
 
         if update_expectations() {
             std::fs::write(expected, &result_content).expect("Failed to update expected file");
-            println!("Updated expected file: {}", expected);
+            println!("Updated expected file: {expected}");
 
             return true; // Consider it equal after updating
         }
@@ -115,19 +115,19 @@ fn test_all() {
 
         let round1_depth_equal = compare_files(
             test_set.depth_counts_file,
-            &format!("{}depth_counts.csv", output_dir),
+            &format!("{output_dir}depth_counts.csv"),
         );
         let ref_tie_breaker_order_equal = compare_files(
             test_set.expected_ref_tie_breaker_order_file,
-            &format!("{}ref_tie_breaker_order.csv", output_dir),
+            &format!("{output_dir}ref_tie_breaker_order.csv"),
         );
         let stats_equal = compare_files(
             test_set.expected_stats_file,
-            &format!("{}stats.yaml", output_dir),
+            &format!("{output_dir}stats.yaml"),
         );
         let depths_equal = compare_files(
             test_set.expected_summary_file,
-            &format!("{}alignment_summary.csv", output_dir),
+            &format!("{output_dir}alignment_summary.csv"),
         );
 
         assert!(
@@ -157,25 +157,25 @@ fn test_debug() {
 
     let round1_depth_equal = compare_files(
         test_set.depth_counts_file,
-        &format!("{}depth_counts.csv", output_dir),
+        &format!("{output_dir}depth_counts.csv"),
     );
     let ref_tie_breaker_order_equal = compare_files(
         test_set.expected_ref_tie_breaker_order_file,
-        &format!("{}ref_tie_breaker_order.csv", output_dir),
+        &format!("{output_dir}ref_tie_breaker_order.csv"),
     );
     let stats_equal = compare_files(
         test_set.expected_stats_file,
-        &format!("{}stats.yaml", output_dir),
+        &format!("{output_dir}stats.yaml"),
     );
     let depths_equal = compare_files(
         test_set.expected_summary_file,
-        &format!("{}alignment_summary.csv", output_dir),
+        &format!("{output_dir}alignment_summary.csv"),
     );
     let debug_equal = compare_files(
         &test_set
             .depth_counts_file
             .replace("depth_counts", "debug_alns_round_2"),
-        &format!("{}debug_alns_round_2.csv", output_dir),
+        &format!("{output_dir}debug_alns_round_2.csv"),
     );
 
     assert!(

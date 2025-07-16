@@ -21,7 +21,7 @@ pub fn compare_files(expected: &str, result: &str) -> bool {
     let expected_content = match read_to_string(expected) {
         Ok(content) => content,
         Err(_) => {
-            println!("Failed to read expected file '{}'", expected);
+            println!("Failed to read expected file '{expected}'");
             "".to_string()
         }
     };
@@ -29,11 +29,11 @@ pub fn compare_files(expected: &str, result: &str) -> bool {
     let equal = expected_content == result_content;
 
     if !equal {
-        println!("Files differ:\nExpected: {}\nResult: {}", expected, result);
+        println!("Files differ:\nExpected: {expected}\nResult: {result}");
 
         if update_expectations() {
             std::fs::write(expected, &result_content).expect("Failed to update expected file");
-            println!("Updated expected file: {}", expected);
+            println!("Updated expected file: {expected}");
 
             return true; // Consider it equal after updating
         }
@@ -49,7 +49,7 @@ pub fn create_parent_dir<P: AsRef<Path>>(file_path: P) {
 }
 
 pub fn create_bam_from_lines(file_path: &str, lines: Vec<String>) -> Result<()> {
-    let sam_path = format!("{}.sam", file_path);
+    let sam_path = format!("{file_path}.sam");
 
     // create folder if it doesn't exist
     create_parent_dir(file_path);
@@ -57,13 +57,13 @@ pub fn create_bam_from_lines(file_path: &str, lines: Vec<String>) -> Result<()> 
     // Create a SAM file with the specified reference length and alignments
     let mut sam_file = File::create(&sam_path)?;
     for line in lines {
-        writeln!(sam_file, "{}", line)?;
+        writeln!(sam_file, "{line}")?;
     }
 
     // Close the SAM file
     drop(sam_file);
 
-    let unsorted_path = format!("{}.unsorted.bam", file_path);
+    let unsorted_path = format!("{file_path}.unsorted.bam");
 
     // Convert SAM to BAM
     Command::new("samtools")
@@ -98,8 +98,7 @@ pub fn create_bam(
         .iter()
         .map(|(query_id, flag, start, cigar)| {
             format!(
-                "{}\t{}\tref\t{}\t60\t{}\t*\t0\t0\t*\t*",
-                query_id, flag, start, cigar
+                "{query_id}\t{flag}\tref\t{start}\t60\t{cigar}\t*\t0\t0\t*\t*"
             )
         })
         .collect::<Vec<String>>();

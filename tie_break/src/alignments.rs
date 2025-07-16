@@ -223,15 +223,13 @@ pub fn record_to_alignment_info(
 
     if !is_paired && flags.is_first_segment() && flags.is_last_segment() {
         panic!(
-            "Unexpected pairing. {} is segmented but is also first and last segment.",
-            read_id
+            "Unexpected pairing. {read_id} is segmented but is also first and last segment."
         );
     }
     let is_second_in_pair = flags.is_last_segment();
     if !is_paired & is_second_in_pair {
         panic!(
-            "Unexpected pairing. {} is not paired but is also last segment.",
-            read_id
+            "Unexpected pairing. {read_id} is not paired but is also last segment."
         );
     }
 
@@ -321,9 +319,9 @@ mod tests {
             ..Default::default()
         }];
 
-        create_dir_all(format!("{}/alignments", TEST_DIR))
+        create_dir_all(format!("{TEST_DIR}/alignments"))
             .expect("Failed to create test directory");
-        let bam_path = format!("{}/alignments/test_record_to_alignment_info.bam", TEST_DIR);
+        let bam_path = format!("{TEST_DIR}/alignments/test_record_to_alignment_info.bam");
         create_bam_from_lines(&bam_path, lines).expect("Failed to create BAM file");
 
         let results = bam_to_records(&bam_path)
@@ -376,8 +374,7 @@ mod tests {
         ];
 
         let bam_path = format!(
-            "{}/alignments/test_record_to_alignment_info_flags.bam",
-            TEST_DIR
+            "{TEST_DIR}/alignments/test_record_to_alignment_info_flags.bam"
         );
         create_bam_from_lines(&bam_path, lines).expect("Failed to create BAM file");
 
@@ -483,7 +480,7 @@ mod tests {
             },
         ];
 
-        let bam_path = format!("{}/alignments/test_cigar_stats.bam", TEST_DIR);
+        let bam_path = format!("{TEST_DIR}/alignments/test_cigar_stats.bam");
         create_bam_from_lines(&bam_path, lines).expect("Failed to create BAM file");
 
         let results = bam_to_records(&bam_path)

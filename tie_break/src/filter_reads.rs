@@ -356,7 +356,7 @@ fn write_alns_to_csv(file_paths: &[(String, String)], alns_rx: Receiver<(Alignme
                 ])
                 .expect("Failed to write alignment to CSV");
         } else {
-            panic!("No writer found for signal {}", signal);
+            panic!("No writer found for signal {signal}");
         }
     }
 
@@ -482,8 +482,7 @@ pub fn filter_bam(
     let (read_threads, process_threads) = determine_threads(threads);
     if debug {
         println!(
-            "Using {} read threads, {} process threads",
-            read_threads, process_threads
+            "Using {read_threads} read threads, {process_threads} process threads"
         );
     }
 
@@ -524,7 +523,7 @@ pub fn filter_bam(
     let signal_paths: Vec<(String, String)> = signals
         .iter()
         .map(|signal| {
-            let path = format!("{}{}_alns.csv", output_root, signal);
+            let path = format!("{output_root}{signal}_alns.csv");
             (signal.to_string(), path)
         })
         .collect();
@@ -561,7 +560,7 @@ pub fn filter_bam(
 
     let debug_handle = thread::spawn({
         let round_index = if is_round_2 {"round_2"} else {"round_1"};
-        let path = format!("{}debug_alns_{}.csv", output_root, round_index);
+        let path = format!("{output_root}debug_alns_{round_index}.csv");
         let debug_rx = debug_rx.clone();
         move || {
             write_debug_to_csv(&path, debug_rx, debug);
@@ -674,7 +673,7 @@ mod tests {
         .map(|line| line.to_string())
         .collect::<Vec<String>>();
 
-        let file_path = format!("{}/test_filter_reads/one_per_ref1.bam", TEST_DIR);
+        let file_path = format!("{TEST_DIR}/test_filter_reads/one_per_ref1.bam");
         create_bam_from_lines(&file_path, sam_lines)?;
         let records = bam_to_records(&file_path)?;
 
@@ -699,7 +698,7 @@ mod tests {
         .map(|line| line.to_string())
         .collect::<Vec<String>>();
 
-        let file_path = format!("{}/test_filter_reads/one_per_ref2.bam", TEST_DIR);
+        let file_path = format!("{TEST_DIR}/test_filter_reads/one_per_ref2.bam");
         create_bam_from_lines(&file_path, sam_lines)?;
         let records = bam_to_records(&file_path)?;
 
