@@ -1,6 +1,8 @@
 #!/usr/bin/env nextflow
 include { competitiveMapping } from './process/competitive_mapping.nf'
 include { dynamicCompetitiveMapping } from './process/competitive_mapping.nf'
+include { tie_break } from './process/competitive_mapping.nf'
+include { dynamic_tie_break } from './process/competitive_mapping.nf'
 include { has_enough_reads } from './process/competitive_mapping.nf'
 
 // input parameters
@@ -86,18 +88,16 @@ workflow {
     )
 
     if (params.seq_platform == 'ont') {
-        input_files = Channel
-            .fromPath("${params.input_dir}/${params.input_single_suffix}", checkIfExists: true)
+        input_files = Channel.fromPath("${params.input_dir}/${params.input_single_suffix}", checkIfExists: true)
             .ifEmpty { error("cannot find any reads matching ${params.input_single_suffix} in ${params.input_dir}") }
             .map { it -> tuple(it.simpleName, it) }
     }
     else if (params.seq_platform == 'illumina') {
-        input_files = Channel
-            .fromFilePairs(
+        input_files = Channel.fromFilePairs(
                 "${params.input_dir}/${params.input_paired_suffix}",
                 flat: false,
                 checkIfExists: true,
-                size: -1
+                size: -1,
             )
             .ifEmpty { error("cannot find any reads matching ${params.input_paired_suffix} in ${params.input_dir}") }
     }
@@ -108,7 +108,8 @@ workflow {
     // Using fromPath means they can be provided as relative paths
     manifest = Channel.fromPath(params.manifest, checkIfExists: true).first()
     species_list = Channel.fromPath(params.species_list, checkIfExists: true).first()
-    competitive_mapping(input_files, manifest, species_list, params.seq_platform, params.reference_name)
+    // competitive_mapping(input_files, manifest, species_list, params.seq_platform, params.reference_name)
+    cm_analzer_workflow(input_files, manifest, species_list, params.seq_platform, params.reference_name)
 }
 
 
@@ -126,12 +127,12 @@ workflow competitive_mapping {
 
     competitive_mapping_output = competitiveMapping(input_files, manifest, species_list, seq_platform, reference_name)
     threshold = seq_platform == 'illumina' ? params.illumina_threshold : params.ont_threshold
-    has_enough_reads(competitive_mapping_output.cm_report, threshold)
+    has_enough_reads(competitive_mapping_output.report_json, threshold)
 
     emit:
-    cm_tb_reads = competitive_mapping_output.cm_tb_reads
-    cm_report = competitive_mapping_output.cm_report
-    cm_csv = competitive_mapping_output.cm_csv
+    ref_reads = competitive_mapping_output.ref_reads
+    report_json = competitive_mapping_output.report_json
+    report_csv = competitive_mapping_output.report_csv
     cm_enough_reads = has_enough_reads.out
 }
 
@@ -151,12 +152,69 @@ workflow dynamic_competitive_mapping {
         db_genome_path_files,
         db_taxonomy,
         seq_platform,
-        params.use_whole_genera_in_dynamic_cm
+        params.use_whole_genera_in_dynamic_cm,
     )
 
     emit:
-    cm_report = competitive_mapping_output.cm_report
-    cm_csv = competitive_mapping_output.cm_csv
+    report_json = competitive_mapping_output.report_json
+    report_csv = competitive_mapping_output.report_csv
+}
+
+// WARNING: Experimental process
+workflow cm_analzer_workflow {
+    take:
+    input_files
+    manifest
+    species_list
+    seq_platform
+    reference_name
+
+    main:
+    check_seq_platform(seq_platform)
+
+    analyzer_params = Channel.fromPath("${moduleDir}/process/params_${seq_platform}.yml").first()
+
+    tie_break(
+        input_files,
+        manifest,
+        species_list,
+        seq_platform,
+        analyzer_params,
+        reference_name,
+    )
+
+    emit:
+    report_csv = tie_break.out.report_csv
+    stats = tie_break.out.stats
+    ref_reads = tie_break.out.ref_reads
+}
+
+// WARNING: Experimental process
+// currently also runs standard workflow for comparison
+workflow dynamic_cm_analzer_workflow {
+    take:
+    input_files
+    genomes_path
+    assembly_metadata
+    seq_platform
+
+    main:
+    check_seq_platform(seq_platform)
+
+    analyzer_params = Channel.fromPath("${moduleDir}/process/params_${seq_platform}.yml").first()
+
+    dynamic_tie_break(
+        input_files,
+        genomes_path,
+        assembly_metadata,
+        seq_platform,
+        params.use_whole_genera_in_dynamic_cm,
+        analyzer_params,
+    )
+
+    emit:
+    report_csv = dynamic_tie_break.out.report_csv
+    stats = dynamic_tie_break.out.stats
 }
 
 def check_seq_platform(seq_platform) {

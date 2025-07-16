@@ -76,16 +76,17 @@ def main(manifest_metadata, output_dir):
     df = pd.read_csv(manifest_metadata)
 
     # Remove the excluded assemblies
-    df = df[df["not_used_in_manifest"] != "y"]
+    if "not_used_in_manifest" in df.columns:
+        df = df[df["not_used_in_manifest"] != "y"]
 
     # Check for duplicate assemblies
-    duplicated_assemblies = df[df.duplicated(subset="assembly", keep=False)]
+    duplicated_assemblies = df[df.duplicated(subset="assembly_accession", keep=False)]
     if not duplicated_assemblies.empty:
         print("Duplicated assemblies:")
         print(duplicated_assemblies)
         return
 
-    for accession in df["assembly"]:
+    for accession in df["assembly_accession"]:
         download_assembly(accession.strip(), output_dir)
 
 

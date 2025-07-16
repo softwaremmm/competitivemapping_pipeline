@@ -17,7 +17,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
 ]
 requires-python = "~=3.11"
-version = "2.2.3"
+version = "3.0.0"
 
 [project.scripts]
 process_coverage = "competitivemapping.process_coverage:cli_entry_point"
@@ -25,8 +25,9 @@ process_aln_stats = "competitivemapping.process_aln_stats:cli_entry_point"
 check_read_count = "competitivemapping.check_read_count:cli_entry_point"
 competitive_mapping = "competitivemapping.competitive_mapping:cli_entry_point"
 manifest_builder = "competitivemapping.manifest_builder:cli_entry_point"
+manifest_builder_manual = "competitivemapping.manifest_builder_manual:cli_entry_point"
 manifest_mapper = "competitivemapping.manifest_mapper:cli_entry_point"
-
+extract_reads = "competitivemapping.extract_reads:cli_entry_point"
 
 [project.optional-dependencies]
 dev = [
@@ -57,7 +58,7 @@ tag_format = "$version"
 
 
 [tool.version_bumper]
-active_version = "2.2.3"
+active_version = "3.0.0"
 version_files = [
     "process/competitive_mapping.nf",
 ]

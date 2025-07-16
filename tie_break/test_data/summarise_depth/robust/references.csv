@@ -1,0 +1,5 @@
+target_id,rname,reference,ref_id,species,ani_group,ref_length
+1,ref,ref1,1,ref1,1,10
+2,ref,ref2,2,ref2,2,100
+3,ref,ref3,3,ref3,3,100
+4,ref,ref4,4,ref4,4,100

@@ -1,3 +1,11 @@
+## 3.0.0
+
+- add tie_break approach for determining read depth and coverage from bam file
+- python script extract_reads for selecting reads for reference with tie_break
+- group targets by ANI for use in tie_break
+- rename output channels to be more consistent/descriptive
+- code to produce new manifest from RefSeq in reproducible way
+
 ### 2.2.3
 
 - Same container image name on both tenancies

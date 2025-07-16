@@ -1,6 +1,6 @@
 nextflow_process {
 
-    name "Test Process competitiveMapping"
+    name "Test Process competitiveMapping with Flu"
     script "process/competitive_mapping.nf"
     process "competitiveMapping"
 
@@ -11,7 +11,7 @@ nextflow_process {
             process{
                 """
                 input[0] = ['sample_test', [file("$projectDir/influenza/SRR29182379_1.fastq.gz"), file("$projectDir/test_data/influenza/SRR29182379_2.fastq.gz")]]
-                input[1] = file("$projectDir/data/manifest/influenza/multifasta.fasta.gz")
+                input[1] = file("$projectDir/data/manifest_flu/test_multifasta.fasta.gz")
                 input[2] = file("$projectDir/test_data/flu_contigs_20250513.csv")
                 input[3] = 'illumina'
                 input[4] = ''
@@ -23,17 +23,17 @@ nextflow_process {
             assert process.success
             assert process.exitStatus == 0
 
-            with(process.out.cm_report) {
+            with(process.out.report_json) {
                 assert size() == 1
                 assert get(0)[1].contains("species_comparison_report.json")
             }
 
-            with(process.out.cm_csv) {
+            with(process.out.report_csv) {
                 assert size() == 1
                 assert get(0)[1].contains("species_comparison.csv")
             }
 
-            with(process.out.cm_tb_reads) {
+            with(process.out.ref_reads) {
                 assert size() == 0
             }
         }

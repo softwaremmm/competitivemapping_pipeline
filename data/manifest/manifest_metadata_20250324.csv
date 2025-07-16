@@ -1,4 +1,4 @@
-reference,first_contig,strain,assembly,not_used_in_manifest
+reference,first_contig,strain,assembly_accession,not_used_in_manifest
 M.tuberculosis,AL123456.3,H37Rv,GCA_000195955.2,
 M.shigaense,AP018164.1,JCM_32072,GCA_002356315.1,
 M.pseudoshottsii,AP018410.1,JCM_15466,GCA_003584745.1,y

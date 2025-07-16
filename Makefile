@@ -13,6 +13,16 @@ run:
 		--publish_dir results \
 		-resume
 
+run_flu:
+	nextflow run . \
+		--seq_platform illumina \
+		--input_dir flu_input/N1_illumina \
+		--manifest data/manifest_flu/all_influenza_A_plus_all_h_all_n.fasta \
+		--species_list data/manifest_flu/manifest_20250624_groups.csv \
+		--publish_dir flu_results \
+		-profile local_docker \
+		-resume
+
 container:
 	docker build -t test_container_cm .
 
@@ -21,6 +31,11 @@ test:
 	nf-test test tests/nextflow/*.test
 
 test_local:
+	cd tie_break && cargo test
 	pytest tests
 	docker build -t test_container_cm .
 	nf-test test tests/nextflow/*.test --profile local_docker
+
+clippy:
+	cd tie_break && \
+	cargo clippy --all --all-features --tests --fix --allow-dirty -- -D warnings

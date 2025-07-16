@@ -127,8 +127,7 @@ A Python package that processes the output from command line tools orchestrated 
 
 ### Installation
 
-Clone the repo as described above. Create a virtual environment and install the package using `pip install -e .[dev]`. Set up pre-commit
-with `pre-commit install`.
+Clone the repo as described above. Create a virtual environment and install the package using `pip install -e .[dev]`. Set up pre-commit with `pre-commit install`.
 
 
 ### Execution

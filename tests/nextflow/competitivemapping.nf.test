@@ -23,18 +23,18 @@ nextflow_process {
             assert process.exitStatus == 0
 
 
-            with(process.out.cm_report) {
+            with(process.out.report_json) {
                 assert size() == 1
                 assert get(0)[1].contains("species_comparison_report.json")
                 assert path(get(0)[1]).json == path("$projectDir/test_data/TB_10k/species_comparison_report.json").json
             }
 
-            with(process.out.cm_csv) {
+            with(process.out.report_csv) {
                 assert size() == 1
                 assert get(0)[1].contains("species_comparison.csv")
             }
 
-            with(process.out.cm_tb_reads) {
+            with(process.out.ref_reads) {
                 assert size() == 1
                 assert get(0)[1][0].contains("reads_for_assembly_1.fastq.gz")
                 assert get(0)[1][1].contains("reads_for_assembly_2.fastq.gz")
@@ -61,18 +61,18 @@ nextflow_process {
             assert process.exitStatus == 0
 
 
-            with(process.out.cm_report) {
+            with(process.out.report_json) {
                 assert size() == 1
                 assert get(0)[1].contains("species_comparison_report.json")
                 assert path(get(0)[1]).json == path("$projectDir/test_data/chloro_10k/species_comparison_report.json").json
             }
 
-            with(process.out.cm_csv) {
+            with(process.out.report_csv) {
                 assert size() == 1
                 assert get(0)[1].contains("species_comparison.csv")
             }
 
-            with(process.out.cm_tb_reads) {
+            with(process.out.ref_reads) {
                 assert size() == 1
                 assert get(0)[1][0].contains("reads_for_assembly_1.fastq.gz")
                 assert get(0)[1][1].contains("reads_for_assembly_2.fastq.gz")
@@ -99,18 +99,18 @@ nextflow_process {
             assert process.exitStatus == 0
 
 
-            with(process.out.cm_report) {
+            with(process.out.report_json) {
                 assert size() == 1
                 assert get(0)[1].contains("species_comparison_report.json")
                 assert path(get(0)[1]).json == path("$projectDir/test_data/TB_ont/species_comparison_report.json").json
             }
 
-            with(process.out.cm_csv) {
+            with(process.out.report_csv) {
                 assert size() == 1
                 assert get(0)[1].contains("species_comparison.csv")
             }
 
-            with(process.out.cm_tb_reads) {
+            with(process.out.ref_reads) {
                 assert size() == 1
                 assert get(0)[1].contains("reads_for_assembly.fastq.gz")
             }

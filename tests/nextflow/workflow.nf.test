@@ -1,6 +1,6 @@
 nextflow_workflow {
 
-    name "Test Workflow"
+    name "Test competitive_mapping Workflow"
     script "main.nf"
     workflow "competitive_mapping"
 
@@ -22,17 +22,17 @@ nextflow_workflow {
         then {
             assert workflow.success
 
-            with(workflow.out.cm_report) {
+            with(workflow.out.report_json) {
                 assert size() == 1
                 assert get(0)[1].contains("species_comparison_report.json")
             }
 
-            with(workflow.out.cm_csv) {
+            with(workflow.out.report_csv) {
                 assert size() == 1
                 assert get(0)[1].contains("species_comparison.csv")
             }
 
-            with(workflow.out.cm_tb_reads) {
+            with(workflow.out.ref_reads) {
                 assert size() == 1
                 assert get(0)[1][0].contains("reads_for_assembly_1.fastq.gz")
                 assert get(0)[1][1].contains("reads_for_assembly_2.fastq.gz")
@@ -58,17 +58,17 @@ nextflow_workflow {
         then {
             assert workflow.success
 
-            with(workflow.out.cm_report) {
+            with(workflow.out.report_json) {
                 assert size() == 1
                 assert get(0)[1].contains("species_comparison_report.json")
             }
 
-            with(workflow.out.cm_csv) {
+            with(workflow.out.report_csv) {
                 assert size() == 1
                 assert get(0)[1].contains("species_comparison.csv")
             }
 
-            with(workflow.out.cm_tb_reads) {
+            with(workflow.out.ref_reads) {
                 assert size() == 1
                 assert get(0)[1].contains("reads_for_assembly.fastq.gz")
             }

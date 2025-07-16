@@ -15,11 +15,16 @@ h37rv_100k*
 data/*
 !data/manifest/
 !data/manifest_flu/
-!data/manifest_flu/all_influenza_A.fasta
+!data/manifest_flu/influenza_A_20250709.fasta
 data/manifest/manifest_20231001
+data/manifest/ncbi_taxonomy
+data/manifest/reference_genomes
+data/manifest/assembly_summary_refseq.txt
+
 
 # nf-tests
 .nf-test/*
+.nf.test*
 *.snap
 
 # tests data
