@@ -1,4 +1,4 @@
-## 2.2.4
+## 3.0.0
 
 - add tie_break approach for determining read depth and coverage from bam file
 - python script extract_reads for selecting reads for reference with tie_break
