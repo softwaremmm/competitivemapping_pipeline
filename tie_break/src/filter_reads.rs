@@ -41,7 +41,7 @@ fn filter_read_alns(
     params: &FilterParams,
     tid_to_ref_id_and_ani_group: &HashMap<i32, (i32, i32)>,
     ani_group_ordering: &Option<HashMap<i32, u32>>, // Where a lower score is better
-) -> (Vec<(bam::Record, Alignment)>, ReadStats) {
+) -> (Vec<Alignment>, ReadStats) {
     // For paired reads, each part of the pair will have the filter stats calculated separately.
     let mut max_query_coverage = [0.0, 0.0]; // (first in pair, second in pair)
     let mut min_divergence = [1.0, 1.0];
@@ -49,7 +49,7 @@ fn filter_read_alns(
     let mut expected_divergence = [0.0, 0.0];
 
     let mut some_unmapped = false;
-    let alns: Vec<(bam::Record, Alignment)> = aln_group
+    let alns: Vec<Alignment> = aln_group
         .into_iter()
         .map(|record| {
             let (mut aln, _aln_extra) = record_to_alignment_info(&record, false);
@@ -64,9 +64,9 @@ fn filter_read_alns(
                 aln.ref_id = Some(*ref_id);
                 aln.ani_group = Some(*ani_group);
             }
-            (record, aln)
+            aln
         })
-        .filter(|(_, aln)| !aln.is_unmapped)
+        .filter(|aln| !aln.is_unmapped)
         .collect();
     let read_type = match (some_unmapped, !alns.is_empty()) {
         (false, _) => ReadType::Mapped,
@@ -74,7 +74,7 @@ fn filter_read_alns(
         (true, true) => ReadType::HalfMapped,
     };
 
-    for (_record, aln) in alns.iter() {
+    for aln in alns.iter() {
         let query_coverage = (aln.query_covered as f32) / (aln.query_length as f32);
 
         let pair_index = aln.pair_index();
@@ -105,9 +105,9 @@ fn filter_read_alns(
     let mut ani_groups: HashSet<i32> = HashSet::new();
     let mut strong_ani_groups: HashSet<i32> = HashSet::new();
 
-    let mut filtered_alns: Vec<(bam::Record, Alignment)> = alns
+    let mut filtered_alns: Vec<Alignment> = alns
         .into_iter()
-        .filter(|(_rec, aln)| {
+        .filter(|aln| {
             let query_coverage = (aln.query_covered as f32) / (aln.query_length as f32);
             let pair_index = aln.pair_index();
 
@@ -156,7 +156,7 @@ fn filter_read_alns(
             s.finish()
         }
         // Keep the best by alignment score
-        filtered_alns.sort_by_key(|(_rec, aln)| {
+        filtered_alns.sort_by_key(|aln| {
             (
                 aln.ref_id.expect("Ref ID should be set"),
                 -aln.alignment_score,
@@ -168,7 +168,7 @@ fn filter_read_alns(
         // but using hash to avoid bias
 
         let mut seen_refs = (HashSet::new(), HashSet::new());
-        filtered_alns.retain(|(_rec, aln)| {
+        filtered_alns.retain(|aln| {
             let ref_id = aln.ref_id.expect("Ref ID should be set");
             let seen_refs = if aln.is_second_in_pair {
                 &mut seen_refs.1
@@ -208,7 +208,7 @@ fn filter_read_alns(
                     .expect("Just checked that this ani_group is in the ordering")
             });
 
-        filtered_alns.retain(|(_rec, aln)| {
+        filtered_alns.retain(|aln| {
             if aln.ani_group == best_group {
                 return true;
             }
@@ -284,7 +284,7 @@ fn process_read_aln_groups(
                 return;
             }
 
-            for (_record, aln) in records {
+            for aln in records {
                 write_tx
                     .send((aln, signal.clone()))
                     .expect("Processor thread crashed");
