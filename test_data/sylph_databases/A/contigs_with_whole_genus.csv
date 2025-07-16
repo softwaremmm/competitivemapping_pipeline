@@ -1,13 +1,13 @@
-reference,rname,length,totallength,species
-GCF_000819615.1,NC_001422.1,5386,5386,Sinsheimervirus phiX174
-GCF_000820355.1,NC_005817.1,2928,5886,Sclerophthora macrospora virus A
-GCF_000820355.1,NC_005818.1,1981,5886,Sclerophthora macrospora virus A
-GCF_000820355.1,NC_005819.1,977,5886,Sclerophthora macrospora virus A
-GCF_000820495.2,NC_002204.1,2368,14452,Betainfluenzavirus influenzae
-GCF_000820495.2,NC_002205.1,2313,14452,Betainfluenzavirus influenzae
-GCF_000820495.2,NC_002206.1,2204,14452,Betainfluenzavirus influenzae
-GCF_000820495.2,NC_002207.1,1882,14452,Betainfluenzavirus influenzae
-GCF_000820495.2,NC_002208.1,1841,14452,Betainfluenzavirus influenzae
-GCF_000820495.2,NC_002209.1,1557,14452,Betainfluenzavirus influenzae
-GCF_000820495.2,NC_002210.1,1191,14452,Betainfluenzavirus influenzae
-GCF_000820495.2,NC_002211.1,1096,14452,Betainfluenzavirus influenzae
+reference,rname,length,totallength,ani_group,species
+GCF_000819615.1,NC_001422.1,5386,5386,1,Sinsheimervirus phiX174
+GCF_000820355.1,NC_005817.1,2928,5886,2,Sclerophthora macrospora virus A
+GCF_000820355.1,NC_005818.1,1981,5886,2,Sclerophthora macrospora virus A
+GCF_000820355.1,NC_005819.1,977,5886,2,Sclerophthora macrospora virus A
+GCF_000820495.2,NC_002204.1,2368,14452,3,Betainfluenzavirus influenzae
+GCF_000820495.2,NC_002205.1,2313,14452,3,Betainfluenzavirus influenzae
+GCF_000820495.2,NC_002206.1,2204,14452,3,Betainfluenzavirus influenzae
+GCF_000820495.2,NC_002207.1,1882,14452,3,Betainfluenzavirus influenzae
+GCF_000820495.2,NC_002208.1,1841,14452,3,Betainfluenzavirus influenzae
+GCF_000820495.2,NC_002209.1,1557,14452,3,Betainfluenzavirus influenzae
+GCF_000820495.2,NC_002210.1,1191,14452,3,Betainfluenzavirus influenzae
+GCF_000820495.2,NC_002211.1,1096,14452,3,Betainfluenzavirus influenzae

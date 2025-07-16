@@ -1,2 +1,4 @@
 process/competitive_mapping.nf
+process/params_illumina.yaml
+process/params_ont.yaml
 main.nf

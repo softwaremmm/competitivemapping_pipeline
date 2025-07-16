@@ -15,7 +15,7 @@ on:
 env:
   REGISTRY: lhr.ocir.io
   IMAGE_NAME: lrbvkel2wjot/gpas/competitivemapping_pipeline
-  IMAGE_NAME_GPAS_LTD: lr3yhdniv6gu/competitivemapping_pipeline
+  IMAGE_NAME_GPAS_LTD: lr3yhdniv6gu/gpas/competitivemapping_pipeline
 
 jobs:
   build:

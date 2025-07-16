@@ -1,0 +1,4 @@
+depth_type,reference,species,ani_group,ref_length,reads,coverage,mean_depth,median_nonzero_depth,simple_expected_coverage,robust_depth_estimate,robust_expected_coverage
+final,M.tuberculosis,M.tuberculosis,168,4411532,994,30.623,0.369,1.0,30.86,0.37 (0.36-0.37),30.62 (30.06-31.22)
+unique,M.tuberculosis,M.tuberculosis,168,4411532,928,28.805,0.347,1.0,29.32,0.37 (0.36-0.37),30.6 (30.12-31.15)
+winner,M.tuberculosis,M.tuberculosis,168,4411532,1,28.847,0.348,1.0,29.39,0.37 (0.36-0.38),30.82 (30.27-31.47)

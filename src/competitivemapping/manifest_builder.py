@@ -8,8 +8,10 @@ import logging
 import multiprocessing
 import os
 import re
+import subprocess
 from concurrent.futures import ProcessPoolExecutor
 
+import networkx as nx
 import pandas as pd
 from Bio import SeqIO
 
@@ -30,11 +32,13 @@ class Config:
     Args:
         cpus (int): Number of cores to use
         include_whole_genus (bool): Whether to include all genomes from genera found
+        ani_threshold (float): ANI threshold for grouping genomes
         output_root (str): Path to the output root
     """
 
     cpus: int
     include_whole_genus: bool
+    ani_threshold: float
     output_root: str
 
 
@@ -119,6 +123,51 @@ def get_genome_paths(genome_dir: str) -> pd.DataFrame:
     return df
 
 
+def get_ani_distances(
+    selected_df: pd.DataFrame,
+    config: Config,
+) -> pd.DataFrame:
+    """Get ANI distances between genomes using skani"""
+    all_genomes = " ".join(selected_df["path"].tolist())
+    command = f"skani triangle -E -t {config.cpus} --medium {all_genomes} > {config.output_root}ani_edge_list.tsv"
+    subprocess.run(command, shell=True, check=True)
+    ani_df = pd.read_csv(f"{config.output_root}ani_edge_list.tsv", sep="\t")
+
+    # Want to replace path with accession
+    path_to_accession = selected_df.set_index("path")["accession"].to_dict()
+    ani_df["Ref"] = ani_df["Ref_file"].map(path_to_accession)
+    ani_df["Query"] = ani_df["Query_file"].map(path_to_accession)
+
+    return ani_df
+
+
+def assign_ani_groups(contigs_df, ani_df, ani_threshold) -> pd.DataFrame:
+    """Find groups of similar genomes based on ANI threshold.
+    Returns copy of contigs_df with ani_group column added"""
+    ani_df = ani_df[ani_df["ANI"] >= ani_threshold]
+
+    # build graph from filtered data
+    graph = nx.from_pandas_edgelist(ani_df, "Ref", "Query")
+
+    groups = {}
+    group_index = 1
+    for c in nx.connected_components(graph):
+        for accession in c:
+            groups[accession] = group_index
+        group_index += 1
+
+    # Assign to singletons
+    for accession in contigs_df["reference"].unique():
+        if accession not in groups:
+            groups[accession] = group_index
+            group_index += 1
+
+    new_df = contigs_df.copy()
+    new_df["ani_group"] = new_df["reference"].map(groups)
+
+    return new_df
+
+
 def make_manifest(
     report_path: str,
     taxonomy_files: list[str],
@@ -145,7 +194,14 @@ def make_manifest(
         with gzip.open(manifest_file, "wb") as _outfile:
             pass
         contigs_df = pd.DataFrame(
-            columns=["reference", "rname", "length", "totallength", "species"]
+            columns=[
+                "reference",
+                "rname",
+                "length",
+                "totallength",
+                "ani_group",
+                "species",
+            ]
         )
         return manifest_file, contigs_df
 
@@ -234,6 +290,10 @@ def make_manifest(
         "sum"
     )
 
+    # add ani information
+    ani_df = get_ani_distances(selected_df, config)
+    contigs_df = assign_ani_groups(contigs_df, ani_df, config.ani_threshold)
+
     # add species information from metadata
     species_lookup = metadata_df.set_index("accession")["species"].to_dict()
     contigs_df["species"] = contigs_df["reference"].map(species_lookup)
@@ -265,6 +325,12 @@ def cli_entry_point():
         help="Include all genomes from genera found in the sylph report",
         action="store_true",
     )
+    parser.add_argument(
+        "--ani_threshold",
+        help="ANI threshold for grouping genomes",
+        default=97.0,
+        type=float,
+    )
     parser.add_argument("--cpus", help="Number of CPUs to use", default=4, type=int)
     parser.add_argument("--output_root", required=True, help="Path to the output files")
 
@@ -275,6 +341,7 @@ def cli_entry_point():
     config = Config(
         cpus=int(args.cpus),
         include_whole_genus=args.include_whole_genus,
+        ani_threshold=float(args.ani_threshold),
         output_root=args.output_root,
     )
 
