@@ -56,6 +56,23 @@ impl FilterRoundStats {
     }
 }
 
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, Eq)]
+pub enum FilterResult {
+    #[default]
+    Passed,
+    Unmapped,
+    LowQueryCoverage,
+    LowQueryCoveragePcOfMax,
+    HighDivergence,
+    HighDivergenceFromExpected,
+    HighDivergenceFromBest,
+    LowScore,
+    WeakScore,
+    ReadHasBetterAlnForRef,
+    RefLostDraw,
+    TargetExcluded,
+}
+
 #[derive(Debug, Clone, Default, Deserialize, Serialize)]
 pub struct FilterCounts {
     pub unmapped: usize,

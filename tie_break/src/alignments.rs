@@ -1,13 +1,16 @@
 //! This module provides functionality to extract alignment information from BAM records.
 
+use crate::filter_reads::filter_counts::FilterResult;
+
 use super::Result;
 use noodles::bam;
 use noodles::sam::alignment::record::data::field::value::Value;
 use noodles::sam::alignment::record::{
     cigar::op::Kind, Cigar, QualityScores as QualityScoresTrait,
 };
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Alignment {
     pub read_id: String,
     pub is_paired: bool,
@@ -24,6 +27,7 @@ pub struct Alignment {
     pub expected_error_rate: f32,
     pub ref_id: Option<i32>,    // This requires the references_df to set
     pub ani_group: Option<i32>, // This requires the references_df to set
+    pub filter_result: FilterResult,
 }
 
 impl PartialEq for Alignment {

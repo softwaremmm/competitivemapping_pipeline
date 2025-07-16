@@ -27,7 +27,9 @@ use rayon::ThreadPoolBuilder;
 
 pub mod filter_counts;
 use crate::get_target_id_to_ref_and_ani_group;
-use filter_counts::{FilterCounts, FilterRoundStats, InputStats, ReadStats, ReadType};
+use filter_counts::{
+    FilterCounts, FilterResult, FilterRoundStats, InputStats, ReadStats, ReadType,
+};
 
 /// Take all the alignments for a single read (or read pair) and filter them based on the provided parameters.
 ///
@@ -49,7 +51,7 @@ fn filter_read_alns(
     let mut expected_divergence = [0.0, 0.0];
 
     let mut some_unmapped = false;
-    let alns: Vec<Alignment> = aln_group
+    let mut alns: Vec<Alignment> = aln_group
         .into_iter()
         .map(|record| {
             let (mut aln, _aln_extra) = record_to_alignment_info(&record, false);
@@ -79,7 +81,10 @@ fn filter_read_alns(
 
         let pair_index = aln.pair_index();
         max_query_coverage[pair_index] = f32::max(max_query_coverage[pair_index], query_coverage);
-        min_divergence[pair_index] = f32::min(min_divergence[pair_index], aln.gap_compressed_seq_divergence);
+        min_divergence[pair_index] = f32::min(
+            min_divergence[pair_index],
+            aln.gap_compressed_seq_divergence,
+        );
 
         if aln.is_primary {
             primary_score[pair_index] = aln.alignment_score;
@@ -89,12 +94,15 @@ fn filter_read_alns(
 
     // Query coverage filters
     let min_query_coverage = params.min_query_coverage.unwrap_or(0.0);
-    let min_query_coverage_pc_of_max = max_query_coverage.map(|x| x * params.min_query_coverage_pc_of_max.unwrap_or(0.0));
+    let min_query_coverage_pc_of_max =
+        max_query_coverage.map(|x| x * params.min_query_coverage_pc_of_max.unwrap_or(0.0));
 
     // Divergence filters
     let max_divergence = params.max_divergence.unwrap_or(1.0);
-    let max_divergence_from_expected = expected_divergence.map(|x| x + params.max_divergence_from_expected.unwrap_or(1.0));
-    let max_divergence_from_best = min_divergence.map(|x| x + params.max_divergence_from_best.unwrap_or(1.0));
+    let max_divergence_from_expected =
+        expected_divergence.map(|x| x + params.max_divergence_from_expected.unwrap_or(1.0));
+    let max_divergence_from_best =
+        min_divergence.map(|x| x + params.max_divergence_from_best.unwrap_or(1.0));
 
     // Score filters
     let min_score_fraction = params.min_score_fraction.unwrap_or(0.0);
@@ -105,49 +113,57 @@ fn filter_read_alns(
     let mut ani_groups: HashSet<i32> = HashSet::new();
     let mut strong_ani_groups: HashSet<i32> = HashSet::new();
 
+    for aln in alns.iter_mut() {
+        let query_coverage = (aln.query_covered as f32) / (aln.query_length as f32);
+        let pair_index = aln.pair_index();
+
+        if query_coverage < min_query_coverage {
+            filter_counts.low_query_cov += 1;
+            aln.filter_result = FilterResult::LowQueryCoverage;
+            continue;
+        }
+        if query_coverage < min_query_coverage_pc_of_max[pair_index] {
+            filter_counts.low_query_cov_pc_of_max += 1;
+            aln.filter_result = FilterResult::LowQueryCoveragePcOfMax;
+            continue;
+        }
+        if aln.gap_compressed_seq_divergence > max_divergence {
+            filter_counts.high_divergence += 1;
+            aln.filter_result = FilterResult::HighDivergence;
+            continue;
+        }
+        if aln.gap_compressed_seq_divergence > max_divergence_from_expected[pair_index] {
+            filter_counts.high_divergence_from_expected += 1;
+            aln.filter_result = FilterResult::HighDivergenceFromExpected;
+            continue;
+        }
+        if aln.gap_compressed_seq_divergence > max_divergence_from_best[pair_index] {
+            filter_counts.high_divergence_from_best += 1;
+            aln.filter_result = FilterResult::HighDivergenceFromBest;
+            continue;
+        }
+
+        let score_fraction = aln.alignment_score as f32 / primary_score[pair_index] as f32;
+        if score_fraction < min_score_fraction {
+            filter_counts.low_score += 1;
+            aln.filter_result = FilterResult::LowScore;
+            continue;
+        }
+
+        ani_groups.insert(aln.ani_group.expect("ANI group should be set"));
+        if score_fraction < share_threshold {
+            filter_counts.weak += 1;
+            aln.filter_result = FilterResult::WeakScore;
+            continue;
+        }
+
+        strong_ani_groups.insert(aln.ani_group.expect("ANI group should be set"));
+        aln.filter_result = FilterResult::Passed;
+    }
+
     let mut filtered_alns: Vec<Alignment> = alns
         .into_iter()
-        .filter(|aln| {
-            let query_coverage = (aln.query_covered as f32) / (aln.query_length as f32);
-            let pair_index = aln.pair_index();
-
-            if query_coverage < min_query_coverage {
-                filter_counts.low_query_cov += 1;
-                return false;
-            }
-            if query_coverage < min_query_coverage_pc_of_max[pair_index] {
-                filter_counts.low_query_cov_pc_of_max += 1;
-                return false;
-            }
-            if aln.gap_compressed_seq_divergence > max_divergence {
-                filter_counts.high_divergence += 1;
-                return false;
-            }
-            if aln.gap_compressed_seq_divergence > max_divergence_from_expected[pair_index] {
-                filter_counts.high_divergence_from_expected += 1;
-                return false;
-            }
-            if aln.gap_compressed_seq_divergence > max_divergence_from_best[pair_index] {
-                filter_counts.high_divergence_from_best += 1;
-                return false;
-            }
-
-            let score_fraction = aln.alignment_score as f32 / primary_score[pair_index] as f32;
-            if score_fraction < min_score_fraction {
-                filter_counts.low_score += 1;
-                return false;
-            }
-
-            ani_groups.insert(aln.ani_group.expect("ANI group should be set"));
-            if score_fraction < share_threshold {
-                filter_counts.weak += 1;
-                return false;
-            }
-
-            strong_ani_groups.insert(aln.ani_group.expect("ANI group should be set"));
-            return true;
-        })
-        .collect();
+        .filter(|aln| aln.filter_result == FilterResult::Passed).collect();
 
     if !params.allow_reads_multiple_alns_per_ref {
         fn calculate_hash<T: Hash>(t: &T) -> u64 {
