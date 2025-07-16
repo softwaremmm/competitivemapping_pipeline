@@ -38,13 +38,6 @@ pub fn analyze_alignments(args: AnalyzeArgs) -> Result<(), Box<dyn std::error::E
     let program_start = SystemTime::now();
     let mut stats = OverallStats::default();
 
-    if let Some(threads) = args.threads {
-        rayon::ThreadPoolBuilder::new()
-            .num_threads(threads)
-            .build_global()
-            .unwrap();
-    }
-
     let params: Params = serde_yaml::from_reader(
         File::open(args.parameters)
             .map_err(|e| format!("Failed to read params file. Error: {}", e))?,

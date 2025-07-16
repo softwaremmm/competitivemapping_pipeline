@@ -18,6 +18,8 @@ Note that `aln.bam` must be sorted by name:
 samtools sort -n input.bam -o name_sorted.bam
 ```
 
+use `--debug` to print all alignment info to files.
+
 ### Testing
 
 Use

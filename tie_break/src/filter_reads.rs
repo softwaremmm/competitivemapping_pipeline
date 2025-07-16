@@ -43,6 +43,7 @@ fn filter_read_alns(
     params: &FilterParams,
     tid_to_ref_id_and_ani_group: &HashMap<i32, (i32, i32)>,
     ani_group_ordering: &Option<HashMap<i32, u32>>, // Where a lower score is better
+    debug: bool,
 ) -> (Vec<Alignment>, ReadStats) {
     // For paired reads, each part of the pair will have the filter stats calculated separately.
     let mut max_query_coverage = [0.0, 0.0]; // (first in pair, second in pair)
@@ -161,9 +162,9 @@ fn filter_read_alns(
         aln.filter_result = FilterResult::Passed;
     }
 
-    let mut filtered_alns: Vec<Alignment> = alns
-        .into_iter()
-        .filter(|aln| aln.filter_result == FilterResult::Passed).collect();
+    if !debug {
+        alns.retain(|aln| aln.filter_result == FilterResult::Passed);
+    }
 
     if !params.allow_reads_multiple_alns_per_ref {
         fn calculate_hash<T: Hash>(t: &T) -> u64 {
@@ -172,7 +173,7 @@ fn filter_read_alns(
             s.finish()
         }
         // Keep the best by alignment score
-        filtered_alns.sort_by_key(|aln| {
+        alns.sort_by_key(|aln| {
             (
                 aln.ref_id.expect("Ref ID should be set"),
                 -aln.alignment_score,
@@ -183,60 +184,66 @@ fn filter_read_alns(
         // sorting by target_id and ref_start to ensure stable sorting
         // but using hash to avoid bias
 
-        let mut seen_refs = (HashSet::new(), HashSet::new());
-        filtered_alns.retain(|aln| {
+        let mut seen_refs = [HashSet::new(), HashSet::new()];
+
+        for aln in alns.iter_mut() {
+            if aln.filter_result != FilterResult::Passed {
+                continue;
+            }
             let ref_id = aln.ref_id.expect("Ref ID should be set");
-            let seen_refs = if aln.is_second_in_pair {
-                &mut seen_refs.1
-            } else {
-                &mut seen_refs.0
-            };
+            let seen_refs = &mut seen_refs[aln.pair_index()];
             if seen_refs.contains(&ref_id) {
                 filter_counts.read_has_better_aln_for_ref += 1;
-                return false;
+                aln.filter_result = FilterResult::ReadHasBetterAlnForRef;
+                continue;
             }
             seen_refs.insert(ref_id);
-            return true;
-        });
+        }
+
+        if !debug {
+            alns.retain(|aln| aln.filter_result == FilterResult::Passed);
+        }
     }
 
-    if strong_ani_groups.is_empty() {
-        return (
-            vec![],
-            ReadStats {
-                read_type,
-                signal: "all_fail".to_string(),
-                filter_counts,
-            },
-        );
-    }
+    if !strong_ani_groups.is_empty() {
+        // If ordering provided then need to select best ANI group
+        if let Some(ani_group_ordering) = ani_group_ordering {
+            strong_ani_groups.retain(|ani_group| ani_group_ordering.contains_key(ani_group));
 
-    // If ordering provided then need to select best ANI group
-    if let Some(ani_group_ordering) = ani_group_ordering {
-        strong_ani_groups.retain(|ani_group| ani_group_ordering.contains_key(ani_group));
+            let best_group = strong_ani_groups
+                .clone()
+                .into_iter()
+                .min_by_key(|ani_group| {
+                    ani_group_ordering
+                        .get(ani_group)
+                        .expect("Just checked that this ani_group is in the ordering")
+                });
 
-        let best_group = strong_ani_groups
-            .clone()
-            .into_iter()
-            .min_by_key(|ani_group| {
-                ani_group_ordering
-                    .get(ani_group)
-                    .expect("Just checked that this ani_group is in the ordering")
-            });
+            for aln in alns.iter_mut() {
+                if aln.filter_result != FilterResult::Passed {
+                    continue;
+                }
+                let ani_group = aln.ani_group.expect("ANI group should be set");
+                if Some(ani_group) == best_group {
+                    continue;
+                }
 
-        filtered_alns.retain(|aln| {
-            if aln.ani_group == best_group {
-                return true;
+                if strong_ani_groups.contains(&ani_group) {
+                    filter_counts.ref_lost_draw += 1;
+                    aln.filter_result = FilterResult::RefLostDraw;
+                    continue;
+                }
+                filter_counts.target_excluded += 1;
+                aln.filter_result = FilterResult::TargetExcluded;
             }
-            if strong_ani_groups.contains(&aln.ani_group.expect("ANI group should be set")) {
-                filter_counts.ref_lost_draw += 1;
-                return false;
+
+            if !debug {
+                alns.retain(|aln| aln.filter_result == FilterResult::Passed);
             }
-            filter_counts.target_excluded += 1;
-            return false;
-        });
+        }
     }
-    filter_counts.passed = filtered_alns.len();
+
+    filter_counts.passed = alns.iter().filter(|aln| aln.filter_result == FilterResult::Passed).count();
 
     let signal = match (
         ani_groups.len(),
@@ -250,10 +257,10 @@ fn filter_read_alns(
         (_, _, _) => "shared".to_string(),
     };
 
-    assert!(signal == "all_fail" || !filtered_alns.is_empty());
+    assert!(signal == "all_fail" || filter_counts.passed > 0);
 
     return (
-        filtered_alns,
+        alns,
         ReadStats {
             read_type,
             signal,
@@ -271,8 +278,10 @@ fn process_read_aln_groups(
     tie_break_order: Arc<Option<HashMap<i32, u32>>>,
     stats_tx: Sender<ReadStats>,
     write_tx: Sender<(Alignment, String)>,
+    debug_tx: Option<Sender<Vec<Alignment>>>,
 ) {
     let job_counter = Arc::new(AtomicUsize::new(0));
+    let debug = debug_tx.is_some();
     for group in aln_group_rx {
         while job_counter.load(Ordering::Relaxed) >= max_jobs {
             thread::sleep(std::time::Duration::from_millis(10));
@@ -282,25 +291,31 @@ fn process_read_aln_groups(
         let inner_counter = job_counter.clone();
         let stats_tx = stats_tx.clone();
         let write_tx = write_tx.clone();
+        let debug_tx = debug_tx.clone();
         let tid_to_ref_id_and_ani_group = tid_to_ref_id_and_ani_group.clone();
         let tie_break_order = tie_break_order.clone();
         thread_pool.spawn(move || {
-            let (records, read_stats) = filter_read_alns(
+            let (mut alns, read_stats) = filter_read_alns(
                 group,
                 &params,
                 &tid_to_ref_id_and_ani_group,
                 &tie_break_order,
+                debug,
             );
 
             let signal = read_stats.signal.clone();
             stats_tx.send(read_stats).expect("Stats thread crashed");
 
-            if signal == "all_fail" {
-                inner_counter.fetch_sub(1, Ordering::Relaxed);
-                return;
+            if debug {
+                if let Some(debug_tx) = &debug_tx {
+                    debug_tx
+                        .send(alns.clone())
+                        .expect("Debug thread crashed");
+                }
+                alns.retain(|aln| aln.filter_result == FilterResult::Passed);
             }
 
-            for aln in records {
+            for aln in alns {
                 write_tx
                     .send((aln, signal.clone()))
                     .expect("Processor thread crashed");
@@ -349,6 +364,21 @@ fn write_alns_to_csv(file_paths: &[(String, String)], alns_rx: Receiver<(Alignme
     for writer in writers.values_mut() {
         writer.flush().expect("Failed to flush CSV writer");
     }
+}
+
+fn write_debug_to_csv(file_path: &str, alns_rx: Receiver<Vec<Alignment>>, active: bool) {
+    if ! active {
+        return;
+    }
+    let mut writer = csv::Writer::from_writer(BufWriter::new(File::create(file_path).unwrap()));
+
+    for aln_group in alns_rx {
+        for aln in aln_group {
+            writer.serialize(aln).expect("Failed to serialize alignment");
+        }
+    }
+
+    writer.flush().expect("Failed to flush debug CSV writer");
 }
 
 fn process_stats(
@@ -422,6 +452,10 @@ fn determine_threads(requested_threads: Option<usize>) -> (usize, usize) {
             .get(),
     };
 
+    if available_threads <= 2 {
+        return (1, 1);
+    }
+
     let process_threads = available_threads / 2;
     let read_threads = if available_threads % 2 == 0 {
         process_threads
@@ -472,6 +506,7 @@ pub fn filter_bam(
     let (aln_group_tx, aln_group_rx) = bounded::<Vec<bam::Record>>(max_jobs); // Groups
     let (stats_tx, stats_rx) = bounded::<ReadStats>(max_jobs); // Results
     let (write_tx, write_rx) = bounded::<(Alignment, String)>(max_jobs); // Results for CSV
+    let (debug_tx, debug_rx) = bounded::<Vec<Alignment>>(max_jobs);
 
     // Set up shared stats objects
     let shared_stats_object = Arc::new(Mutex::new((
@@ -497,6 +532,9 @@ pub fn filter_bam(
     let process_handle = thread::spawn({
         let stats_tx = stats_tx.clone();
         let write_tx = write_tx.clone();
+        let debug_tx = if debug {
+            Some(debug_tx.clone())
+        } else { None };
         move || {
             process_read_aln_groups(
                 aln_group_rx,
@@ -507,6 +545,7 @@ pub fn filter_bam(
                 tie_break_order,
                 stats_tx,
                 write_tx,
+                debug_tx,
             );
         }
     });
@@ -517,6 +556,15 @@ pub fn filter_bam(
         let alns_rx = write_rx.clone();
         move || {
             write_alns_to_csv(&file_paths, alns_rx);
+        }
+    });
+
+    let debug_handle = thread::spawn({
+        let round_index = if is_round_2 {"round_2"} else {"round_1"};
+        let path = format!("{}debug_alns_{}.csv", output_root, round_index);
+        let debug_rx = debug_rx.clone();
+        move || {
+            write_debug_to_csv(&path, debug_rx, debug);
         }
     });
 
@@ -579,12 +627,14 @@ pub fn filter_bam(
     drop(aln_group_tx);
     drop(write_tx);
     drop(stats_tx);
+    drop(debug_tx);
 
     process_handle
         .join()
         .expect("Failed to join process handle");
     write_handle.join().expect("Failed to join write handle");
     stats_handle.join().expect("Failed to join stats handle");
+    debug_handle.join().expect("Failed to join debug handle");
 
     println!("Reading bam took {:?}", now.elapsed().unwrap());
 
@@ -629,7 +679,7 @@ mod tests {
         let records = bam_to_records(&file_path)?;
 
         let (filtered_alns, read_stats) =
-            filter_read_alns(records, &params, &tid_to_ref_id_and_ani_group, &None);
+            filter_read_alns(records, &params, &tid_to_ref_id_and_ani_group, &None, false);
 
         assert_eq!(read_stats.read_type, ReadType::Mapped);
         assert_eq!(read_stats.signal, "unique");
@@ -654,7 +704,7 @@ mod tests {
         let records = bam_to_records(&file_path)?;
 
         let (filtered_alns, read_stats) =
-            filter_read_alns(records, &params, &tid_to_ref_id_and_ani_group, &None);
+            filter_read_alns(records, &params, &tid_to_ref_id_and_ani_group, &None, false);
 
         assert_eq!(read_stats.read_type, ReadType::Mapped);
         assert_eq!(read_stats.signal, "shared");
