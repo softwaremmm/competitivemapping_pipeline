@@ -396,8 +396,6 @@ pub fn count_alns(alns_csv_file: &str, reference_df: &DataFrame, signals: Option
         .try_into_reader_with_file_path(Some(alns_csv_file.into()))?
         .finish()?;
 
-    println!("{alns_df:?}");
-
     if let Some(signals) = &signals {
         let signals: Vec<u8> = signals.iter().map(|s| *s as u8).collect();
         let signals = Series::new("allowed".into(), signals);

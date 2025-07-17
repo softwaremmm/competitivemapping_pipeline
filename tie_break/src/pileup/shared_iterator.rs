@@ -45,6 +45,7 @@ pub fn get_depth_counts_round1(
 
     let unique_df = get_depth_counts(reference_df, alns_path, Some(vec![Signals::Unique]))?;
     let winner_df = get_depth_counts(reference_df, alns_path, Some(vec![Signals::Unique, Signals::Winner]))?;
+    let good_df = get_depth_counts(reference_df, alns_path, Some(vec![Signals::Unique, Signals::Winner, Signals::Shared]))?;
 
     let combined = concat(
         [
@@ -54,6 +55,9 @@ pub fn get_depth_counts_round1(
             winner_df
                 .lazy()
                 .with_column(lit("winner").alias("depth_type")),
+            good_df
+                .lazy()
+                .with_column(lit("good").alias("depth_type")),
         ],
         UnionArgs::default(),
     )?

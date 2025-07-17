@@ -2,7 +2,7 @@ use crate::depth_counts_analysis::{count_alns, order_best_refs, summarise_depth}
 use crate::filter_reads::filter_bam;
 use crate::filter_reads::filter_counts::{OverallStats, Signals};
 use crate::parameters::Params;
-use crate::pileup::shared_iterator::{get_depth_counts_round1, get_depth_counts};
+use crate::pileup::shared_iterator::{get_depth_counts, get_depth_counts_round1};
 use crate::{make_reference_df, save_csv};
 use clap::Parser;
 use polars::prelude::*;
@@ -64,7 +64,6 @@ pub fn analyze_alignments(args: AnalyzeArgs) -> Result<(), Box<dyn std::error::E
     stats.input_stats = input_stats;
     stats.filter_round1 = round1_stats;
 
-
     // Depth counts are ref_id, depth_type, depth, count
     let depth_counts = get_depth_counts_round1(&reference_df, &alns_path)?;
     let round1_summarised_depth = summarise_depth(&depth_counts, &reference_df)?;
@@ -97,15 +96,19 @@ pub fn analyze_alignments(args: AnalyzeArgs) -> Result<(), Box<dyn std::error::E
     let round2_summarised_depth = summarise_depth(&final_depth_counts, &reference_df)?;
 
     save_csv(
-        &concat([final_depth_counts.lazy(), depth_counts.lazy()], Default::default())?.collect()?,
+        &concat(
+            [final_depth_counts.lazy(), depth_counts.lazy()],
+            Default::default(),
+        )?
+        .collect()?,
         format!("{}{}", args.output_root, "depth_counts.csv"),
     )?;
 
     // Now just need to combine all into one table
 
     let depth_type_order = df!(
-        "depth_type" => ["final", "unique", "winner"],
-        "depth_type_order" => [2, 1, 0]
+        "depth_type" => ["final", "unique", "winner", "good"],
+        "depth_type_order" => [3, 2, 1, 0]
     )?;
     let ref_order = round2_summarised_depth
         .clone()
@@ -117,7 +120,16 @@ pub fn analyze_alignments(args: AnalyzeArgs) -> Result<(), Box<dyn std::error::E
     // Get read/alns counts
     let final_read_counts = count_alns(&best_alns_path, &reference_df, None)?;
     let unique_read_counts = count_alns(&alns_path, &reference_df, Some(vec![Signals::Unique]))?;
-    let winner_read_counts = count_alns(&alns_path, &reference_df, Some(vec![Signals::Unique, Signals::Winner]))?;
+    let winner_read_counts = count_alns(
+        &alns_path,
+        &reference_df,
+        Some(vec![Signals::Unique, Signals::Winner]),
+    )?;
+    let good_read_counts = count_alns(
+        &alns_path,
+        &reference_df,
+        Some(vec![Signals::Unique, Signals::Winner, Signals::Shared]),
+    )?;
     let read_counts = concat(
         [
             final_read_counts
@@ -129,6 +141,9 @@ pub fn analyze_alignments(args: AnalyzeArgs) -> Result<(), Box<dyn std::error::E
             winner_read_counts
                 .lazy()
                 .with_column(lit("winner").alias("depth_type")),
+            good_read_counts
+                .lazy()
+                .with_column(lit("good").alias("depth_type")),
         ],
         UnionArgs::default(),
     )?;
