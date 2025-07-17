@@ -17,7 +17,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
 ]
 requires-python = "~=3.11"
-version = "3.0.1"
+version = "3.0.2-rc1"
 
 [project.scripts]
 process_coverage = "competitivemapping.process_coverage:cli_entry_point"

@@ -5,6 +5,11 @@
 - add "good" rows to alignment summary. This includes shared reads from round 1
 - tie_break produces sensible output on empty bam
 
+## 3.0.2
+
+- Correct pipeline names
+- Correct container prefixes
+
 ## 3.0.1
 
 - Correct file extension for build system
