@@ -183,7 +183,7 @@ process tie_break {
     # If reference_name is provided, filter reads
     if [ "${reference_name}" != "" ]
     then
-        extract_reads -f ${fqs} -a out.best_alns.csv \
+        extract_reads -f ${fqs} -a out.alns_round_2.csv \
             -c out.references.csv \
             -r ${reference_name} \
             -o ${ref_reads_root}
