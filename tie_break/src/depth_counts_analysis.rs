@@ -3,6 +3,8 @@
 
 #![allow(dead_code)]
 
+use crate::filter_reads::filter_counts::Signals;
+
 use super::Result;
 use polars::prelude::*;
 use rand::{
@@ -379,19 +381,32 @@ pub fn order_best_refs(summarised_df: &DataFrame, min_coverage_pc: f64) -> Resul
     Ok(ordered_refs)
 }
 
-pub fn count_alns(alns_csv_file: &str, reference_df: &DataFrame) -> Result<DataFrame> {
+pub fn count_alns(alns_csv_file: &str, reference_df: &DataFrame, signals: Option<Vec<Signals>>) -> Result<DataFrame> {
 
     // schema used to force some types
     let schema = Schema::from_iter(vec![
         Field::new("target_id".into(), DataType::UInt32),
+        Field::new("signal".into(), DataType::UInt8),
     ]);
 
-    let alns_df = CsvReadOptions::default()
+    let mut alns_df = CsvReadOptions::default()
         .with_has_header(true)
         .with_infer_schema_length(None)
         .with_schema_overwrite(Some(std::sync::Arc::new(schema)))
         .try_into_reader_with_file_path(Some(alns_csv_file.into()))?
         .finish()?;
+
+    println!("{alns_df:?}");
+
+    if let Some(signals) = &signals {
+        let signals: Vec<u8> = signals.iter().map(|s| *s as u8).collect();
+        let signals = Series::new("allowed".into(), signals);
+
+        alns_df = alns_df
+            .lazy()
+            .filter(col("signal").is_in(lit(signals)))
+            .collect()?;
+    }
 
     let aln_counts_df = alns_df
         .lazy()
@@ -507,7 +522,7 @@ mod tests {
         let expected_counts_file = get_abs_input_path("count_alns/aln_counts.csv");
 
         let reference_df: DataFrame = read_csv(&reference_file);
-        let aln_counts_df = count_alns(&alns_file, &reference_df).unwrap();
+        let aln_counts_df = count_alns(&alns_file, &reference_df, Some(vec![Signals::Unique])).unwrap();
 
         // save
         let output_path = get_abs_output_path("count_alns/aln_counts.csv");
