@@ -17,6 +17,15 @@ RUN cargo chef cook --release --recipe-path recipe.json
 # Copy the source code and build
 COPY tie_break/Cargo.* .
 COPY tie_break/src ./src
+COPY tie_break/test_data ./test_data
+
+ARG TESTING=false
+RUN if [ "$TESTING" = "true" ]; then \
+    apt-get update && \
+    apt-get install -y samtools && \
+    cargo test --release; \
+fi
+
 RUN cargo build --release
 
 # ---- Conda Build Stage ----

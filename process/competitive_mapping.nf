@@ -1,7 +1,7 @@
 process competitiveMapping {
     publishDir "${params.publish_dir}", enabled: params.publish_dir != "", mode: "copy", saveAs: { filename -> sample_name + "_" + filename }
     container {
-        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:3.0.2-rc1' : params.test_container_cm
+        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:3.1.0-rc1' : params.test_container_cm
     }
 
     cpus 4
@@ -70,7 +70,7 @@ process competitiveMapping {
 process dynamicCompetitiveMapping {
     publishDir "${params.publish_dir}", enabled: params.publish_dir != "", mode: "copy", saveAs: { filename -> sample_name + "_" + filename }
     container {
-        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:3.0.2-rc1' : params.test_container_cm
+        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:3.1.0-rc1' : params.test_container_cm
     }
 
     cpus 4
@@ -134,7 +134,7 @@ process dynamicCompetitiveMapping {
 process tie_break {
     publishDir "${params.publish_dir}", enabled: params.publish_dir != "", mode: "copy", saveAs: { filename -> sample_name + "_" + filename }
     container {
-        params.test_container_cm == "" ? params.container_prefix + 'gpas/competitivemapping_pipeline:3.0.2-rc1' : params.test_container_cm
+        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:3.1.0-rc1' : params.test_container_cm
     }
 
     cpus 4
@@ -183,7 +183,7 @@ process tie_break {
     # If reference_name is provided, filter reads
     if [ "${reference_name}" != "" ]
     then
-        extract_reads -f ${fqs} -a out.best_alns.csv \
+        extract_reads -f ${fqs} -a out.alns_round_2.csv \
             -c out.references.csv \
             -r ${reference_name} \
             -o ${ref_reads_root}
@@ -200,7 +200,7 @@ process tie_break {
 process dynamic_tie_break {
     publishDir "${params.publish_dir}", enabled: params.publish_dir != "", mode: "copy", saveAs: { filename -> sample_name + "_" + filename }
     container {
-        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:3.0.2-rc1' : params.test_container_cm
+        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:3.1.0-rc1' : params.test_container_cm
     }
 
     cpus 4
@@ -261,7 +261,7 @@ process dynamic_tie_break {
 
 process has_enough_reads {
     container {
-        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:3.0.2-rc1' : params.test_container_cm
+        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:3.1.0-rc1' : params.test_container_cm
     }
 
     cpus 1

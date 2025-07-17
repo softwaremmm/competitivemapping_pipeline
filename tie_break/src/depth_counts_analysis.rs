@@ -3,6 +3,8 @@
 
 #![allow(dead_code)]
 
+use crate::filter_reads::filter_counts::Signals;
+
 use super::Result;
 use polars::prelude::*;
 use rand::{
@@ -207,6 +209,25 @@ fn agg_get_robust_mean_range(
 }
 
 pub fn summarise_depth(depth_count_df: &DataFrame, reference_df: &DataFrame) -> Result<DataFrame> {
+    // If depth_count_df is empty, return an empty DataFrame with the correct schema
+    if depth_count_df.height() == 0 {
+        return Ok(DataFrame::new(vec![
+            Series::new("ref_id".into(), Vec::<u32>::new()).into(),
+            Series::new("reference".into(), Vec::<String>::new()).into(),
+            Series::new("ani_group".into(), Vec::<i64>::new()).into(),
+            Series::new("species".into(), Vec::<String>::new()).into(),
+            Series::new("ref_length".into(), Vec::<u32>::new()).into(),
+            Series::new("depth_type".into(), Vec::<String>::new()).into(),
+            Series::new("coverage".into(), Vec::<f32>::new()).into(),
+            Series::new("mean_depth".into(), Vec::<f32>::new()).into(),
+            Series::new("median_nonzero_depth".into(), Vec::<f64>::new()).into(),
+            Series::new("simple_expected_coverage".into(), Vec::<String>::new()).into(),
+            Series::new("robust_depth_estimate".into(), Vec::<f64>::new()).into(),
+            Series::new("robust_expected_coverage".into(), Vec::<String>::new()).into(),
+        ])?);
+    }
+
+
     let agg_df = depth_count_df
         .clone()
         .lazy()
@@ -379,19 +400,30 @@ pub fn order_best_refs(summarised_df: &DataFrame, min_coverage_pc: f64) -> Resul
     Ok(ordered_refs)
 }
 
-pub fn count_alns(alns_csv_file: &str, reference_df: &DataFrame) -> Result<DataFrame> {
+pub fn count_alns(alns_csv_file: &str, reference_df: &DataFrame, signals: Option<Vec<Signals>>) -> Result<DataFrame> {
 
     // schema used to force some types
     let schema = Schema::from_iter(vec![
         Field::new("target_id".into(), DataType::UInt32),
+        Field::new("signal".into(), DataType::UInt8),
     ]);
 
-    let alns_df = CsvReadOptions::default()
+    let mut alns_df = CsvReadOptions::default()
         .with_has_header(true)
         .with_infer_schema_length(None)
         .with_schema_overwrite(Some(std::sync::Arc::new(schema)))
         .try_into_reader_with_file_path(Some(alns_csv_file.into()))?
         .finish()?;
+
+    if let Some(signals) = &signals {
+        let signals: Vec<u8> = signals.iter().map(|s| *s as u8).collect();
+        let signals = Series::new("allowed".into(), signals);
+
+        alns_df = alns_df
+            .lazy()
+            .filter(col("signal").is_in(lit(signals)))
+            .collect()?;
+    }
 
     let aln_counts_df = alns_df
         .lazy()
@@ -454,6 +486,12 @@ mod tests {
             refs_file: "robust/references.csv",
             expectation_file: "robust/summarised_depths.csv",
         },
+        TestSet {
+            name: "empty",
+            depth_counts_file: "empty/depth_counts.csv",
+            refs_file: "empty/references.csv",
+            expectation_file: "empty/summarised_depths.csv",
+        },
     ];
 
     fn get_abs_input_path(path: &str) -> String {
@@ -507,7 +545,7 @@ mod tests {
         let expected_counts_file = get_abs_input_path("count_alns/aln_counts.csv");
 
         let reference_df: DataFrame = read_csv(&reference_file);
-        let aln_counts_df = count_alns(&alns_file, &reference_df).unwrap();
+        let aln_counts_df = count_alns(&alns_file, &reference_df, Some(vec![Signals::Unique])).unwrap();
 
         // save
         let output_path = get_abs_output_path("count_alns/aln_counts.csv");

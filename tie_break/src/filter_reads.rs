@@ -28,10 +28,9 @@ use rayon::ThreadPoolBuilder;
 pub mod filter_counts;
 use crate::get_target_id_to_ref_and_ani_group;
 use filter_counts::{
-    FilterCounts, FilterResult, FilterRoundStats, InputStats, ReadStats, ReadType,
+    FilterCounts, FilterResult, FilterRoundStats, InputStats, ReadStats, ReadType, Signals,
 };
 
-type SignalFiles = Vec<(String, String)>;
 
 /// Take all the alignments for a single read (or read pair) and filter them based on the provided parameters.
 ///
@@ -252,14 +251,14 @@ fn filter_read_alns(
         strong_ani_groups.len(),
         ani_group_ordering.is_some(),
     ) {
-        (_, 0, _) => "all_fail".to_string(),
-        (_, _, true) => "best".to_string(),
-        (1, _, _) => "unique".to_string(),
-        (_, 1, _) => "winner".to_string(),
-        (_, _, _) => "shared".to_string(),
+        (_, 0, _) => Signals::Failed,
+        (_, _, true) => Signals::Best,
+        (1, _, _) => Signals::Unique,
+        (_, 1, _) => Signals::Winner,
+        (_, _, _) => Signals::Shared,
     };
 
-    assert!(signal == "all_fail" || filter_counts.passed > 0);
+    assert!(signal == Signals::Failed || filter_counts.passed > 0);
 
     return (
         alns,
@@ -280,7 +279,7 @@ fn process_read_aln_groups(
     tid_to_ref_id_and_ani_group: Arc<HashMap<i32, (i32, i32)>>,
     tie_break_order: Arc<Option<HashMap<i32, u32>>>,
     stats_tx: Sender<ReadStats>,
-    write_tx: Sender<(Alignment, String)>,
+    write_tx: Sender<(Alignment, Signals)>,
     debug_tx: Option<Sender<Vec<Alignment>>>,
 ) {
     let job_counter = Arc::new(AtomicUsize::new(0));
@@ -306,7 +305,7 @@ fn process_read_aln_groups(
                 debug,
             );
 
-            let signal = read_stats.signal.clone();
+            let signal = read_stats.signal;
             stats_tx.send(read_stats).expect("Stats thread crashed");
 
             if debug {
@@ -320,7 +319,7 @@ fn process_read_aln_groups(
 
             for aln in alns {
                 write_tx
-                    .send((aln, signal.clone()))
+                    .send((aln, signal))
                     .expect("Processor thread crashed");
             }
             inner_counter.fetch_sub(1, Ordering::Relaxed);
@@ -328,46 +327,37 @@ fn process_read_aln_groups(
     }
 }
 
-fn write_alns_to_csv(file_paths: &[(String, String)], alns_rx: Receiver<(Alignment, String)>) {
-    let mut writers: HashMap<String, csv::Writer<BufWriter<File>>> = HashMap::new();
-    for (signal, path) in file_paths {
-        let mut writer = csv::Writer::from_writer(BufWriter::new(File::create(path).unwrap()));
+fn write_alns_to_csv(file_path: &str, alns_rx: Receiver<(Alignment, Signals)>) {
+    let mut writer = csv::Writer::from_writer(BufWriter::new(File::create(file_path).unwrap()));
+    writer
+        .write_record([
+            "query_name",
+            "is_second_in_pair",
+            "target_id",
+            "query_length",
+            "ref_start",
+            "ref_end",
+            "signal",
+        ])
+        .expect("Failed to write header to CSV");
 
-        writer
-            .write_record([
-                "query_name",
-                "is_second_in_pair",
-                "target_id",
-                "query_length",
-                "ref_start",
-                "ref_end",
-            ])
-            .expect("Failed to write header to CSV");
-        writers.insert(signal.clone(), writer);
-    }
 
     for (aln, signal) in alns_rx {
-        if let Some(writer) = writers.get_mut(&signal) {
-            writer
-                .write_record(&[
-                    aln.read_id,
-                    aln.is_second_in_pair.to_string(),
-                    aln.target_id.to_string(),
-                    aln.query_length.to_string(),
-                    aln.ref_start.to_string(),
-                    (aln.ref_start + aln.ref_covered - 1).to_string(),
-                ])
-                .expect("Failed to write alignment to CSV");
-        } else {
-            panic!("No writer found for signal {signal}");
-        }
+        writer
+            .write_record(&[
+                aln.read_id,
+                aln.is_second_in_pair.to_string(),
+                aln.target_id.to_string(),
+                aln.query_length.to_string(),
+                aln.ref_start.to_string(),
+                (aln.ref_start + aln.ref_covered - 1).to_string(),
+                (signal as u8).to_string(),
+            ])
+            .expect("Failed to write alignment to CSV");
     }
-
-    // Flush all writers
-    for writer in writers.values_mut() {
-        writer.flush().expect("Failed to flush CSV writer");
-    }
+    writer.flush().expect("Failed to flush CSV writer");
 }
+
 
 fn write_debug_to_csv(file_path: &str, alns_rx: Receiver<Vec<Alignment>>, active: bool) {
     if ! active {
@@ -397,7 +387,7 @@ fn process_stats(
             round_stats.passed_reads += 1;
 
             // Count the signal for this read
-            let signal_count = signal_counts.entry(read_stats.signal.clone()).or_insert(0);
+            let signal_count = signal_counts.entry(read_stats.signal).or_insert(0);
             *signal_count += read_stats.filter_counts.passed;
         }
         match read_stats.read_type {
@@ -414,7 +404,7 @@ fn process_stats(
     shared_stats.0.half_mapped_reads = input_stats.half_mapped_reads;
     shared_stats.1.passed_reads = round_stats.passed_reads;
     shared_stats.1.filter_counts = round_stats.filter_counts;
-    shared_stats.1.signal_counts = signal_counts.into_iter().collect();
+    shared_stats.1.signal_counts = signal_counts.into_iter().map(|(signal, count)| (signal.to_string(), count)).collect();
 }
 
 fn get_ani_group_order(tie_break_order: Option<DataFrame>) -> Result<Option<HashMap<i32, u32>>> {
@@ -477,10 +467,11 @@ pub fn filter_bam(
     threads: Option<usize>,
     tie_break_order: Option<DataFrame>,
     debug: bool,
-) -> Result<(SignalFiles, InputStats, FilterRoundStats)> {
+) -> Result<(String, InputStats, FilterRoundStats)> {
     let now = SystemTime::now();
 
     let is_round_2 = tie_break_order.is_some();
+    let round_name = if is_round_2 {"round_2"} else {"round_1"};
 
     let (read_threads, process_threads) = determine_threads(threads);
     if debug {
@@ -507,7 +498,7 @@ pub fn filter_bam(
     let max_jobs = 500;
     let (aln_group_tx, aln_group_rx) = bounded::<Vec<bam::Record>>(max_jobs); // Groups
     let (stats_tx, stats_rx) = bounded::<ReadStats>(max_jobs); // Results
-    let (write_tx, write_rx) = bounded::<(Alignment, String)>(max_jobs); // Results for CSV
+    let (write_tx, write_rx) = bounded::<(Alignment, Signals)>(max_jobs); // Results for CSV
     let (debug_tx, debug_rx) = bounded::<Vec<Alignment>>(max_jobs);
 
     // Set up shared stats objects
@@ -518,18 +509,7 @@ pub fn filter_bam(
     let tid_to_ref_id_and_ani_group = Arc::new(get_target_id_to_ref_and_ani_group(ref_df)?);
     let tie_break_order = Arc::new(get_ani_group_order(tie_break_order)?);
 
-    let signals = if is_round_2 {
-        vec!["best"]
-    } else {
-        vec!["unique", "winner", "shared"]
-    };
-    let signal_paths: SignalFiles = signals
-        .iter()
-        .map(|signal| {
-            let path = format!("{output_root}{signal}_alns.csv");
-            (signal.to_string(), path)
-        })
-        .collect();
+
 
     let process_handle = thread::spawn({
         let stats_tx = stats_tx.clone();
@@ -553,17 +533,17 @@ pub fn filter_bam(
     });
 
     // Writing here is just writing to csv so only need one thread
+    let alns_file = format!("{output_root}alns_{round_name}.csv");
     let write_handle = thread::spawn({
-        let file_paths = signal_paths.clone();
+        let alns_file = alns_file.clone();
         let alns_rx = write_rx.clone();
         move || {
-            write_alns_to_csv(&file_paths, alns_rx);
+            write_alns_to_csv(&alns_file, alns_rx);
         }
     });
 
     let debug_handle = thread::spawn({
-        let round_index = if is_round_2 {"round_2"} else {"round_1"};
-        let path = format!("{output_root}debug_alns_{round_index}.csv");
+        let path = format!("{output_root}debug_alns_{round_name}.csv");
         let debug_rx = debug_rx.clone();
         move || {
             write_debug_to_csv(&path, debug_rx, debug);
@@ -647,7 +627,7 @@ pub fn filter_bam(
     input_stats.total_alns = top_level_counts.total_alns;
     let filter_stats = shared_stats.1.clone();
 
-    Ok((signal_paths, input_stats, filter_stats))
+    Ok((alns_file, input_stats, filter_stats))
 }
 
 #[cfg(test)]
@@ -684,7 +664,7 @@ mod tests {
             filter_read_alns(records, &params, &tid_to_ref_id_and_ani_group, &None, false);
 
         assert_eq!(read_stats.read_type, ReadType::Mapped);
-        assert_eq!(read_stats.signal, "unique");
+        assert_eq!(read_stats.signal, Signals::Unique);
         assert_eq!(read_stats.filter_counts.passed, 1);
         assert_eq!(filtered_alns.len(), 1);
 
@@ -709,7 +689,7 @@ mod tests {
             filter_read_alns(records, &params, &tid_to_ref_id_and_ani_group, &None, false);
 
         assert_eq!(read_stats.read_type, ReadType::Mapped);
-        assert_eq!(read_stats.signal, "shared");
+        assert_eq!(read_stats.signal, Signals::Shared);
         assert_eq!(read_stats.filter_counts.passed, 2);
         assert_eq!(filtered_alns.len(), 2);
 

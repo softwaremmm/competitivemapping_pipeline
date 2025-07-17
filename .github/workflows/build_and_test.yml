@@ -45,6 +45,7 @@ jobs:
           username: ${{ secrets.OCR_USERNAME }}
           password: ${{ secrets.OCR_TOKEN }}
 
+      # cargo test is run within the build process
       - name: Build docker container
         run: |
           docker build -t test_container_cm . --build-arg TESTING=true
