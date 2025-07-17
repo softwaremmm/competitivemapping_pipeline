@@ -209,6 +209,25 @@ fn agg_get_robust_mean_range(
 }
 
 pub fn summarise_depth(depth_count_df: &DataFrame, reference_df: &DataFrame) -> Result<DataFrame> {
+    // If depth_count_df is empty, return an empty DataFrame with the correct schema
+    if depth_count_df.height() == 0 {
+        return Ok(DataFrame::new(vec![
+            Series::new("ref_id".into(), Vec::<u32>::new()).into(),
+            Series::new("reference".into(), Vec::<String>::new()).into(),
+            Series::new("ani_group".into(), Vec::<i64>::new()).into(),
+            Series::new("species".into(), Vec::<String>::new()).into(),
+            Series::new("ref_length".into(), Vec::<u32>::new()).into(),
+            Series::new("depth_type".into(), Vec::<String>::new()).into(),
+            Series::new("coverage".into(), Vec::<f32>::new()).into(),
+            Series::new("mean_depth".into(), Vec::<f32>::new()).into(),
+            Series::new("median_nonzero_depth".into(), Vec::<f64>::new()).into(),
+            Series::new("simple_expected_coverage".into(), Vec::<String>::new()).into(),
+            Series::new("robust_depth_estimate".into(), Vec::<f64>::new()).into(),
+            Series::new("robust_expected_coverage".into(), Vec::<String>::new()).into(),
+        ])?);
+    }
+
+
     let agg_df = depth_count_df
         .clone()
         .lazy()
@@ -466,6 +485,12 @@ mod tests {
             depth_counts_file: "robust/depth_counts.csv",
             refs_file: "robust/references.csv",
             expectation_file: "robust/summarised_depths.csv",
+        },
+        TestSet {
+            name: "empty",
+            depth_counts_file: "empty/depth_counts.csv",
+            refs_file: "empty/references.csv",
+            expectation_file: "empty/summarised_depths.csv",
         },
     ];
 
