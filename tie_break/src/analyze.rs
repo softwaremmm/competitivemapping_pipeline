@@ -6,6 +6,7 @@ use crate::pileup::shared_iterator::{get_depth_counts, get_depth_counts_round1};
 use crate::{make_reference_df, save_csv};
 use clap::Parser;
 use polars::prelude::*;
+use rayon::{prelude::*, ThreadPoolBuilder};
 use std::fs::File;
 use std::time::SystemTime;
 
@@ -65,7 +66,7 @@ pub fn analyze_alignments(args: AnalyzeArgs) -> Result<(), Box<dyn std::error::E
     stats.filter_round1 = round1_stats;
 
     // Depth counts are ref_id, depth_type, depth, count
-    let depth_counts = get_depth_counts_round1(&reference_df, &alns_path)?;
+    let depth_counts = get_depth_counts_round1(&reference_df, &alns_path, args.threads)?;
     let round1_summarised_depth = summarise_depth(&depth_counts, &reference_df)?;
 
     let ref_tie_breaker_order =
@@ -117,34 +118,40 @@ pub fn analyze_alignments(args: AnalyzeArgs) -> Result<(), Box<dyn std::error::E
         .select([col("ref_id")])
         .with_row_index("ref_order", Some(1));
 
-    // Get read/alns counts
-    let final_read_counts = count_alns(&best_alns_path, &reference_df, None)?;
-    let unique_read_counts = count_alns(&alns_path, &reference_df, Some(vec![Signals::Unique]))?;
-    let winner_read_counts = count_alns(
-        &alns_path,
-        &reference_df,
-        Some(vec![Signals::Unique, Signals::Winner]),
-    )?;
-    let good_read_counts = count_alns(
-        &alns_path,
-        &reference_df,
-        Some(vec![Signals::Unique, Signals::Winner, Signals::Shared]),
-    )?;
+
+    let pool = ThreadPoolBuilder::new()
+        .num_threads(args.threads.unwrap_or(1))
+        .build()
+        .unwrap();
+
+    let read_count_dfs: Vec<_> = pool.install(|| {
+        let jobs = vec![
+            (&best_alns_path, None, "final"),
+            (&alns_path, Some(vec![Signals::Unique]), "unique"),
+            (
+                &alns_path,
+                Some(vec![Signals::Unique, Signals::Winner]),
+                "winner",
+            ),
+            (
+                &alns_path,
+                Some(vec![Signals::Unique, Signals::Winner, Signals::Shared]),
+                "good",
+            ),
+        ];
+
+        jobs.into_par_iter()
+            .map(|(path, signals, read_type)| {
+                let count_df = count_alns(path, &reference_df, signals.clone())
+                    .expect(&format!("Failed to count alignments for {signals:?}"));
+                count_df.lazy()
+                    .with_column(lit(read_type).alias("depth_type"))
+            })
+            .collect()
+    });
+
     let read_counts = concat(
-        [
-            final_read_counts
-                .lazy()
-                .with_column(lit("final").alias("depth_type")),
-            unique_read_counts
-                .lazy()
-                .with_column(lit("unique").alias("depth_type")),
-            winner_read_counts
-                .lazy()
-                .with_column(lit("winner").alias("depth_type")),
-            good_read_counts
-                .lazy()
-                .with_column(lit("good").alias("depth_type")),
-        ],
+        read_count_dfs,
         UnionArgs::default(),
     )?;
 

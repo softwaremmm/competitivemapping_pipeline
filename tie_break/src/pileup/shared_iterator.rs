@@ -2,14 +2,11 @@
 //!
 //! Currently set to use alignments in CSV format
 //! But can be adapted to use BAM files fairly easily
-//!
-//! Used to be multithreaded with BAM files,
-//! but that is much slower with csvs due to repeated reading and filtering csv file
-//! And often majority of alignments are to the top target_id anyway
 
 use crate::filter_reads::filter_counts::Signals;
 use crate::Result;
 use polars::prelude::*;
+use rayon::{prelude::*, ThreadPoolBuilder};
 use std::collections::HashMap;
 use std::time::SystemTime;
 
@@ -40,25 +37,36 @@ fn depth_count_hashmap_to_dataframe(depth_counts: HashMap<(u32, u32), u32>) -> R
 pub fn get_depth_counts_round1(
     reference_df: &DataFrame,
     alns_path: &str,
+    threads: Option<usize>,
 ) -> Result<DataFrame> {
     let now = SystemTime::now();
 
-    let unique_df = get_depth_counts(reference_df, alns_path, Some(vec![Signals::Unique]))?;
-    let winner_df = get_depth_counts(reference_df, alns_path, Some(vec![Signals::Unique, Signals::Winner]))?;
-    let good_df = get_depth_counts(reference_df, alns_path, Some(vec![Signals::Unique, Signals::Winner, Signals::Shared]))?;
+    let pool = ThreadPoolBuilder::new()
+        .num_threads(threads.unwrap_or(1))
+        .build()
+        .unwrap();
+
+    let depth_dfs: Vec<_> = pool.install(|| {
+        let jobs = vec![
+            (vec![Signals::Unique], "unique"),
+            (vec![Signals::Unique, Signals::Winner], "winner"),
+            (vec![Signals::Unique, Signals::Winner, Signals::Shared], "good"),
+        ];
+
+        jobs.into_par_iter()
+            .map(|(signals, depth_type)| {
+                let depth_df = get_depth_counts(reference_df, alns_path, Some(signals))
+                    .expect(&format!(
+                        "Failed to get depth counts for {depth_type:?}"
+                    ));
+                depth_df.lazy()
+                    .with_column(lit(depth_type).alias("depth_type"))
+            })
+            .collect()
+    });
 
     let combined = concat(
-        [
-            unique_df
-                .lazy()
-                .with_column(lit("unique").alias("depth_type")),
-            winner_df
-                .lazy()
-                .with_column(lit("winner").alias("depth_type")),
-            good_df
-                .lazy()
-                .with_column(lit("good").alias("depth_type")),
-        ],
+        depth_dfs,
         UnionArgs::default(),
     )?
     .filter(col("depth").gt(0))
@@ -194,7 +202,7 @@ mod tests {
             .expect("Failed to create output directory");
         let output_path = format!("{}/{}", TEST_DIR, "pileup/combined_depth_counts.csv");
 
-        let df = get_depth_counts_round1(&reference_df, &alns_path).unwrap();
+        let df = get_depth_counts_round1(&reference_df, &alns_path, None).unwrap();
         save_csv(&df, &output_path).unwrap();
 
         assert!(compare_files(&expected_depth_file, &output_path));
