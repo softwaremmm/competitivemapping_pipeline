@@ -1,3 +1,8 @@
+## 3.0.2
+
+- Correct pipeline names
+- Correct container prefixes
+
 ## 3.0.1
 
 - Correct file extension for build system

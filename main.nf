@@ -109,7 +109,7 @@ workflow {
     manifest = Channel.fromPath(params.manifest, checkIfExists: true).first()
     species_list = Channel.fromPath(params.species_list, checkIfExists: true).first()
     // competitive_mapping(input_files, manifest, species_list, params.seq_platform, params.reference_name)
-    cm_analzer_workflow(input_files, manifest, species_list, params.seq_platform, params.reference_name)
+    tie_break_workflow(input_files, manifest, species_list, params.seq_platform, params.reference_name)
 }
 
 
@@ -161,7 +161,7 @@ workflow dynamic_competitive_mapping {
 }
 
 // WARNING: Experimental process
-workflow cm_analzer_workflow {
+workflow tie_break_workflow {
     take:
     input_files
     manifest
@@ -191,7 +191,7 @@ workflow cm_analzer_workflow {
 
 // WARNING: Experimental process
 // currently also runs standard workflow for comparison
-workflow dynamic_cm_analzer_workflow {
+workflow dynamic_tie_break_workflow {
     take:
     input_files
     genomes_path
