@@ -1,11 +1,12 @@
 use crate::depth_counts_analysis::{count_alns, order_best_refs, summarise_depth};
 use crate::filter_reads::filter_bam;
-use crate::filter_reads::filter_counts::OverallStats;
+use crate::filter_reads::filter_counts::{OverallStats, Signals};
 use crate::parameters::Params;
-use crate::pileup::shared_iterator::{get_depth_counts_round1, get_depth_counts_single};
+use crate::pileup::shared_iterator::{get_depth_counts, get_depth_counts_round1};
 use crate::{make_reference_df, save_csv};
 use clap::Parser;
 use polars::prelude::*;
+use rayon::{prelude::*, ThreadPoolBuilder};
 use std::fs::File;
 use std::time::SystemTime;
 
@@ -52,7 +53,7 @@ pub fn analyze_alignments(args: AnalyzeArgs) -> Result<(), Box<dyn std::error::E
         println!("Reference DataFrame: {reference_df:?}");
     }
 
-    let (signal_paths, input_stats, round1_stats) = filter_bam(
+    let (alns_path, input_stats, round1_stats) = filter_bam(
         &args.input_bam,
         &reference_df,
         params.round_1,
@@ -64,19 +65,8 @@ pub fn analyze_alignments(args: AnalyzeArgs) -> Result<(), Box<dyn std::error::E
     stats.input_stats = input_stats;
     stats.filter_round1 = round1_stats;
 
-    let unique_path = signal_paths
-        .iter()
-        .find(|(signal, _)| signal == "unique")
-        .map(|(_, path)| path)
-        .ok_or("No unique path found in signal paths")?;
-    let winner_path = signal_paths
-        .iter()
-        .find(|(signal, _)| signal == "winner")
-        .map(|(_, path)| path)
-        .ok_or("No winner path found in signal paths")?;
-
     // Depth counts are ref_id, depth_type, depth, count
-    let depth_counts = get_depth_counts_round1(&reference_df, unique_path, winner_path)?;
+    let depth_counts = get_depth_counts_round1(&reference_df, &alns_path, args.threads)?;
     let round1_summarised_depth = summarise_depth(&depth_counts, &reference_df)?;
 
     let ref_tie_breaker_order =
@@ -89,7 +79,7 @@ pub fn analyze_alignments(args: AnalyzeArgs) -> Result<(), Box<dyn std::error::E
         format!("{}{}", args.output_root, "ref_tie_breaker_order.csv"),
     )?;
 
-    let (best_path, _, round2_stats) = filter_bam(
+    let (best_alns_path, _, round2_stats) = filter_bam(
         &args.input_bam,
         &reference_df,
         params.round_2,
@@ -98,25 +88,28 @@ pub fn analyze_alignments(args: AnalyzeArgs) -> Result<(), Box<dyn std::error::E
         Some(ref_tie_breaker_order),
         args.debug,
     )?;
-    let best_path = best_path[0].1.clone();
 
     stats.filter_round2 = round2_stats;
     let stats_file = File::create(format!("{}{}", args.output_root, "stats.yaml"))?;
     serde_yaml::to_writer(stats_file, &stats.sorted())?;
 
-    let final_depth_counts = get_depth_counts_single(&reference_df, &best_path)?;
+    let final_depth_counts = get_depth_counts(&reference_df, &best_alns_path, None)?;
     let round2_summarised_depth = summarise_depth(&final_depth_counts, &reference_df)?;
 
     save_csv(
-        &concat([final_depth_counts.lazy(), depth_counts.lazy()], Default::default())?.collect()?,
+        &concat(
+            [final_depth_counts.lazy(), depth_counts.lazy()],
+            Default::default(),
+        )?
+        .collect()?,
         format!("{}{}", args.output_root, "depth_counts.csv"),
     )?;
 
     // Now just need to combine all into one table
 
     let depth_type_order = df!(
-        "depth_type" => ["final", "unique", "winner"],
-        "depth_type_order" => [2, 1, 0]
+        "depth_type" => ["final", "unique", "winner", "good"],
+        "depth_type_order" => [3, 2, 1, 0]
     )?;
     let ref_order = round2_summarised_depth
         .clone()
@@ -125,22 +118,40 @@ pub fn analyze_alignments(args: AnalyzeArgs) -> Result<(), Box<dyn std::error::E
         .select([col("ref_id")])
         .with_row_index("ref_order", Some(1));
 
-    // Get read/alns counts
-    let final_read_counts = count_alns(&best_path, &reference_df)?;
-    let unique_read_counts = count_alns(unique_path, &reference_df)?;
-    let winner_read_counts = count_alns(winner_path, &reference_df)?;
+
+    let pool = ThreadPoolBuilder::new()
+        .num_threads(args.threads.unwrap_or(1))
+        .build()
+        .unwrap();
+
+    let read_count_dfs: Vec<_> = pool.install(|| {
+        let jobs = vec![
+            (&best_alns_path, None, "final"),
+            (&alns_path, Some(vec![Signals::Unique]), "unique"),
+            (
+                &alns_path,
+                Some(vec![Signals::Unique, Signals::Winner]),
+                "winner",
+            ),
+            (
+                &alns_path,
+                Some(vec![Signals::Unique, Signals::Winner, Signals::Shared]),
+                "good",
+            ),
+        ];
+
+        jobs.into_par_iter()
+            .map(|(path, signals, read_type)| {
+                let count_df = count_alns(path, &reference_df, signals.clone())
+                    .unwrap_or_else(|_| panic!("Failed to count alignments for {signals:?}"));
+                count_df.lazy()
+                    .with_column(lit(read_type).alias("depth_type"))
+            })
+            .collect()
+    });
+
     let read_counts = concat(
-        [
-            final_read_counts
-                .lazy()
-                .with_column(lit("final").alias("depth_type")),
-            unique_read_counts
-                .lazy()
-                .with_column(lit("unique").alias("depth_type")),
-            winner_read_counts
-                .lazy()
-                .with_column(lit("winner").alias("depth_type")),
-        ],
+        read_count_dfs,
         UnionArgs::default(),
     )?;
 

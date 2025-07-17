@@ -8,6 +8,52 @@ pub enum ReadType {
     HalfMapped,
 }
 
+// Signal converts to u8 for csv writing/reading
+#[repr(u8)]
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, Copy, Hash)]
+#[serde(into = "u8", try_from = "u8")]
+pub enum Signals {
+    Unique = 0,
+    Winner = 1,
+    Shared = 2,
+    Best = 3,
+    Failed = 4,
+}
+
+impl From<Signals> for u8 {
+    fn from(s: Signals) -> u8 {
+        s as u8
+    }
+}
+
+impl TryFrom<u8> for Signals {
+    type Error = String;
+
+    fn try_from(v: u8) -> Result<Self, Self::Error> {
+        match v {
+            0 => Ok(Signals::Unique),
+            1 => Ok(Signals::Winner),
+            2 => Ok(Signals::Shared),
+            3 => Ok(Signals::Best),
+            4 => Ok(Signals::Failed),
+            _ => Err(format!("Invalid value for Signals enum: {v}")),
+        }
+    }
+}
+
+// implement to_string for Signals
+impl std::fmt::Display for Signals {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Signals::Unique => write!(f, "unique"),
+            Signals::Winner => write!(f, "winner"),
+            Signals::Shared => write!(f, "shared"),
+            Signals::Best => write!(f, "best"),
+            Signals::Failed => write!(f, "failed"),
+        }
+    }
+}
+
 #[derive(Debug, Clone, Default, Deserialize, Serialize)]
 pub struct OverallStats {
     pub input_stats: InputStats,
@@ -36,7 +82,7 @@ pub struct InputStats {
 
 #[derive(Debug, Clone, Default, Deserialize, Serialize)]
 pub struct FilterRoundStats {
-    pub passed_reads: usize,      // reads where at least one alignment passed
+    pub passed_reads: usize, // reads where at least one alignment passed
     pub filter_counts: FilterCounts,
     pub signal_counts: IndexMap<String, usize>,
 }
@@ -108,6 +154,6 @@ impl FilterRoundStats {
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct ReadStats {
     pub read_type: ReadType,
-    pub signal: String,
+    pub signal: Signals,
     pub filter_counts: FilterCounts,
 }

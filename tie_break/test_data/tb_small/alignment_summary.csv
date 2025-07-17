@@ -1,4 +1,6 @@
 depth_type,reference,species,ani_group,ref_length,reads,coverage,mean_depth,median_nonzero_depth,simple_expected_coverage,robust_depth_estimate,robust_expected_coverage
 final,M.tuberculosis,M.tuberculosis,168,4411532,100,7.18,0.075,1.0,7.23,0.09 (0.08-0.1),8.73 (7.92-9.34)
 unique,M.tuberculosis,M.tuberculosis,168,4411532,91,6.66,0.068,1.0,6.57,0.05 (0.05-0.06),5.17 (4.53-5.68)
-winner,M.tuberculosis,M.tuberculosis,168,4411532,,6.66,0.068,1.0,6.57,0.05 (0.05-0.06),5.17 (4.53-5.68)
+winner,M.tuberculosis,M.tuberculosis,168,4411532,91,6.66,0.068,1.0,6.57,0.05 (0.05-0.06),5.17 (4.53-5.68)
+good,M.tuberculosis,M.tuberculosis,168,4411532,98,7.054,0.074,1.0,7.13,0.09 (0.08-0.1),8.89 (8.06-9.54)
+good,M.novocastrense,M.novocastrense,113,5624151,7,0.42,0.004,1.0,0.4,NaN (NaN-NaN),NaN (NaN-NaN)

@@ -4,9 +4,12 @@ use std::fs::File;
 use std::iter::Peekable;
 use std::path::Path;
 
+use crate::filter_reads::filter_counts::Signals;
+
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Aln {
     target_id: u32,
+    signal: Signals,
     ref_start: u32,
     ref_end: u32, // inclusive end
 }
@@ -37,7 +40,11 @@ where
 }
 
 impl CsvPileupIterator<std::vec::IntoIter<Aln>> {
-    pub fn from_path<P: AsRef<Path>>(path: P, target_id: Option<u32>) -> Result<Self> {
+    pub fn from_path<P: AsRef<Path>>(
+        path: P,
+        target_id: Option<u32>,
+        signals: Option<Vec<Signals>>,
+    ) -> Result<Self> {
         let file = File::open(path)?;
         let mut rdr = csv::Reader::from_reader(file);
 
@@ -45,6 +52,11 @@ impl CsvPileupIterator<std::vec::IntoIter<Aln>> {
             .deserialize::<Aln>()
             .filter_map(|res| res.ok()) // Skip invalid rows
             .filter(|aln| target_id.is_none_or(|tid| aln.target_id == tid))
+            .filter(|aln| {
+                signals
+                    .as_ref()
+                    .is_none_or(|sigs| sigs.contains(&aln.signal))
+            })
             .collect();
         // sort by target_id and ref_start
         aln_vec.sort_by_key(|aln| (aln.target_id, aln.ref_start));
@@ -115,7 +127,8 @@ mod tests {
     fn test_csv_pileup_iterator() {
         let alns_file = format!("{}/{}", TEST_DATA, "pileup/alns.csv");
         let expected_depths_file = format!("{}/{}", TEST_DATA, "pileup/expected_depths.csv");
-        let iter = CsvPileupIterator::from_path(alns_file, None).expect("Failed to create iterator");
+        let iter =
+            CsvPileupIterator::from_path(alns_file, None, None).expect("Failed to create iterator");
 
         create_dir_all(format!("{}/{}", TEST_DIR, "pileup"))
             .expect("Failed to create output directory");
@@ -136,13 +149,27 @@ mod tests {
     #[test]
     fn test_csv_pileup_iterator_target_id() {
         let alns_file = format!("{}/{}", TEST_DATA, "pileup/alns.csv");
-        let iter = CsvPileupIterator::from_path(alns_file, Some(2))
+        let iter = CsvPileupIterator::from_path(alns_file, Some(2), None)
             .expect("Failed to create iterator with target_id");
 
         let depths = iter.collect::<Vec<_>>();
         assert_eq!(depths.len(), 10);
         for (target_id, _pos, depth) in depths {
             assert_eq!(target_id, 2);
+            assert_eq!(depth, 1);
+        }
+    }
+
+    #[test]
+    fn test_csv_pileup_iterator_signals() {
+        let alns_file = format!("{}/{}", TEST_DATA, "pileup/alns.csv");
+        let iter = CsvPileupIterator::from_path(alns_file, Some(1), Some(vec![Signals::Unique, Signals::Winner]))
+            .expect("Failed to create iterator with target_id");
+
+        let depths = iter.collect::<Vec<_>>();
+        assert_eq!(depths.len(), 32);
+        for (target_id, _pos, depth) in depths {
+            assert_eq!(target_id, 1);
             assert_eq!(depth, 1);
         }
     }

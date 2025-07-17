@@ -2,15 +2,11 @@
 //!
 //! Currently set to use alignments in CSV format
 //! But can be adapted to use BAM files fairly easily
-//!
-//! Used to be multithreaded with BAM files,
-//! but that is much slower with csvs due to repeated reading and filtering csv file
-//! And often majority of alignments are to the top target_id anyway
 
+use crate::filter_reads::filter_counts::Signals;
 use crate::Result;
-use itertools::merge_join_by;
-use itertools::EitherOrBoth::{Both, Left, Right};
 use polars::prelude::*;
+use rayon::{prelude::*, ThreadPoolBuilder};
 use std::collections::HashMap;
 use std::time::SystemTime;
 
@@ -40,173 +36,53 @@ fn depth_count_hashmap_to_dataframe(depth_counts: HashMap<(u32, u32), u32>) -> R
 
 pub fn get_depth_counts_round1(
     reference_df: &DataFrame,
-    unique_alns_path: &str,
-    winner_alns_path: &str,
+    alns_path: &str,
+    threads: Option<usize>,
 ) -> Result<DataFrame> {
     let now = SystemTime::now();
 
-    let unique_depth_iter = CsvPileupIterator::from_path(unique_alns_path, None)
-        .expect("Failed to create iterator from path");
-    let winner_depth_iter = CsvPileupIterator::from_path(winner_alns_path, None)
-        .expect("Failed to create iterator from path");
+    let pool = ThreadPoolBuilder::new()
+        .num_threads(threads.unwrap_or(1))
+        .build()
+        .unwrap();
 
-    let merged_iter = merge_join_by(
-        unique_depth_iter,
-        winner_depth_iter,
-        |a, b| (a.0, a.1).cmp(&(b.0, b.1)), // Compare by target_id and pos
-    );
+    let depth_dfs: Vec<_> = pool.install(|| {
+        let jobs = vec![
+            (vec![Signals::Unique], "unique"),
+            (vec![Signals::Unique, Signals::Winner], "winner"),
+            (vec![Signals::Unique, Signals::Winner, Signals::Shared], "good"),
+        ];
 
-    let mut unique_depth_counts: HashMap<(u32, u32), u32> = HashMap::new();
-    let mut winner_depth_counts: HashMap<(u32, u32), u32> = HashMap::new();
+        jobs.into_par_iter()
+            .map(|(signals, depth_type)| {
+                let depth_df = get_depth_counts(reference_df, alns_path, Some(signals))
+                    .unwrap_or_else(|_| panic!("Failed to get depth counts for {depth_type:?}"));
+                depth_df.lazy()
+                    .with_column(lit(depth_type).alias("depth_type"))
+            })
+            .collect()
+    });
 
-    merged_iter
-        .map(|item| match item {
-            Both((tid, _, unique_depth), (_, _, winner_depth)) => {
-                (tid, Some(unique_depth), Some(winner_depth + unique_depth))
-            }
-            Left((tid, _, unique_depth)) => (tid, Some(unique_depth), Some(unique_depth)),
-            Right((tid, _, winner_depth)) => (tid, None, Some(winner_depth)),
-        })
-        .for_each(|(tid, unique_depth, winner_depth)| {
-            if let Some(unique_depth) = unique_depth {
-                let count = unique_depth_counts.entry((tid, unique_depth)).or_insert(0);
-                *count += 1;
-            }
-            if let Some(winner_depth) = winner_depth {
-                let count = winner_depth_counts.entry((tid, winner_depth)).or_insert(0);
-                *count += 1;
-            }
-        });
-
-    let unique_df = depth_count_hashmap_to_dataframe(unique_depth_counts)?;
-    let winner_df = depth_count_hashmap_to_dataframe(winner_depth_counts)?;
     let combined = concat(
-        [
-            unique_df
-                .lazy()
-                .with_column(lit("unique").alias("depth_type")),
-            winner_df
-                .lazy()
-                .with_column(lit("winner").alias("depth_type")),
-        ],
+        depth_dfs,
         UnionArgs::default(),
     )?
     .filter(col("depth").gt(0))
-    .collect()?;
-
-    let final_df = combined
-        .lazy()
-        .join(
-            reference_df
-                .clone()
-                .lazy()
-                .select([cols(["target_id", "ref_id"])]),
-            [col("target_id")],
-            [col("target_id")],
-            JoinArgs::new(JoinType::Left).with_coalesce(JoinCoalesce::CoalesceColumns),
-        )
-        .group_by(["ref_id", "depth_type", "depth"])
-        .agg([col("count").sum().alias("count")])
-        .sort(
+    .sort(
             ["ref_id", "depth", "depth_type"],
             SortMultipleOptions::default(),
         )
-        .collect()?;
+    .collect()?;
 
     println!("Reading took {:?} overall", now.elapsed().unwrap());
-    Ok(final_df)
-}
-
-/// Currently set up to use unique and winner
-/// Not in use yet
-/// This function is a more generic version of the above
-#[allow(dead_code)]
-fn read_depth_count_for_region_custom<I>(
-    depth_iterators: Vec<I>,
-    target_id: u32,
-    combining_logic: fn(Vec<u32>) -> Vec<u32>,
-    combined_labels: Vec<String>,
-) -> Result<DataFrame>
-where
-    I: Iterator<Item = (u32, u32)>,
-{
-    let mut depth_counts: Vec<HashMap<u32, u32>> = Vec::new();
-
-    let iterator = merge_pos_iterators(depth_iterators);
-
-    for (_pos, depths) in iterator {
-        let combined_depths = combining_logic(depths);
-        for (i, depth) in combined_depths.iter().enumerate() {
-            let count = depth_counts[i].entry(*depth).or_insert(0);
-            *count += 1;
-        }
-    }
-
-    // check that combined_labels and depth_counts have the same length
-    if depth_counts.len() != combined_labels.len() {
-        return Err("Length of combined_labels and depth_counts do not match".into());
-    }
-
-    let dataframes = depth_counts
-        .into_iter()
-        .zip(combined_labels)
-        .map(|(depth_count, label)| {
-            let df = hashmap_to_dataframe!(depth_count, "depth".into(), "count".into()).unwrap();
-            df.lazy().with_column(lit(label).alias("depth_type"))
-        })
-        .collect::<Vec<LazyFrame>>();
-
-    let combined = concat(dataframes, UnionArgs::default())?
-        .with_column(lit(target_id).alias("target_id"))
-        .filter(col("depth").gt(0))
-        .collect()?;
-
     Ok(combined)
 }
 
-// Generic function to merge multiple iterators over positions and depths
-// Unlikely to be as efficient as just mergining two with merge_join_by
-// but this is a more generic solution
-fn merge_pos_iterators<I>(iterators: Vec<I>) -> impl Iterator<Item = (u32, Vec<u32>)>
-where
-    I: Iterator<Item = (u32, u32)>,
-{
-    let mut peekable_iters: Vec<_> = iterators.into_iter().map(|iter| iter.peekable()).collect();
 
-    std::iter::from_fn(move || {
-        let mut min_pos: Option<u32> = None;
-
-        for peekable_iter in &mut peekable_iters {
-            if let Some((pos, _)) = peekable_iter.peek() {
-                if min_pos.is_none() || *pos < min_pos.unwrap() {
-                    min_pos = Some(*pos);
-                }
-            }
-        }
-
-        // If all iterators are exhausted, return None
-        min_pos?;
-        let min_pos = min_pos.unwrap();
-
-        let mut depths = vec![];
-        for peekable_iter in &mut peekable_iters {
-            if let Some((pos, depth)) = peekable_iter.peek() {
-                if *pos == min_pos {
-                    depths.push(*depth);
-                    peekable_iter.next();
-                    continue;
-                }
-            }
-            depths.push(0);
-        }
-        Some((min_pos, depths))
-    })
-}
-
-pub fn get_depth_counts_single(reference_df: &DataFrame, alns_paths: &str) -> Result<DataFrame> {
+pub fn get_depth_counts(reference_df: &DataFrame, alns_paths: &str, signals: Option<Vec<Signals>>) -> Result<DataFrame> {
     let now = SystemTime::now();
 
-    let depth_iter = CsvPileupIterator::from_path(alns_paths, None)
+    let depth_iter = CsvPileupIterator::from_path(alns_paths, None, signals)
         .expect("Failed to create iterator from path");
 
     let mut depth_counts: HashMap<(u32, u32), u32> = HashMap::new();
@@ -291,9 +167,10 @@ mod tests {
     }
 
     #[test]
-    fn test_get_depth_counts_simple() {
+    fn test_get_depth_counts() {
         let reference_df = reference_df();
-        let unique_alns_path = format!("{}/{}", TEST_DATA, "pileup/unique_alns.csv");
+        let alns_path = format!("{}/{}", TEST_DATA, "pileup/alns_2.csv");
+
         let expected_depth_file = format!(
             "{}/{}",
             TEST_DATA, "pileup/expected_unique_depth_counts.csv"
@@ -303,17 +180,17 @@ mod tests {
             .expect("Failed to create output directory");
         let output_path = format!("{}/{}", TEST_DIR, "pileup/unique_depth_counts.csv");
 
-        let df = get_depth_counts_single(&reference_df, &unique_alns_path).unwrap();
+        let df = get_depth_counts(&reference_df, &alns_path, Some(vec![Signals::Unique])).unwrap();
         save_csv(&df, &output_path).unwrap();
 
         assert!(compare_files(&expected_depth_file, &output_path));
     }
 
     #[test]
-    fn test_get_depth_counts() {
+    fn test_get_depth_counts_round1() {
         let reference_df = reference_df();
-        let unique_alns_path = format!("{}/{}", TEST_DATA, "pileup/unique_alns.csv");
-        let winner_alns_path = format!("{}/{}", TEST_DATA, "pileup/winner_alns.csv");
+        let alns_path = format!("{}/{}", TEST_DATA, "pileup/alns_2.csv");
+
         let expected_depth_file = format!(
             "{}/{}",
             TEST_DATA, "pileup/expected_combined_depth_counts.csv"
@@ -323,8 +200,7 @@ mod tests {
             .expect("Failed to create output directory");
         let output_path = format!("{}/{}", TEST_DIR, "pileup/combined_depth_counts.csv");
 
-        let df =
-            get_depth_counts_round1(&reference_df, &unique_alns_path, &winner_alns_path).unwrap();
+        let df = get_depth_counts_round1(&reference_df, &alns_path, None).unwrap();
         save_csv(&df, &output_path).unwrap();
 
         assert!(compare_files(&expected_depth_file, &output_path));
