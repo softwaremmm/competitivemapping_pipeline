@@ -134,7 +134,7 @@ process dynamicCompetitiveMapping {
 process tie_break {
     publishDir "${params.publish_dir}", enabled: params.publish_dir != "", mode: "copy", saveAs: { filename -> sample_name + "_" + filename }
     container {
-        params.test_container_cm == "" ? 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:3.0.2-rc0' : params.test_container_cm
+        params.test_container_cm == "" ? params.container_prefix + 'gpas/competitivemapping_pipeline:3.0.2-rc0' : params.test_container_cm
     }
 
     cpus 4
@@ -200,7 +200,7 @@ process tie_break {
 process dynamic_tie_break {
     publishDir "${params.publish_dir}", enabled: params.publish_dir != "", mode: "copy", saveAs: { filename -> sample_name + "_" + filename }
     container {
-        params.test_container_cm == "" ? 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:3.0.2-rc0' : params.test_container_cm
+        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:3.0.2-rc0' : params.test_container_cm
     }
 
     cpus 4
