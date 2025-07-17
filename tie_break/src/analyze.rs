@@ -143,7 +143,7 @@ pub fn analyze_alignments(args: AnalyzeArgs) -> Result<(), Box<dyn std::error::E
         jobs.into_par_iter()
             .map(|(path, signals, read_type)| {
                 let count_df = count_alns(path, &reference_df, signals.clone())
-                    .expect(&format!("Failed to count alignments for {signals:?}"));
+                    .unwrap_or_else(|_| panic!("Failed to count alignments for {signals:?}"));
                 count_df.lazy()
                     .with_column(lit(read_type).alias("depth_type"))
             })

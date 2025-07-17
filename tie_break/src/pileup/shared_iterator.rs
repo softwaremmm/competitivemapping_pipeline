@@ -56,9 +56,7 @@ pub fn get_depth_counts_round1(
         jobs.into_par_iter()
             .map(|(signals, depth_type)| {
                 let depth_df = get_depth_counts(reference_df, alns_path, Some(signals))
-                    .expect(&format!(
-                        "Failed to get depth counts for {depth_type:?}"
-                    ));
+                    .unwrap_or_else(|_| panic!("Failed to get depth counts for {depth_type:?}"));
                 depth_df.lazy()
                     .with_column(lit(depth_type).alias("depth_type"))
             })
