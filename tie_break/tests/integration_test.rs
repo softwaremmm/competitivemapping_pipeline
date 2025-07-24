@@ -38,6 +38,18 @@ const TEST_SETS: &[TestSet] = &[
         expected_summary_file: "test_data/no_mapping/alignment_summary.csv",
     },
     TestSet {
+        name: "no_good_targets",
+        input_bam: "test_data/tb_intracellulare/aln.bam",
+        contigs: "test_data/tb_intracellulare/contigs.csv",
+        output_root: "tests/test_produced_files/no_good_targets/",
+        parameters: "test_data/tb_intracellulare/no_good_targets/params.yaml",
+        depth_counts_file: "test_data/tb_intracellulare/no_good_targets/depth_counts.csv",
+        expected_ref_tie_breaker_order_file:
+            "test_data/tb_intracellulare/no_good_targets/ref_tie_breaker_order.csv",
+        expected_stats_file: "test_data/tb_intracellulare/no_good_targets/stats.yaml",
+        expected_summary_file: "test_data/tb_intracellulare/no_good_targets/alignment_summary.csv",
+    },
+    TestSet {
         name: "tb_intracellulare",
         input_bam: "test_data/tb_intracellulare/aln.bam",
         contigs: "test_data/tb_intracellulare/contigs.csv",
