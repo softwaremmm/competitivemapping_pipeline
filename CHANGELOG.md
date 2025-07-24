@@ -1,9 +1,10 @@
-## New
+## 3.1.0
 
 - Refactor tie_break to use signal in alns csv internally
 - Fixed bug where winner read count didn't include unique reads (but should have done)
-- add "good" rows to alignment summary. This includes shared reads from round 1
+- add "good" rows to alignment summary. This includes shared reads as well as unique/winner from round 1
 - tie_break produces sensible output on empty bam
+- set tie_break version to 1.0.0
 
 ## 3.0.2
 
