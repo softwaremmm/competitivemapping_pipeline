@@ -181,7 +181,7 @@ pub fn analyze_alignments(args: AnalyzeArgs) -> Result<(), Box<dyn std::error::E
         JoinArgs::new(JoinType::Left),
     )
     .sort(
-        ["depth_type_order", "ref_order"],
+        ["depth_type_order", "ref_order", "mean_depth"],
         SortMultipleOptions::default()
             .with_order_descending(true)
             .with_nulls_last(true),
