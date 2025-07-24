@@ -1,3 +1,8 @@
+## New
+
+- Use correct schema when making empty depth summary
+- sort non-ordered references by mean_depth
+
 ## 3.1.0
 
 - Refactor tie_break to use signal in alns csv internally

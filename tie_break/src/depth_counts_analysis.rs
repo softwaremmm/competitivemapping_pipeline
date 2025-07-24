@@ -216,13 +216,13 @@ pub fn summarise_depth(depth_count_df: &DataFrame, reference_df: &DataFrame) -> 
             Series::new("reference".into(), Vec::<String>::new()).into(),
             Series::new("ani_group".into(), Vec::<i64>::new()).into(),
             Series::new("species".into(), Vec::<String>::new()).into(),
-            Series::new("ref_length".into(), Vec::<u32>::new()).into(),
+            Series::new("ref_length".into(), Vec::<i64>::new()).into(),
             Series::new("depth_type".into(), Vec::<String>::new()).into(),
-            Series::new("coverage".into(), Vec::<f32>::new()).into(),
-            Series::new("mean_depth".into(), Vec::<f32>::new()).into(),
+            Series::new("coverage".into(), Vec::<f64>::new()).into(),
+            Series::new("mean_depth".into(), Vec::<f64>::new()).into(),
             Series::new("median_nonzero_depth".into(), Vec::<f64>::new()).into(),
-            Series::new("simple_expected_coverage".into(), Vec::<String>::new()).into(),
-            Series::new("robust_depth_estimate".into(), Vec::<f64>::new()).into(),
+            Series::new("simple_expected_coverage".into(), Vec::<f64>::new()).into(),
+            Series::new("robust_depth_estimate".into(), Vec::<String>::new()).into(),
             Series::new("robust_expected_coverage".into(), Vec::<String>::new()).into(),
         ])?);
     }
