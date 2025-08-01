@@ -138,7 +138,7 @@ process tie_break {
     }
 
     cpus 4
-    memory { 8.GB + (12.GB * task.attempt) }
+    memory { 5.GB + (8.GB * task.attempt) }
 
     pod label: "name", value: "competitive_mapping_pipeline:tie_break"
     pod label: "sample_id", value: "${params.sample_id}"
