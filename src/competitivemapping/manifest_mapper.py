@@ -1,4 +1,5 @@
 """Maps reads against a manifest to produce bam file"""
+
 import argparse
 import dataclasses
 import gzip
@@ -68,7 +69,12 @@ def map_reads(manifest: str, reads: list[str], config: Config, output_bam: str) 
 
     command += f" {manifest} {' '.join(reads)}"
 
-    command += f"| samtools sort -@ {config.cpus}"
+    # Limit samtools to a maximum of 6 CPUs
+    # More give minimal gains and keeps using more ram
+    # cap to 500M per thread
+    samtools_cpus = min(config.cpus, 6)
+
+    command += f"| samtools sort -m 500M -@ {samtools_cpus}"
 
     if config.sort_by_name:
         command += " -n"
@@ -78,6 +84,8 @@ def map_reads(manifest: str, reads: list[str], config: Config, output_bam: str) 
         command += " | samtools view -F 2048"
 
     command += f" -o {output_bam}"
+
+    logging.info(f"Running command: {command}")
 
     subprocess.run(
         command,

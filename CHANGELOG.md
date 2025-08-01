@@ -1,3 +1,7 @@
+## New
+
+- limit samtools sort to using 6 threads at 500M ram each.
+
 ## 3.1.1
 
 - Use correct schema when making empty depth summary
