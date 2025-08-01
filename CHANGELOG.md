@@ -1,4 +1,4 @@
-## New
+## 3.1.1
 
 - Use correct schema when making empty depth summary
 - sort non-ordered references by mean_depth
