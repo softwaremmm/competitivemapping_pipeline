@@ -1,6 +1,8 @@
 ## New
 
 - limit samtools sort to using 6 threads at 500M ram each.
+- tie_break will detect missing bam file and produce empty results.
+- tweak tie_break params to reduce spurious low depth hits. (May mildly impact flu results).
 
 ## 3.1.1
 
