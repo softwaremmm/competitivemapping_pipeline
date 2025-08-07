@@ -1,6 +1,5 @@
 #!/usr/bin/env nextflow
 include { competitiveMapping } from './process/competitive_mapping.nf'
-include { dynamicCompetitiveMapping } from './process/competitive_mapping.nf'
 include { tie_break } from './process/competitive_mapping.nf'
 include { dynamic_tie_break } from './process/competitive_mapping.nf'
 include { has_enough_reads } from './process/competitive_mapping.nf'
@@ -134,30 +133,6 @@ workflow competitive_mapping {
     report_json = competitive_mapping_output.report_json
     report_csv = competitive_mapping_output.report_csv
     cm_enough_reads = has_enough_reads.out
-}
-
-workflow dynamic_competitive_mapping {
-    take:
-    input_files // Channel expected to be tuple (sample_name, fqs, sylph_report)
-    db_genome_path_files // Used to find genome for manifest
-    db_taxonomy // Taxonomy data of genomes in sylph db
-    seq_platform
-
-    main:
-
-    check_seq_platform(seq_platform)
-
-    competitive_mapping_output = dynamicCompetitiveMapping(
-        input_files,
-        db_genome_path_files,
-        db_taxonomy,
-        seq_platform,
-        params.use_whole_genera_in_dynamic_cm,
-    )
-
-    emit:
-    report_json = competitive_mapping_output.report_json
-    report_csv = competitive_mapping_output.report_csv
 }
 
 // WARNING: Experimental process
