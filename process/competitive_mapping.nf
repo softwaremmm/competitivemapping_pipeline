@@ -212,8 +212,9 @@ process dynamic_tie_break {
 
     input:
     tuple val(sample_name), path(fqs), path(sylph_report)
-    path genomes_dir
-    path assembly_metadata
+    path genome_dirs
+    // Pattern used to avoid name conflicts
+    path "metadata?/*"
     val seq_platform
     val include_whole_genus
     path tie_break_params
@@ -228,8 +229,8 @@ process dynamic_tie_break {
     tie_break_stats = "tie_break_stats.yaml"
     """
     manifest_builder --sylph_report ${sylph_report} \
-        --genome_dirs ${genomes_dir} \
-        --metadata_files ${assembly_metadata} \
+        --genome_dirs ${genome_dirs} \
+        --metadata_files metadata*/* \
         ${whole_genera_arg} \
         --cpus ${task.cpus} \
         --output_root "out."

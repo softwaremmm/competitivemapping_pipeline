@@ -194,7 +194,7 @@ workflow tie_break_workflow {
 workflow dynamic_tie_break_workflow {
     take:
     input_files
-    genomes_path
+    genome_dirs // Each directory must contain a genome_paths.tsv file
     assembly_metadata
     seq_platform
 
@@ -205,7 +205,7 @@ workflow dynamic_tie_break_workflow {
 
     dynamic_tie_break(
         input_files,
-        genomes_path,
+        genome_dirs,
         assembly_metadata,
         seq_platform,
         params.use_whole_genera_in_dynamic_cm,
