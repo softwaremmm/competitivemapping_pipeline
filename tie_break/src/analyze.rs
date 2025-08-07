@@ -8,6 +8,7 @@ use clap::Parser;
 use polars::prelude::*;
 use rayon::{prelude::*, ThreadPoolBuilder};
 use std::fs::File;
+use std::io::Write;
 use std::time::SystemTime;
 
 /// Analyzes competitive mapping data
@@ -43,6 +44,19 @@ pub fn analyze_alignments(args: AnalyzeArgs) -> Result<(), Box<dyn std::error::E
         File::open(args.parameters)
             .map_err(|e| format!("Failed to read params file. Error: {e}"))?,
     )?;
+
+    // Check if input_bam exists
+    if !std::path::Path::new(&args.input_bam).exists() {
+        println!("Input BAM file does not exist: {}", args.input_bam);
+        println!("Producing empty output files.");
+        let stats_file = File::create(format!("{}{}", args.output_root, "stats.yaml"))?;
+        serde_yaml::to_writer(stats_file, &stats.sorted())?;
+
+        let mut alignment_summary_file =
+            File::create(format!("{}{}", args.output_root, "alignment_summary.csv"))?;
+        writeln!(alignment_summary_file, "depth_type,reference,species,ani_group,ref_length,reads,coverage,mean_depth,median_nonzero_depth,simple_expected_coverage,robust_depth_estimate,robust_expected_coverage\n")?;
+        return Ok(());
+    }
 
     let reference_df = make_reference_df(&args.input_bam, &args.contigs)?;
     save_csv(
@@ -118,7 +132,6 @@ pub fn analyze_alignments(args: AnalyzeArgs) -> Result<(), Box<dyn std::error::E
         .select([col("ref_id")])
         .with_row_index("ref_order", Some(1));
 
-
     let pool = ThreadPoolBuilder::new()
         .num_threads(args.threads.unwrap_or(1))
         .build()
@@ -144,16 +157,14 @@ pub fn analyze_alignments(args: AnalyzeArgs) -> Result<(), Box<dyn std::error::E
             .map(|(path, signals, read_type)| {
                 let count_df = count_alns(path, &reference_df, signals.clone())
                     .unwrap_or_else(|_| panic!("Failed to count alignments for {signals:?}"));
-                count_df.lazy()
+                count_df
+                    .lazy()
                     .with_column(lit(read_type).alias("depth_type"))
             })
             .collect()
     });
 
-    let read_counts = concat(
-        read_count_dfs,
-        UnionArgs::default(),
-    )?;
+    let read_counts = concat(read_count_dfs, UnionArgs::default())?;
 
     let combined_summary = concat(
         [
