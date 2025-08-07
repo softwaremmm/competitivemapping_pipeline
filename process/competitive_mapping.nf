@@ -101,7 +101,7 @@ process dynamicCompetitiveMapping {
     """
     manifest_builder --sylph_report ${sylph_report} \
         --genome_dirs db_genome_dirs* \
-        --taxonomy_files db_taxonomy* \
+        --metadata_files db_taxonomy* \
         ${whole_genera_arg} \
         --cpus ${task.cpus} \
         --output_root "out."
@@ -213,7 +213,6 @@ process dynamic_tie_break {
     input:
     tuple val(sample_name), path(fqs), path(sylph_report)
     path genomes_dir
-    // Used to go from assembly to species
     path assembly_metadata
     val seq_platform
     val include_whole_genus

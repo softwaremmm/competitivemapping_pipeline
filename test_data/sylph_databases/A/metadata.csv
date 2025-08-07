@@ -1,0 +1,5 @@
+accession,ani_group,taxonomy
+GCF_000819615.1,101,x__Viruses;x__Monodnaviria;x__Sangervirae;p__Phixviricota;c__Malgrandaviricetes;o__Petitvirales;f__Microviridae;x__Bullavirinae;g__Sinsheimervirus;s__Sinsheimervirus phiX174;x__Escherichia phage phiX174
+GCF_000820355.1,102,x__Viruses;x__Riboviria;x__unclassified Riboviria;x__unclassified ssRNA viruses;x__unclassified ssRNA positive-strand viruses;s__Sclerophthora macrospora virus A
+GCF_000820495.2,103,x__Viruses;x__Riboviria;x__Orthornavirae;p__Negarnaviricota;x__Polyploviricotina;c__Insthoviricetes;o__Articulavirales;f__Orthomyxoviridae;g__Sinsheimervirus;s__Betainfluenzavirus influenzae;x__Influenza B virus;x__Influenza B virus (B/Lee/1940)
+GCF_000836805.1,104,x__Viruses;x__Monodnaviria;x__Sangervirae;p__Phixviricota;c__Malgrandaviricetes;o__Petitvirales;f__Microviridae;x__Gokushovirinae;g__Chlamydiamicrovirus;s__Chlamydiamicrovirus CPG1;x__Chlamydia phage CPG1

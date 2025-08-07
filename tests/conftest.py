@@ -210,6 +210,7 @@ def sylph_db_A() -> dict:
     return {
         "db": "test_data/sylph_databases/A/db.syldb",
         "taxonomy": "test_data/sylph_databases/A/taxonomy.tsv",
+        "metadata": "test_data/sylph_databases/A/metadata.csv",
         "genomes_dir": "test_data/sylph_databases/A",
         "sylph_report": "test_data/sylph_databases/A/sylph.tsv",
         "manifest": "test_data/sylph_databases/A/manifest.fasta.gz",

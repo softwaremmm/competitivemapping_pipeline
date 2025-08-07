@@ -132,7 +132,7 @@ def test_build_manifest_A(sylph_db_A, test_outputs_dir, mocker):
             sylph_db_A["sylph_report"],
             "--genome_dirs",
             sylph_db_A["genomes_dir"],
-            "--taxonomy_files",
+            "--metadata_files",
             sylph_db_A["taxonomy"],
             "--output_root",
             output_root,
@@ -163,7 +163,7 @@ def test_build_manifest_A_with_whole_genus(sylph_db_A, test_outputs_dir, mocker)
             sylph_db_A["sylph_report"],
             "--genome_dirs",
             sylph_db_A["genomes_dir"],
-            "--taxonomy_files",
+            "--metadata_files",
             sylph_db_A["taxonomy"],
             "--output_root",
             output_root,
@@ -182,6 +182,40 @@ def test_build_manifest_A_with_whole_genus(sylph_db_A, test_outputs_dir, mocker)
     check_file(sylph_db_A["contigs_with_whole_genus"], output_root + "contigs.csv")
 
 
+def test_build_manifest_A_metadata(sylph_db_A, test_outputs_dir, mocker):
+    output_dir = os.path.join(test_outputs_dir, "test_build_manifest_A")
+    os.makedirs(output_dir, exist_ok=True)
+    output_root = str(output_dir) + "/"
+
+    mocker.patch(
+        "sys.argv",
+        [
+            "manifest_builder",
+            "--sylph_report",
+            sylph_db_A["sylph_report"],
+            "--genome_dirs",
+            sylph_db_A["genomes_dir"],
+            "--metadata_files",
+            sylph_db_A["metadata"],
+            "--output_root",
+            output_root,
+            "--cpus",
+            str(get_cpus()),
+        ],
+    )
+
+    manifest_builder.cli_entry_point()
+
+    # check that manifest and contigs are the same
+    check_gzipped_file(sylph_db_A["manifest"], output_root + "manifest.fasta.gz")
+    contigs_df = pd.read_csv(output_root + "contigs.csv")
+    reference_to_ani_group = contigs_df.set_index("reference")["ani_group"].to_dict()
+    assert reference_to_ani_group == {
+        "GCF_000819615.1": 101,
+        "GCF_000820355.1": 102,
+    }
+
+
 def test_build_manifest_A_and_B(sylph_db_A, sylph_db_B, test_outputs_dir, mocker):
     # test that manifest builder works with two sylph databases
     output_dir = os.path.join(test_outputs_dir, "test_build_manifest_A_and_B")
@@ -197,7 +231,7 @@ def test_build_manifest_A_and_B(sylph_db_A, sylph_db_B, test_outputs_dir, mocker
             "--genome_dirs",
             sylph_db_A["genomes_dir"],
             sylph_db_B["genomes_dir"],
-            "--taxonomy_files",
+            "--metadata_files",
             sylph_db_A["taxonomy"],
             sylph_db_B["taxonomy"],
             "--output_root",
@@ -230,7 +264,7 @@ def test_empty_sylph(
             empty_sylph["sylph_report"],
             "--genome_dirs",
             sylph_rep_paths,
-            "--taxonomy_files",
+            "--metadata_files",
             sylph_metadata,
             "--output_root",
             output_root,

@@ -3,6 +3,7 @@
 - limit samtools sort to using 6 threads at 500M ram each.
 - tie_break will detect missing bam file and produce empty results.
 - tweak tie_break params to reduce spurious low depth hits. (May mildly impact flu results).
+- When running dynamic comp mapping. Can provide fixed ani groups via metadata file
 
 ## 3.1.1
 
