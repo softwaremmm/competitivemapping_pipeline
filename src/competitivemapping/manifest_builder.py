@@ -23,6 +23,11 @@ logging.basicConfig(
     level=logging.DEBUG,
 )
 
+REF_FILE_SUFFIXES = ["_genomic.fna.gz", ".fasta.gz"]
+REF_FILE_SUFFIX_PATTERN = (
+    "(" + "|".join(re.escape(suffix) for suffix in REF_FILE_SUFFIXES) + ")$"
+)
+
 
 @dataclasses.dataclass
 class Config:
@@ -229,13 +234,13 @@ def make_manifest(
         sylph_df["Genome_file"]
         .str.split("/")
         .str[-1]
-        .str.replace("_genomic.fna.gz", "")
+        .str.replace(REF_FILE_SUFFIX_PATTERN, "", regex=True)
     )
     sylph_accessions = sylph_df["accession"].tolist()
 
     genome_paths = pd.concat(get_genome_paths(genome_dir) for genome_dir in genome_dirs)
     genome_paths["accession"] = genome_paths["filename"].str.replace(
-        "_genomic.fna.gz", ""
+        REF_FILE_SUFFIX_PATTERN, "", regex=True
     )
 
     metadata_df = pd.concat([read_metadata_file(f) for f in metadata_files])
