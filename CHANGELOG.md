@@ -1,4 +1,4 @@
-## New
+## 3.2.0
 
 - limit samtools sort to using 6 threads at 500M ram each.
 - tie_break will detect missing bam file and produce empty results.
