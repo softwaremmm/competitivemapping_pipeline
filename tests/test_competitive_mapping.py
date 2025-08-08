@@ -114,6 +114,9 @@ def test_empty_contigs(empty_sylph, test_outputs_dir, mocker):
     )
 
 
+## Test cases for output_fastqs function
+
+
 @pytest.fixture
 def mock_contigs_df():
     """Create a mock contigs dataframe for testing"""
