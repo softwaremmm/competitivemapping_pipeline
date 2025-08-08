@@ -42,6 +42,25 @@ class Config:
     output_root: str
 
 
+def read_metadata_file(filepath: str) -> pd.DataFrame:
+    """Read a metadata file and return a DataFrame"""
+    # Note that pandas will automatically handle gzipped files
+    sep = "\t" if filepath.endswith(".tsv") or filepath.endswith(".tsv.gz") else ","
+
+    first_row = pd.read_csv(filepath, sep=sep, nrows=1, header=None)
+    if first_row.shape[1] == 2:
+        # Then reading a two column taxonomy file
+        df = pd.read_csv(
+            filepath, sep=sep, header=None, names=["accession", "taxonomy"]
+        )
+    else:
+        # Full metadata file from custom database
+        df = pd.read_csv(
+            filepath, sep=sep, usecols=["accession", "taxonomy", "ani_group"]
+        )
+    return df
+
+
 def read_contigs(args: tuple[str, str]) -> list[dict[str, str]]:
     """Read contigs from a gzipped fasta file"""
     accession, filepath = args
@@ -170,7 +189,7 @@ def assign_ani_groups(contigs_df, ani_df, ani_threshold) -> pd.DataFrame:
 
 def make_manifest(
     report_path: str,
-    taxonomy_files: list[str],
+    metadata_files: list[str],
     genome_dirs: list[str],
     config: Config,
 ) -> tuple[str, pd.DataFrame]:
@@ -178,7 +197,7 @@ def make_manifest(
 
     Args:
         report_path (str): Path to the sylph report
-        taxonomy_files (list[str]): path to the db metadata files, with taxonomy info
+        metadata_files (list[str]): path to the db metadata files, with taxonomy info
         genome_dirs (list[str]): path to the directories with the genome fastas
         config (Config): Config object
 
@@ -219,12 +238,7 @@ def make_manifest(
         "_genomic.fna.gz", ""
     )
 
-    metadata_df = pd.concat(
-        [
-            pd.read_csv(f, sep="\t", header=None, names=["accession", "taxonomy"])
-            for f in taxonomy_files
-        ]
-    )
+    metadata_df = pd.concat([read_metadata_file(f) for f in metadata_files])
 
     # Can restrict to only representative genomes (those with a genome path)
     metadata_df = metadata_df[
@@ -290,9 +304,19 @@ def make_manifest(
         "sum"
     )
 
-    # add ani information
-    ani_df = get_ani_distances(selected_df, config)
-    contigs_df = assign_ani_groups(contigs_df, ani_df, config.ani_threshold)
+    # add ani information if missing
+    if "ani_group" in metadata_df.columns:
+        # If ani_group is already present, use it
+        contigs_df = contigs_df.merge(
+            metadata_df[["accession", "ani_group"]],
+            left_on="reference",
+            right_on="accession",
+            how="left",
+        )
+        contigs_df.drop(columns=["accession"], inplace=True)
+    else:
+        ani_df = get_ani_distances(selected_df, config)
+        contigs_df = assign_ani_groups(contigs_df, ani_df, config.ani_threshold)
 
     # add species information from metadata
     species_lookup = metadata_df.set_index("accession")["species"].to_dict()
@@ -307,9 +331,9 @@ def cli_entry_point():
         "--sylph_report", required=True, help="Path to the sylph report TSV file"
     )
     parser.add_argument(
-        "--taxonomy_files",
+        "--metadata_files",
         required=True,
-        help="Path to the metadata files with assembly to taxonomy mapping",
+        help="Path to the metadata files with taxonomy (and optionally ani) mapping. Can be gzipped",
         nargs="+",
     )
     # Need to provide parent directory to work with nextflow symlinks
@@ -347,7 +371,7 @@ def cli_entry_point():
 
     _manifest, contigs = make_manifest(
         sylph_report,
-        args.taxonomy_files,
+        args.metadata_files,
         args.genome_dirs,
         config,
     )
