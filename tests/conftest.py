@@ -171,23 +171,15 @@ def samples(request) -> dict:
 
 
 @pytest.fixture
-def enough_tb() -> Path:
-    return Path("tests/samples/json/enough_tb.json")
-
-
-@pytest.fixture
-def not_enough_tb() -> Path:
-    return Path("tests/samples/json/not_enough_tb.json")
-
-
-@pytest.fixture
-def no_genome_name_key() -> Path:
-    return Path("tests/samples/json/no_genome_name_key.json")
-
-
-@pytest.fixture
-def no_mb_value() -> Path:
-    return Path("tests/samples/json/no_mb_value.json")
+def check_read_count_files() -> dict[str, Path]:
+    return {
+        "enough": Path("test_data/check_read_count/enough_tb.json"),
+        "not_enough": Path("test_data/check_read_count/not_enough_tb.json"),
+        "no_mb_value": Path("test_data/check_read_count/no_mb_value.json"),
+        "no_genome_name_key": Path(
+            "test_data/check_read_count/no_genome_name_key.json"
+        ),
+    }
 
 
 @pytest.fixture
