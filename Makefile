@@ -4,21 +4,22 @@ clean:
 	find . -type f -regex '.*\.nextflow\.log.*' | xargs rm -f
 	find . -type d -name .nf-test | xargs rm -rf
 
-run:
+run_myco:
 	nextflow run . \
 		--seq_platform illumina \
-		--input_dir test_data/chloro_10k \
-		--manifest data/manifest/manifest_20231001 \
-		--species_list test_data/species_list_manifest_20250324.csv \
+		--input_dir test_data/samples/illumina/chloro \
+		--manifest test_data/myco_manifest/manifest.fasta.gz \
+		--species_list test_data/myco_manifest/contigs.csv \
 		--publish_dir results \
+		-profile local_docker \
 		-resume
 
 run_flu:
 	nextflow run . \
 		--seq_platform illumina \
-		--input_dir flu_input/N1_illumina \
-		--manifest data/manifest_flu/all_influenza_A_plus_all_h_all_n.fasta \
-		--species_list data/manifest_flu/manifest_20250624_groups.csv \
+		--input_dir test_data/samples/illumina/flu \
+		--manifest test_data/flu_manifest/manifest.fasta.gz \
+		--species_list test_data/flu_manifest/contigs.csv \
 		--publish_dir flu_results \
 		-profile local_docker \
 		-resume

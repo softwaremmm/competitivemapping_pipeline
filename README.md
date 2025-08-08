@@ -74,18 +74,20 @@ The workflow takes the following inputs
 - input_dir. Path to directory containing input fastq files
 - seq_platform. `illumina` or `ont`.
 - manifest. Path to manifest file
-- species_list. Patht to species list file which has the contig to genome mapping
+- species_list. Path to csv which has the contig to genome mapping
 
 When running locally can save outputs by using `--publish_dir`.
+And to use locally built container add `-profile local_docker`.
 
 Example using test data:
 ```bash
 nextflow run . \
-		--seq_platform illumina \
-		--input_dir test_data/chloro_10k \
-		--manifest data/manifest/manifest_20231001 \
-		--species_list test_data/species_list_manifest_20250324.csv \
-    --publish_dir results
+  --seq_platform illumina \
+  --input_dir test_data/samples/illumina/chloro \
+  --manifest test_data/myco_manifest/manifest.fasta.gz \
+  --species_list test_data/myco_manifest/contigs.csv \
+  --publish_dir results \
+  -resume
 ```
 
 
@@ -94,7 +96,7 @@ By default it will look for files in the input directory based on the following 
 - `params.input_single_suffix = "*.fastq.gz"`
 
 but these can be overriden. e.g.
-```
+```bash
 nextflow run ... --input_paired_suffix "tb_sample*_{1,2}.fna.gz"
 ```
 
