@@ -1,7 +1,7 @@
 process competitiveMapping {
     publishDir "${params.publish_dir}", enabled: params.publish_dir != "", mode: "copy", saveAs: { filename -> sample_name + "_" + filename }
     container {
-        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:3.1.1' : params.test_container_cm
+        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:3.2.0-rc1' : params.test_container_cm
     }
 
     cpus 4
@@ -67,78 +67,15 @@ process competitiveMapping {
     """
 }
 
-process dynamicCompetitiveMapping {
-    publishDir "${params.publish_dir}", enabled: params.publish_dir != "", mode: "copy", saveAs: { filename -> sample_name + "_" + filename }
-    container {
-        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:3.1.1' : params.test_container_cm
-    }
-
-    cpus 4
-    memory { 8.GB + (12.GB * task.attempt) }
-
-    pod label: "name", value: "competitive_mapping_pipeline:dynamicCompetitiveMapping"
-    pod label: "sample_id", value: "${params.sample_id}"
-    pod label: "run_id", value: "${params.run_id}"
-
-    input:
-    tuple val(sample_name), path(fqs), path(sylph_report)
-    // genome dir paths and taxonomy files can be single paths, or lists of paths
-    // Renamed to avoid any name clashes
-    path "db_genome_dirs"
-    path "db_taxonomy"
-    // Used to go from assembly to species
-    val seq_platform
-    val include_whole_genus
-
-    output:
-    tuple val(sample_name), path(competitive_mapping_report), emit: report_json
-    tuple val(sample_name), path(competitive_mapping_csv), emit: report_csv
-
-    script:
-    competitive_mapping_report = "species_comparison_report.json"
-    competitive_mapping_csv = "species_comparison.csv"
-    whole_genera_arg = include_whole_genus ? "--include_whole_genus" : ""
-    """
-    manifest_builder --sylph_report ${sylph_report} \
-        --genome_dirs db_genome_dirs* \
-        --taxonomy_files db_taxonomy* \
-        ${whole_genera_arg} \
-        --cpus ${task.cpus} \
-        --output_root "out."
-
-
-    manifest_mapper \
-        --seq_platform ${seq_platform} \
-        --manifest out.manifest.fasta.gz \
-        --reads ${fqs} \
-        --cpus ${task.cpus} \
-        -o aln.bam
-
-    competitive_mapping \
-        --input_bam aln.bam \
-        --seq_platform ${seq_platform} \
-        --contigs out.contigs.csv \
-        --cpus ${task.cpus} \
-        --output_root "out."
-
-    mv out.species_comparison.json ${competitive_mapping_report}
-    mv out.species_comparison.csv ${competitive_mapping_csv}
-
-    # clean up large intermediate files
-    rm aln.bam
-    rm out.manifest.fasta.gz
-    """
-}
-
 // WARNING: Experimental process
 process tie_break {
     publishDir "${params.publish_dir}", enabled: params.publish_dir != "", mode: "copy", saveAs: { filename -> sample_name + "_" + filename }
     container {
-        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:3.1.1' : params.test_container_cm
+        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:3.2.0-rc1' : params.test_container_cm
     }
 
     cpus 4
-    memory { 8.GB + (12.GB * task.attempt) }
+    memory { 5.GB + (8.GB * task.attempt) }
 
     pod label: "name", value: "competitive_mapping_pipeline:tie_break"
     pod label: "sample_id", value: "${params.sample_id}"
@@ -200,7 +137,7 @@ process tie_break {
 process dynamic_tie_break {
     publishDir "${params.publish_dir}", enabled: params.publish_dir != "", mode: "copy", saveAs: { filename -> sample_name + "_" + filename }
     container {
-        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:3.1.1' : params.test_container_cm
+        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:3.2.0-rc1' : params.test_container_cm
     }
 
     cpus 4
@@ -212,9 +149,9 @@ process dynamic_tie_break {
 
     input:
     tuple val(sample_name), path(fqs), path(sylph_report)
-    path genomes_dir
-    // Used to go from assembly to species
-    path assembly_metadata
+    path genome_dirs
+    // Pattern used to avoid name conflicts
+    path "metadata?/*"
     val seq_platform
     val include_whole_genus
     path tie_break_params
@@ -229,8 +166,8 @@ process dynamic_tie_break {
     tie_break_stats = "tie_break_stats.yaml"
     """
     manifest_builder --sylph_report ${sylph_report} \
-        --genome_dirs ${genomes_dir} \
-        --metadata_files ${assembly_metadata} \
+        --genome_dirs ${genome_dirs} \
+        --metadata_files metadata*/* \
         ${whole_genera_arg} \
         --cpus ${task.cpus} \
         --output_root "out."
@@ -261,7 +198,7 @@ process dynamic_tie_break {
 
 process has_enough_reads {
     container {
-        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:3.1.1' : params.test_container_cm
+        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:3.2.0-rc1' : params.test_container_cm
     }
 
     cpus 1
