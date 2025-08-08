@@ -14,7 +14,7 @@ from competitivemapping import competitive_mapping
 from competitivemapping.competitive_mapping import Config, output_fastqs
 
 
-def test_cli_entry_point(samples, species_table_path, test_outputs_dir, mocker):
+def test_cli_entry_point(samples, myco_manifest, test_outputs_dir, mocker):
     output_root = os.path.join(test_outputs_dir, samples["sample"] + ".")
 
     seq_platform = "ont" if len(samples["reads"]) == 1 else "illumina"
@@ -28,7 +28,7 @@ def test_cli_entry_point(samples, species_table_path, test_outputs_dir, mocker):
         "--ref_for_fastq",
         "M.tuberculosis",
         "--contigs",
-        species_table_path,
+        myco_manifest["contigs"],
         "--output_root",
         output_root,
         "--cpus",
@@ -60,37 +60,35 @@ def test_cli_entry_point(samples, species_table_path, test_outputs_dir, mocker):
 
     match samples["sample"]:
         case "chloro_10k":
-            check_length(output_root + "reads_1.fastq.gz", 2736)
-            check_length(output_root + "reads_2.fastq.gz", 2736)
+            check_length(output_root + "reads_1.fastq.gz", 13)
+            check_length(output_root + "reads_2.fastq.gz", 13)
             check_order(
                 output_root + "reads_1.fastq.gz",
-                "729a5634addf363b4848f38ffc1bc9a9edbd10538b45669a7ac2719a6e2d61c2",
+                "8d024fa8e54867f64c1f78b3882fc148bef1e967d2ff503e1c02e254117b287e",
             )
             check_order(
                 output_root + "reads_2.fastq.gz",
-                "729a5634addf363b4848f38ffc1bc9a9edbd10538b45669a7ac2719a6e2d61c2",
+                "8d024fa8e54867f64c1f78b3882fc148bef1e967d2ff503e1c02e254117b287e",
             )
         case "tb_10k":
-            check_length(output_root + "reads_1.fastq.gz", 9711)
-            check_length(output_root + "reads_2.fastq.gz", 9711)
+            check_length(output_root + "reads_1.fastq.gz", 5235)
+            check_length(output_root + "reads_2.fastq.gz", 5235)
         case "tb_ont":
-            check_length(output_root + "reads.fastq.gz", 998)
+            check_length(output_root + "reads.fastq.gz", 438)
 
 
-def test_empty_contigs(empty_sylph, test_outputs_dir, mocker):
-    output_root = os.path.join(
-        test_outputs_dir, "cm_sylph", empty_sylph["sample"] + "."
-    )
-    os.makedirs(os.path.join(test_outputs_dir, "cm_sylph"), exist_ok=True)
+def test_empty_contigs(empty_files, test_outputs_dir, mocker):
+    output_root = os.path.join(test_outputs_dir, "cm", empty_files["sample"] + ".")
+    os.makedirs(os.path.join(test_outputs_dir, "cm"), exist_ok=True)
 
-    seq_platform = "ont" if len(empty_sylph["reads"]) == 1 else "illumina"
+    seq_platform = "ont" if len(empty_files["reads"]) == 1 else "illumina"
 
     args = [
         "competitive_mapping",
         "--input_bam",
-        empty_sylph["bam"],
+        "path_to_nothing.bam",
         "--contigs",
-        empty_sylph["contigs"],
+        empty_files["contigs"],
         "--seq_platform",
         seq_platform,
         "--output_root",
@@ -107,11 +105,9 @@ def test_empty_contigs(empty_sylph, test_outputs_dir, mocker):
     competitive_mapping.cli_entry_point()
 
     check_file(
-        empty_sylph["sylph_species_comparison"], output_root + "species_comparison.json"
+        empty_files["species_comparison"], output_root + "species_comparison.json"
     )
-    check_file(
-        empty_sylph["sylph_csv_comparison"], output_root + "species_comparison.csv"
-    )
+    check_file(empty_files["csv_comparison"], output_root + "species_comparison.csv")
 
 
 ## Test cases for output_fastqs function

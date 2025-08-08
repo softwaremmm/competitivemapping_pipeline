@@ -4,16 +4,17 @@ nextflow_process {
     script "process/competitive_mapping.nf"
     process "tie_break"
 
-    test("Illumina - Process should succeed when sample files and a manifest are provided") {
+    test("Illumina - Should succeed") {
         tag "illumina"
         when {
             process{
                 """
-                input[0] = ['sample_test', [file("$projectDir/test_data/TB_10k/TB_1.fastq.gz"), file("$projectDir/test_data/TB_10k/TB_2.fastq.gz")]]
-                input[1] = file("$projectDir/data/manifest/manifest_20231001")
-                input[2] = file("$projectDir/test_data/species_list_manifest_20250324_grouped.csv")
+                input[0] = Channel.of(['sample_test', [file("$projectDir/test_data/samples/illumina/TB/TB_1.fastq.gz"),
+                                                       file("$projectDir/test_data/samples/illumina/TB/TB_2.fastq.gz")]])
+                input[1] = file("$projectDir/test_data/myco_manifest/manifest.fasta.gz")
+                input[2] = file("$projectDir/test_data/myco_manifest/contigs.csv")
                 input[3] = 'illumina'
-                input[4] = file("$projectDir/test_data/TB_10k/tie_break_params_illumina.yml")
+                input[4] = file("$projectDir/test_data/tie_break_params/params_illumina.yml")
                 input[5] = 'M.tuberculosis'
                 """
             }
@@ -26,12 +27,12 @@ nextflow_process {
 
             with(process.out.report_csv) {
                 assert size() == 1
-                assert path(get(0)[1]).md5 == path("$projectDir/test_data/TB_10k/tie_break.csv").md5
+                assert path(get(0)[1]).md5 == path("$projectDir/test_data/samples/illumina/TB/tie_break_summary.csv").md5
             }
 
             with(process.out.stats) {
                 assert size() == 1
-                assert path(get(0)[1]).yaml == path("$projectDir/test_data/TB_10k/tie_break_stats.yaml").yaml
+                assert path(get(0)[1]).yaml == path("$projectDir/test_data/samples/illumina/TB/tie_break_stats.yaml").yaml
             }
 
             with(process.out.ref_reads) {
@@ -42,16 +43,16 @@ nextflow_process {
         }
     }
 
-    test("ONT - Process should succeed when sample files and a manifest are provided") {
+    test("ONT - Process should succeed") {
         tag "ont"
         when {
             process{
                 """
-                input[0] = ['sample_test', file("$projectDir/test_data/TB_ont/ont_lineage4_10.fastq.gz")]
-                input[1] = file("$projectDir/data/manifest/manifest_20231001")
-                input[2] = file("$projectDir/test_data/species_list_manifest_20250324.csv")
+                input[0] = ['sample_test', file("$projectDir/test_data/samples/ont/TB/lin4_10.fastq.gz")]
+                input[1] = file("$projectDir/test_data/myco_manifest/manifest.fasta.gz")
+                input[2] = file("$projectDir/test_data/myco_manifest/contigs.csv")
                 input[3] = 'ont'
-                input[4] = file("$projectDir/test_data/TB_ont/tie_break_params_ont.yml")
+                input[4] = file("$projectDir/test_data/tie_break_params/params_ont.yml")
                 input[5] = 'M.tuberculosis'
                 """
             }
@@ -64,12 +65,12 @@ nextflow_process {
 
             with(process.out.report_csv) {
                 assert size() == 1
-                assert path(get(0)[1]).md5 == path("$projectDir/test_data/TB_ont/tie_break.csv").md5
+                assert path(get(0)[1]).md5 == path("$projectDir/test_data/samples/ont/TB/tie_break_summary.csv").md5
             }
 
             with(process.out.stats) {
                 assert size() == 1
-                assert path(get(0)[1]).yaml == path("$projectDir/test_data/TB_ont/tie_break_stats.yaml").yaml
+                assert path(get(0)[1]).yaml == path("$projectDir/test_data/samples/ont/TB/tie_break_stats.yaml").yaml
             }
 
             with(process.out.ref_reads) {

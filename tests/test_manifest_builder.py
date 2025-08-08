@@ -248,11 +248,9 @@ def test_build_manifest_A_and_B(sylph_db_A, sylph_db_B, test_outputs_dir, mocker
     check_file(sylph_db_B["contigs"], output_root + "contigs.csv")
 
 
-def test_empty_sylph(
-    empty_sylph, sylph_rep_paths, sylph_metadata, test_outputs_dir, mocker
-):
+def test_empty_sylph(empty_files, sylph_db_A, test_outputs_dir, mocker):
     output_root = os.path.join(
-        test_outputs_dir, "build_manifest", empty_sylph["sample"] + "."
+        test_outputs_dir, "build_manifest", empty_files["sample"] + "."
     )
     os.makedirs(os.path.join(test_outputs_dir, "build_manifest"), exist_ok=True)
 
@@ -261,11 +259,11 @@ def test_empty_sylph(
         [
             "manifest_builder",
             "--sylph_report",
-            empty_sylph["sylph_report"],
+            empty_files["sylph_query"],
             "--genome_dirs",
-            sylph_rep_paths,
+            sylph_db_A["genomes_dir"],
             "--metadata_files",
-            sylph_metadata,
+            sylph_db_A["taxonomy"],
             "--output_root",
             output_root,
             "--cpus",
@@ -277,11 +275,11 @@ def test_empty_sylph(
 
     # compare contents of the manifest file which is gzipped
     with (
-        gzopen(empty_sylph["manifest"], "rt") as f_expectation,
+        gzopen(empty_files["manifest"], "rt") as f_expectation,
         gzopen(output_root + "manifest.fasta.gz", "rt") as f_result,
     ):
         expectation = f_expectation.read()
         result = f_result.read()
         assert expectation == result
 
-    check_file(empty_sylph["contigs"], output_root + "contigs.csv")
+    check_file(empty_files["contigs"], output_root + "contigs.csv")

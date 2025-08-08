@@ -8,12 +8,19 @@ The pipeline for competitive mapping takes a pair of FASTQ files and outputs the
 * Docker
 * Nextflow
 
-### Needed data
-* you will need to download manifest to: `$projectDir/data/manifest/manifest_20231001`. See [extra readme](data/manifest/README.md) for details about manifest.
-* species list is provided at `$projectDir/test_data/species_list_manifest_20250324.csv`
-* (for sylph) should have GTDB representative genomes at path: `$projectDir/data/sylph/gtdb_genomes_reps_r220`. Can be found [here](https://data.ace.uq.edu.au/public/gtdb/data/releases/release220/220.0/genomic_files_reps/)
+To install the for development:
+```bash
+conda env create -f env.yml
+conda activate competitive_mapping
+pip install -e .[dev]
+```
 
-These can all be found in the (dev) knowledge bucket.
+### Needed data
+* All data for testing is included in `$projectDir/test_data`.
+* Myco manifest can be found in the knowledge bucket under `manifest`. See [extra readme](data/manifest/README.md) for details about manifest.
+* Flu manifest is under `influenza_virus/manifest`.
+* (for sylph) reference databases are found in the knowledge bucket under `sylph`.
+
 
 ## Overview
 Competitive mapping uses minimap2 to map reads against manifest (multifasta of reference genomes) and then analyse the resulting bam file.
@@ -27,9 +34,9 @@ This is used for the metagenomic pipeline in development. Myco has a fixed manif
 
 parameters:
 - sylph_report: Path to the sylph query/profile output file.
-- genome_dirs: path to directory containing all the reference genomes. Must contain a genome_paths.tsv matching what you find in gtdb_genomes_reps (see note on data needed earlier)
-- metadata_files: file with taxonomy mapping for each reference
-- include_whole_genus: if this is set then for each species sylph finds the whole genus will be added to the manifest
+- genome_dirs: path to directory containing all the reference genomes. Must contain a `genome_paths.tsv`. Look in knowledge bucket for examples.
+- metadata_files: Either the taxonomy file tsv or the metadata csv if ani_groups should be fixed.
+- include_whole_genus: if this is set then for each species sylph finds the whole genus will be added to the manifest.
 
 ### manifest_mapper
 Map reads against the manifest. It will select minimap2 settings based on the seq platform provided.
@@ -57,22 +64,10 @@ parameters:
 - reference_name (optional): Set this to the name of the reference you want to filter reads for e.g. `M.tuberculosis` to output filtered _M. tuberculosis_ reads. Can also take a comma seperated list.
 Note: currently unmapped reads will also be extracted by default
 
-## Notes on Bam to Fastq
-One step in competitive mapping is to filter the bam file (created by mapping against manifest) for tb reads and unmapped reads, and extracting these to a fastq file. This is complex for paired reads!! And so leads to seeming discrepencies with the `species_comparison_report.json`
+### Tie break
+This is a rust based replacement to the competitive mapping python script.
+See its [readme](tie_break/README.md) for more info.
 
-Steps:
-* filter bam file for reads mapping to h37rv or "\*".
-  - "\*" is used for unmapped reads, but only when both reads in a pair are unmapped (as far as Matthew can see from minimap2 outputs).
-  - Reads which are unmapped but have a mapped pair will list rname to match the pair, but have the sam flag set for being unmapped.
-* `samtools fastq` is used with:
-  - `--excl-flags 0x100` which excludes secondary reads
-  - `-s /dev/null` to exclude singleton reads, so that the resulting fastq files are properly paired.
-
-The result of this is that reads are only converted to fastq if
-1. Both in a pair are unmapped
-2. Both in a pair have a primary or supplementary mapping to h37rv
-
-In the future we could change this to out put a read pair as long as **either** read in a pair map to h37rv.
 
 ## Running Nextflow
 The workflow takes the following inputs
@@ -103,41 +98,15 @@ but these can be overriden. e.g.
 nextflow run ... --input_paired_suffix "tb_sample*_{1,2}.fna.gz"
 ```
 
+## Testing
+There a tests for tie_break, python and nextflow using [nf-test](https://github.com/askimed/nf-test).
+All test data is included in the repo.
 
-### Running Tests
-The tests are executed using [nf-test](https://github.com/askimed/nf-test).
-
-Before running the tests check that you have [needed data](#needed-data).
-
-To run tests, run the following command
-
+They are all triggered by running:
 ```bash
-nf-test test tests/nextflow/*.test
-```
-
-If you have made changes to the python code, you may need to build a local test container:
-```bash
-docker build -t test_container_cm .
-nf-test test tests/nextflow/*.test --profile local_docker
-```
-
-## Python
-
-A Python package that processes the output from command line tools orchestrated by NextFlow is included in this repository. This gets installed in the docker image used by nextflow.
-
-### Installation
-
-Clone the repo as described above. Create a virtual environment and install the package using `pip install -e .[dev]`. Set up pre-commit with `pre-commit install`.
-
-
-### Execution
-
-Each python module can be run individually. Check arguments with `--help`, e.g. `process_coverage --help` .
-
-### Testing
-The tests take 3 minutes as they include running the full process of mapping reads as well.
-```
-pytest tests/
+make test
+# Or for local container building
+make test_local
 ```
 
 ### Outputs
@@ -146,13 +115,26 @@ The output from the Python CLI is
 validated against a [JSON Schema](src/competitivemapping/competitivemapping.schema.json). [Documentation for the schema](schema_doc.md)
 can be built / updated using:
 
-```
+```bash
 generate-schema-doc src/competitivemapping/competitivemapping.schema.json --config template_name=md
 ```
 
-## Integrating to a pipeline
+## Notes on Bam to Fastq
+One step in competitive mapping is to filter the bam file (created by mapping against manifest) for tb reads and unmapped reads, and extracting these to a fastq file. This is complex for paired reads!! And so leads to seeming discrepencies with the `species_comparison_report.json`
 
-If you want to use the Competitive Mapping Pipeline as subworkflow in your pipeline, use the competitive_mapping named workflow.
+Steps:
+* filter bam file for reads mapping to h37rv or "\*".
+  - "\*" is used for unmapped reads, but only when both reads in a pair are unmapped (as far as Matthew can see from minimap2 outputs).
+  - Reads which are unmapped but have a mapped pair will list rname to match the pair, but have the sam flag set for being unmapped.
+* `samtools fastq` is used with:
+  - `--excl-flags 0x100` which excludes secondary reads
+  - `-s /dev/null` to exclude singleton reads, so that the resulting fastq files are properly paired.
+
+The result of this is that reads are only converted to fastq if
+1. Both in a pair are unmapped
+2. Both in a pair have a primary or supplementary mapping to h37rv
+
+In the future we could change this to out put a read pair as long as **either** read in a pair map to h37rv.
 
 
 ## Manifest remarks

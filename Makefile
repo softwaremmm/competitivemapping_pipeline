@@ -27,6 +27,7 @@ container:
 	docker build -t test_container_cm .
 
 test:
+	cd tie_break && cargo test
 	pytest tests
 	nf-test test tests/nextflow/*.test
 

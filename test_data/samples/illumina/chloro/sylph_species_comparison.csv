@@ -1,4 +1,0 @@
-species,genome_name,length,numreads,coverage,meandepth,coverage_including_secondary,meandepth_including_secondary,total_reads,total_alns,exclusive_reads,primary_reads,secondary_reads,supplementary_reads,supplementary_alns
-Mycobacterium pyrenivorans,GCF_025821625.1,6688400,19968,33.820659239922854,0.43263112578882845,34.305709720067576,0.4427968864378626,19968,20628,19957,19968,0,0,30
-Mycobacterium tuberculosis,GCF_000195955.2,4411532,2,0.00442023,6.84569e-05,0.0345232,0.000385807,13,13,2,2,11,0,0
-unmapped,unmapped,0,30,0.0,0.0,0.0,0.0,30,0,0,30,0,0,0

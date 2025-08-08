@@ -1,2 +1,0 @@
-Sample_file	Genome_file	Taxonomic_abundance	Sequence_abundance	Adjusted_ANI	Eff_cov	ANI_5-95_percentile	Eff_lambda	Lambda_5-95_percentile	Median_cov	Mean_cov_geq1	Containment_ind	Naive_ANI	kmers_reassigned	Contig_name
-ont_lineage4_10.fastq.gz	gtdb_genomes_reps_r220/database/GCF/000/195/955/GCF_000195955.2_genomic.fna.gz	100.0000	100.0000	99.67	0.232	99.41-99.97	0.232	0.21-0.25	1	1.128	3576/18742	94.80	0	NC_000962.3 Mycobacterium tuberculosis H37Rv, complete genome
