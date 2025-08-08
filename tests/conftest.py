@@ -7,32 +7,29 @@ import pytest
 
 @pytest.fixture
 def coverage_long() -> pd.DataFrame:
-    return pd.read_table("test_data/matching/coverage_long.tsv")
+    return pd.read_table("test_data/process_coverage_examples/coverage_long.tsv")
 
 
 @pytest.fixture
 def coverage_short() -> pd.DataFrame:
-    return pd.read_table("test_data/matching/coverage_short.tsv")
+    return pd.read_table("test_data/process_coverage_examples/coverage_short.tsv")
 
 
 @pytest.fixture
 def species_long() -> pd.DataFrame:
-    return pd.read_csv("test_data/matching/species_long.csv")
+    return pd.read_csv("test_data/process_coverage_examples/species_long.csv")
 
 
 @pytest.fixture
 def species_short() -> pd.DataFrame:
-    return pd.read_csv("test_data/matching/species_short.csv")
+    return pd.read_csv("test_data/process_coverage_examples/species_short.csv")
 
 
 @pytest.fixture
-def coverage_table_path() -> str:
-    return "test_data/cov_WTCHG_885333_73205296.tsv"
-
-
-@pytest.fixture
-def coverage_table(coverage_table_path) -> pd.DataFrame:
-    return pd.read_table(coverage_table_path)
+def coverage_table() -> pd.DataFrame:
+    return pd.read_table(
+        "test_data/process_coverage_examples/cov_WTCHG_885333_73205296.tsv"
+    )
 
 
 @pytest.fixture
@@ -52,17 +49,24 @@ def manifest() -> str:
 
 @pytest.fixture
 def expected_joined() -> pd.DataFrame:
-    return pd.read_csv("test_data/expected_joined.csv")
+    return pd.read_csv("test_data/process_coverage_examples/expected_joined.csv")
 
 
 @pytest.fixture
 def expected_aggregated() -> pd.DataFrame:
-    return pd.read_csv("test_data/expected_aggregated.csv")
+    return pd.read_csv("test_data/process_coverage_examples/expected_aggregated.csv")
 
 
 @pytest.fixture
 def path_invalid_output() -> Path:
-    return Path("test_data/species_comparison_report_invalid.json")
+    return Path(
+        "test_data/process_coverage_examples/species_comparison_report_invalid.json"
+    )
+
+
+@pytest.fixture
+def empty_secondary_cov() -> str:
+    return "test_data/process_coverage_examples/empty-secondary-coverage.tsv"
 
 
 @pytest.fixture
