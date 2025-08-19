@@ -128,8 +128,8 @@ process tie_break {
         gzip ${ref_reads_root}*
     fi
 
-    # clean up large intermediate files
-    rm aln.bam
+    # clean up large intermediate files if present
+    find . -type f -name "aln.bam" -delete
     """
 }
 
@@ -190,9 +190,9 @@ process dynamic_tie_break {
     mv out.alignment_summary.csv ${tie_break_report}
     mv out.stats.yaml ${tie_break_stats}
 
-    # clean up large intermediate files
-    rm aln.bam
-    rm out.manifest.fasta.gz
+    # clean up large intermediate files if present
+    find . -type f -name "aln.bam" -delete
+    find . -type f -name "out.manifest.fasta.gz" -delete
     """
 }
 
