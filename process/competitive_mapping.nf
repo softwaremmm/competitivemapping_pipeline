@@ -1,7 +1,7 @@
 process competitiveMapping {
     publishDir "${params.publish_dir}", enabled: params.publish_dir != "", mode: "copy", saveAs: { filename -> sample_name + "_" + filename }
     container {
-        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:f136228' : params.test_container_cm
+        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:91aeeeb' : params.test_container_cm
     }
 
     cpus 4
@@ -71,7 +71,7 @@ process competitiveMapping {
 process tie_break {
     publishDir "${params.publish_dir}", enabled: params.publish_dir != "", mode: "copy", saveAs: { filename -> sample_name + "_" + filename }
     container {
-        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:f136228' : params.test_container_cm
+        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:91aeeeb' : params.test_container_cm
     }
 
     cpus 4
@@ -128,8 +128,8 @@ process tie_break {
         gzip ${ref_reads_root}*
     fi
 
-    # clean up large intermediate files
-    rm aln.bam
+    # clean up large intermediate files if present
+    find . -type f -name "aln.bam" -delete
     """
 }
 
@@ -137,7 +137,7 @@ process tie_break {
 process dynamic_tie_break {
     publishDir "${params.publish_dir}", enabled: params.publish_dir != "", mode: "copy", saveAs: { filename -> sample_name + "_" + filename }
     container {
-        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:f136228' : params.test_container_cm
+        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:91aeeeb' : params.test_container_cm
     }
 
     cpus 4
@@ -190,15 +190,15 @@ process dynamic_tie_break {
     mv out.alignment_summary.csv ${tie_break_report}
     mv out.stats.yaml ${tie_break_stats}
 
-    # clean up large intermediate files
-    rm aln.bam
-    rm out.manifest.fasta.gz
+    # clean up large intermediate files if present
+    find . -type f -name "aln.bam" -delete
+    find . -type f -name "out.manifest.fasta.gz" -delete
     """
 }
 
 process has_enough_reads {
     container {
-        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:f136228' : params.test_container_cm
+        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:91aeeeb' : params.test_container_cm
     }
 
     cpus 1
