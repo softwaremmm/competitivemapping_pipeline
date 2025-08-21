@@ -1,0 +1,9 @@
+depth_type,reference,species,ani_group,ref_length,reads,coverage,mean_depth,median_nonzero_depth,simple_expected_coverage,robust_depth_estimate,robust_expected_coverage
+final,M.tuberculosis,M.tuberculosis,1,4411532,476,16.127,0.174,1.0,15.97,0.16 (0.15-0.17),14.77 (14.16-15.25)
+final,M.canetti,M.canetti,1,4482059,420,13.563,0.145,1.0,13.5,0.15 (0.14-0.15),13.54 (12.94-14.0)
+unique,M.tuberculosis,M.tuberculosis,1,4411532,472,15.993,0.172,1.0,15.8,0.16 (0.15-0.16),14.36 (13.86-14.93)
+unique,M.canetti,M.canetti,1,4482059,417,13.467,0.144,1.0,13.41,0.14 (0.14-0.15),13.42 (12.73-14.05)
+winner,M.tuberculosis,M.tuberculosis,1,4411532,472,15.993,0.172,1.0,15.8,0.16 (0.15-0.16),14.36 (13.86-14.93)
+winner,M.canetti,M.canetti,1,4482059,417,13.467,0.144,1.0,13.41,0.14 (0.14-0.15),13.42 (12.73-14.05)
+good,M.tuberculosis,M.tuberculosis,1,4411532,472,15.993,0.172,1.0,15.8,0.16 (0.15-0.16),14.36 (13.86-14.93)
+good,M.canetti,M.canetti,1,4482059,417,13.467,0.144,1.0,13.41,0.14 (0.14-0.15),13.42 (12.73-14.05)

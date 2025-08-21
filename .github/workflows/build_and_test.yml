@@ -31,13 +31,6 @@ jobs:
           nextflow -v
           nf-test version
 
-      - name: softlink reference data # This has already been downloaded to the runner
-        run: |
-          mkdir -p data/manifest && \
-          ln -s /mnt/portal-sp3dev-knowledge/manifest/* ./data/manifest/ && \
-          tree data/manifest
-          ln -s /mnt/portal-sp3dev-knowledge/sylph ./data/sylph
-
       - name: Login to OCR
         uses: docker/login-action@v2
         with:
@@ -58,8 +51,6 @@ jobs:
         run: |
           docker run -v ${{ github.workspace }}/tests:/app/tests \
             -v ${{ github.workspace }}/test_data:/app/test_data \
-            -v /mnt/portal-sp3dev-knowledge/manifest:/app/data/manifest \
-            -v /mnt/portal-sp3dev-knowledge/sylph:/app/data/sylph \
             test_container_cm pytest /app/tests
 
       - name: Run nf-test

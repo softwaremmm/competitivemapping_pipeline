@@ -1,0 +1,87 @@
+{
+    "total_read_counts": {
+        "mapped_reads": 482,
+        "unmapped_reads": 0
+    },
+    "references": [
+        {
+            "genome_name": "M.tuberculosis",
+            "length": 4411532,
+            "numreads": 438,
+            "coverage": 15.1924,
+            "meandepth": 0.164014,
+            "coverage_including_secondary": 16.5872,
+            "meandepth_including_secondary": 0.17983,
+            "total_reads": 479,
+            "total_alns": 534,
+            "exclusive_reads": 52,
+            "primary_reads": 434,
+            "secondary_reads": 45,
+            "supplementary_reads": 4,
+            "supplementary_alns": 21
+        },
+        {
+            "genome_name": "M.canetti",
+            "length": 4482059,
+            "numreads": 55,
+            "coverage": 0.950925,
+            "meandepth": 0.00950925,
+            "coverage_including_secondary": 13.7432,
+            "meandepth_including_secondary": 0.148626,
+            "total_reads": 430,
+            "total_alns": 459,
+            "exclusive_reads": 3,
+            "primary_reads": 48,
+            "secondary_reads": 382,
+            "supplementary_reads": 7,
+            "supplementary_alns": 7
+        },
+        {
+            "genome_name": "M.chlorophenolicum",
+            "length": 7330216,
+            "numreads": 0,
+            "coverage": 0.0,
+            "meandepth": 0.0,
+            "coverage_including_secondary": 0.0,
+            "meandepth_including_secondary": 0.0,
+            "total_reads": 0,
+            "total_alns": 0,
+            "exclusive_reads": 0,
+            "primary_reads": 0,
+            "secondary_reads": 0,
+            "supplementary_reads": 0,
+            "supplementary_alns": 0
+        },
+        {
+            "genome_name": "M.pyrenivorans",
+            "length": 6688400,
+            "numreads": 0,
+            "coverage": 0.0,
+            "meandepth": 0.0,
+            "coverage_including_secondary": 0.0,
+            "meandepth_including_secondary": 0.0,
+            "total_reads": 0,
+            "total_alns": 0,
+            "exclusive_reads": 0,
+            "primary_reads": 0,
+            "secondary_reads": 0,
+            "supplementary_reads": 0,
+            "supplementary_alns": 0
+        }
+    ],
+    "definitions": {
+        "length": "Length of all contigs in reference",
+        "numreads": "Number of reads which map well to this reference (primary + supplementary)",
+        "coverage": "Percentage of reference covered by reads (not including secondary alignments)",
+        "meandepth": "Mean depth of coverage of reference (not including secondary alignments)",
+        "coverage_including_secondary": "Percentage of reference covered by reads (including secondary alignments)",
+        "meandepth_including_secondary": "Mean depth of coverage of reference (including secondary alignments)",
+        "total_reads": "Total number of reads which map (in any way) to chrom",
+        "total_alns": "Total number of alignments, so will count supplementary separately",
+        "exclusive_reads": "reads which only maps to this chrom",
+        "primary_reads": "reads which map best to this chrom",
+        "secondary_reads": "reads which map to this chrom but not with primary",
+        "supplementary_reads": "reads which have supplementary alignments but not primary",
+        "supplementary_alns": "number of supplementary alignments"
+    }
+}

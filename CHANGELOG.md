@@ -1,3 +1,8 @@
+## New
+
+- restructure tests so that all test data is small and local. Runs faster and no longer needs knowledge bucket.
+- manifest_builder now works with files ending `.fastq.gz` as well as `_genomic.fna.gz` (helps for testing and sip pipeline).
+
 ## 3.2.0
 
 - limit samtools sort to using 6 threads at 500M ram each.

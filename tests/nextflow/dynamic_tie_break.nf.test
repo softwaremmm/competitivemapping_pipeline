@@ -1,0 +1,81 @@
+nextflow_process {
+
+    name "Test Process dynamic tie_break"
+    script "process/competitive_mapping.nf"
+    process "dynamic_tie_break"
+
+    test("Illumina - Should succeed") {
+        tag "illumina"
+        when {
+            process{
+                """
+                input[0] = Channel.of(['sample_test',
+                            [file("$projectDir/test_data/samples/illumina/viral_mix/reads_1.fastq.gz"),
+                             file("$projectDir/test_data/samples/illumina/viral_mix/reads_2.fastq.gz")],
+                            file("$projectDir/test_data/samples/illumina/viral_mix/sylph_query.tsv")])
+                input[1] = [file("$projectDir/test_data/virus_manifest/part_1/"),
+                            file("$projectDir/test_data/virus_manifest/part_2/")]
+                input[2] = [file("$projectDir/test_data/virus_manifest/part_1/metadata.csv"),
+                            file("$projectDir/test_data/virus_manifest/part_2/metadata.csv")]
+                input[3] = 'illumina'
+                input[4] = 'false'
+                input[5] = file("$projectDir/test_data/tie_break_params/params_illumina.yml")
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert process.exitStatus == 0
+
+
+            with(process.out.report_csv) {
+                assert size() == 1
+                assert path(get(0)[1]).md5 == path("$projectDir/test_data/samples/illumina/viral_mix/tie_break_summary.csv").md5
+            }
+
+            with(process.out.stats) {
+                assert size() == 1
+                assert path(get(0)[1]).yaml == path("$projectDir/test_data/samples/illumina/viral_mix/tie_break_stats.yaml").yaml
+            }
+        }
+    }
+
+    test("ONT - Should succeed") {
+        tag "ont"
+        when {
+            process{
+                """
+                input[0] = Channel.of(['sample_test',
+                            [file("$projectDir/test_data/samples/ont/viral_mix/reads.fastq.gz")],
+                            file("$projectDir/test_data/samples/ont/viral_mix/sylph_query.tsv")])
+                input[1] = [file("$projectDir/test_data/virus_manifest/part_1/"),
+                            file("$projectDir/test_data/virus_manifest/part_2/")]
+                input[2] = [file("$projectDir/test_data/virus_manifest/part_1/metadata.csv"),
+                            file("$projectDir/test_data/virus_manifest/part_2/metadata.csv")]
+                input[3] = 'ont'
+                input[4] = 'false'
+                input[5] = file("$projectDir/test_data/tie_break_params/params_ont.yml")
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert process.exitStatus == 0
+
+
+            with(process.out.report_csv) {
+                assert size() == 1
+                assert path(get(0)[1]).md5 == path("$projectDir/test_data/samples/ont/viral_mix/tie_break_summary.csv").md5
+            }
+
+            with(process.out.stats) {
+                assert size() == 1
+                assert path(get(0)[1]).yaml == path("$projectDir/test_data/samples/ont/viral_mix/tie_break_stats.yaml").yaml
+            }
+        }
+    }
+
+
+}

@@ -1,0 +1,129 @@
+nextflow_workflow {
+
+    name "Test competitive_mapping Workflow"
+    script "main.nf"
+    workflow "competitive_mapping"
+
+    test("Illumina - Should succeed with TB") {
+        tag 'illumina'
+        when {
+            params {
+                illumina_threshold = 10000
+            }
+            workflow {
+                """
+                input[0] = Channel.of(['sample_test', [file("$projectDir/test_data/samples/illumina/TB/TB_1.fastq.gz"), file("$projectDir/test_data/samples/illumina/TB/TB_2.fastq.gz")]])
+                input[1] = file("$projectDir/test_data/myco_manifest/manifest.fasta.gz")
+                input[2] = file("$projectDir/test_data/myco_manifest/contigs.csv")
+                input[3] = 'illumina'
+                input[4] = 'M.tuberculosis'
+                """
+            }
+        }
+
+        then {
+            assert workflow.success
+
+            with(workflow.out.report_json) {
+                assert size() == 1
+                assert get(0)[1].contains("species_comparison_report.json")
+                assert path(get(0)[1]).json == path("$projectDir/test_data/samples/illumina/TB/species_comparison_report.json").json
+            }
+
+            with(workflow.out.report_csv) {
+                assert size() == 1
+                assert get(0)[1].contains("species_comparison.csv")
+            }
+
+            with(workflow.out.ref_reads) {
+                assert size() == 1
+                assert get(0)[1][0].contains("reads_for_assembly_1.fastq.gz")
+                assert get(0)[1][1].contains("reads_for_assembly_2.fastq.gz")
+            }
+
+            assert workflow.out.cm_enough_reads[0][1] == 'true'
+        }
+    }
+
+    test("Illumina - Should succeed with NTM") {
+        tag 'illumina'
+        when {
+            params {
+                illumina_threshold = 10000
+            }
+            workflow {
+                """
+                input[0] = Channel.of(['sample_test', [file("$projectDir/test_data/samples/illumina/chloro/chloro_1.fastq.gz"), file("$projectDir/test_data/samples/illumina/chloro/chloro_2.fastq.gz")]])
+                input[1] = file("$projectDir/test_data/myco_manifest/manifest.fasta.gz")
+                input[2] = file("$projectDir/test_data/myco_manifest/contigs.csv")
+                input[3] = 'illumina'
+                input[4] = 'M.tuberculosis'
+                """
+            }
+        }
+
+        then {
+            assert workflow.success
+
+            with(workflow.out.report_json) {
+                assert size() == 1
+                assert get(0)[1].contains("species_comparison_report.json")
+                assert path(get(0)[1]).json == path("$projectDir/test_data/samples/illumina/chloro/species_comparison_report.json").json
+            }
+
+            with(workflow.out.report_csv) {
+                assert size() == 1
+                assert get(0)[1].contains("species_comparison.csv")
+            }
+
+            with(workflow.out.ref_reads) {
+                assert size() == 1
+                assert get(0)[1][0].contains("reads_for_assembly_1.fastq.gz")
+                assert get(0)[1][1].contains("reads_for_assembly_2.fastq.gz")
+            }
+
+            assert workflow.out.cm_enough_reads[0][1] == 'false'
+        }
+    }
+
+    test("ONT - Should succeed with TB") {
+        tag 'ont'
+        when {
+            params {
+                ont_threshold = 400
+            }
+            workflow {
+                """
+                input[0] = ['sample_test', file("$projectDir/test_data/samples/ont/TB/lin4_10.fastq.gz")]
+                input[1] = file("$projectDir/test_data/myco_manifest/manifest.fasta.gz")
+                input[2] = file("$projectDir/test_data/myco_manifest/contigs.csv")
+                input[3] = 'ont'
+                input[4] = 'M.tuberculosis'
+                """
+            }
+        }
+
+        then {
+            assert workflow.success
+
+            with(workflow.out.report_json) {
+                assert size() == 1
+                assert get(0)[1].contains("species_comparison_report.json")
+                assert path(get(0)[1]).json == path("$projectDir/test_data/samples/ont/TB/species_comparison_report.json").json
+            }
+
+            with(workflow.out.report_csv) {
+                assert size() == 1
+                assert get(0)[1].contains("species_comparison.csv")
+            }
+
+            with(workflow.out.ref_reads) {
+                assert size() == 1
+                assert get(0)[1].contains("reads_for_assembly.fastq.gz")
+            }
+
+            assert workflow.out.cm_enough_reads[0][1] == 'true'
+        }
+    }
+
+}
