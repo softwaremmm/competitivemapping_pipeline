@@ -9,6 +9,7 @@ params.input_dir = ''
 params.manifest = ''
 params.seq_platform = ''
 params.reference_name = ''
+params.workflow = 'comp_mapping'
 
 // default thresholds
 params.illumina_threshold = 100000
@@ -40,6 +41,7 @@ workflow {
             --species_list
             --seq_platform
             --reference_name: Reference name to use for the fastq files. Default: ''. If you want to use a list of names, input a string separated by commas.
+            --workflow: Workflow to run. Options are 'comp_mapping' (default) or 'tie_break'
             '''.stripIndent()
         )
         exit(0)
@@ -75,6 +77,7 @@ workflow {
         --species_list ${params.species_list}
         --seq_platform ${params.seq_platform}
         --reference_name ${params.reference_name}
+        --workflow     ${params.workflow}
 
         Runtime data:
         ------------------------------------------------------------------------
@@ -98,6 +101,7 @@ workflow {
                 checkIfExists: true,
                 size: -1,
             )
+            .map { it -> tuple(it[0].replace("_mycobacterial_reads", ""), it[1]) }
             .ifEmpty { error("cannot find any reads matching ${params.input_paired_suffix} in ${params.input_dir}") }
     }
 
@@ -107,8 +111,13 @@ workflow {
     // Using fromPath means they can be provided as relative paths
     manifest = Channel.fromPath(params.manifest, checkIfExists: true).first()
     species_list = Channel.fromPath(params.species_list, checkIfExists: true).first()
-    competitive_mapping(input_files, manifest, species_list, params.seq_platform, params.reference_name)
-    // tie_break_workflow(input_files, manifest, species_list, params.seq_platform, params.reference_name)
+
+    if (params.workflow == 'comp_mapping') 
+        competitive_mapping(input_files, manifest, species_list, params.seq_platform, params.reference_name)
+    else if (params.workflow == 'tie_break')
+        tie_break_workflow(input_files, manifest, species_list, params.seq_platform, params.reference_name)
+    else
+        exit(1, "error: --workflow must be one of 'comp_mapping' or 'tie_break'")
 }
 
 
