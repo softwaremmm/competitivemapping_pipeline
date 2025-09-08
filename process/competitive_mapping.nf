@@ -130,6 +130,7 @@ process tie_break {
 
     # clean up large intermediate files if present
     find . -type f -name "aln.bam" -delete
+    find . -type f -name "out.alns_round_*.csv" -delete
     """
 }
 
