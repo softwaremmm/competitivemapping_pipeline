@@ -2,8 +2,8 @@
 
 - restructure tests so that all test data is small and local. Runs faster and no longer needs knowledge bucket.
 - manifest_builder now works with files ending `.fastq.gz` as well as `_genomic.fna.gz` (helps for testing and sip pipeline).
-- update skani to 0.3.0 to math version used in paper
-- use workflow param to choose workflow to run locally
+- update skani to 0.3.0 to match version used in paper (only used in manifest building. No impact on myco)
+- use workflow param to choose workflow to run locally (quality of life for local running. No impact on myco)
 
 ## 3.2.0
 
