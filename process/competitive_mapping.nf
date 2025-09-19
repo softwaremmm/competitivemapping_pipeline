@@ -74,8 +74,8 @@ process tie_break {
         params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:80e6a57' : params.test_container_cm
     }
 
-    cpus 4
-    memory { 5.GB + (8.GB * task.attempt) }
+    cpus 8
+    memory { 8.GB + (8.GB * task.attempt) }
 
     pod label: "name", value: "competitive_mapping_pipeline:tie_break"
     pod label: "sample_id", value: "${params.sample_id}"
@@ -130,6 +130,7 @@ process tie_break {
 
     # clean up large intermediate files if present
     find . -type f -name "aln.bam" -delete
+    find . -type f -name "out.alns_round_*.csv" -delete
     """
 }
 

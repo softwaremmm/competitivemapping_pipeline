@@ -24,6 +24,7 @@ def dir_to_df(genome_directory: str) -> pd.DataFrame:
         df["path"]
         .str.replace(".gz", "", regex=False)
         .str.replace(".fasta", "", regex=False)
+        .str.replace("_genomic.fna", "", regex=False)
     )
     df["path"] = df["path"].apply(lambda x: os.path.join(genome_directory, x))
     return df
@@ -94,7 +95,8 @@ def cli_entry_point():
 
     contigs_df.rename(columns={"reference": "assembly_accession"}, inplace=True)
 
-    meta = pd.read_csv(args.metadata)[["assembly_accession", "reference"]]
+    sep = "\t" if args.metadata.endswith(".tsv") else ","
+    meta = pd.read_csv(args.metadata, sep=sep)[["assembly_accession", "reference"]]
 
     contigs_df = contigs_df.merge(meta, on="assembly_accession", how="left")
     contigs_df.sort_values(by=["reference", "rname"], inplace=True)
