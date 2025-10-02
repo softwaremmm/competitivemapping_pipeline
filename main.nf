@@ -3,6 +3,7 @@ include { competitiveMapping } from './process/competitive_mapping.nf'
 include { tie_break } from './process/competitive_mapping.nf'
 include { dynamic_tie_break } from './process/competitive_mapping.nf'
 include { has_enough_reads } from './process/competitive_mapping.nf'
+include { filter_by_depth } from './process/competitive_mapping.nf'
 
 // input parameters
 params.input_dir = ''
@@ -112,12 +113,15 @@ workflow {
     manifest = Channel.fromPath(params.manifest, checkIfExists: true).first()
     species_list = Channel.fromPath(params.species_list, checkIfExists: true).first()
 
-    if (params.workflow == 'comp_mapping') 
+    if (params.workflow == 'comp_mapping') {
         competitive_mapping(input_files, manifest, species_list, params.seq_platform, params.reference_name)
-    else if (params.workflow == 'tie_break')
+    }
+    else if (params.workflow == 'tie_break') {
         tie_break_workflow(input_files, manifest, species_list, params.seq_platform, params.reference_name)
-    else
+    }
+    else {
         exit(1, "error: --workflow must be one of 'comp_mapping' or 'tie_break'")
+    }
 }
 
 
@@ -166,6 +170,19 @@ workflow tie_break_workflow {
         analyzer_params,
         reference_name,
     )
+
+    tie_break.out.report_csv.view()
+
+    filter_by_depth(tie_break.out.report_csv, 5)
+
+    filter_by_depth.out.high_depth_list.view()
+
+    high_depth_refs_ch = filter_by_depth.out.high_depth_list.map { sample_name, file ->
+        def items = file.text.readLines()
+        items.collect { [sample_name, it] }
+    }.join(input_files)
+
+    high_depth_refs_ch.view()
 
     emit:
     report_csv = tie_break.out.report_csv
