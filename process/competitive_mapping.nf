@@ -75,7 +75,7 @@ process tie_break {
     }
 
     cpus 8
-    memory { 8.GB + (8.GB * task.attempt) }
+    memory { 32.GB + (8.GB * task.attempt) }
 
     pod label: "name", value: "competitive_mapping_pipeline:tie_break"
     pod label: "sample_id", value: "${params.sample_id}"
@@ -131,6 +131,33 @@ process tie_break {
     # clean up large intermediate files if present
     find . -type f -name "aln.bam" -delete
     find . -type f -name "out.alns_round_*.csv" -delete
+    """
+}
+
+process filter_by_depth {
+    container {
+        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:f0b14c5' : params.test_container_cm
+    }
+
+    cpus 1
+    memory "128MB"
+
+    debug true
+    pod label: "name", value: "competitive_mapping_pipeline:filter_by_depth"
+    pod label: "sample_id", value: "${params.sample_id}"
+    pod label: "run_id", value: "${params.run_id}"
+
+    input:
+    tuple val(sample_name), path(tie_break_report)
+    val min_depth
+
+    output:
+    tuple val(sample_name), path(high_depth_list), emit: high_depth_list
+
+    script:
+    high_depth_list = "high_depth_refs.txt"
+    """
+    filter_by_depth --tie_break_report ${tie_break_report} --min_depth ${min_depth}
     """
 }
 
