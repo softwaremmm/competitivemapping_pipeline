@@ -92,8 +92,8 @@ process tie_break {
     output:
     tuple val(sample_name), path(tie_break_report), emit: report_csv
     tuple val(sample_name), path(tie_break_stats), emit: stats
-    path round_two_alignments, emit: round_two_alignments
-    path references, emit: references
+    tuple val(sample_name), path(round_two_alignments), emit: round_two_alignments
+    tuple val(sample_name), path(references), emit: references
 
     script:
     tie_break_report = "species_comparison.csv"
@@ -170,9 +170,7 @@ process extract_reads {
     pod label: "run_id", value: "${params.run_id}"
 
     input:
-    tuple val(sample_name), path(fqs), val(reference_name)
-    path round_two_alignments
-    path references
+    tuple val(sample_name), path(fqs), val(reference_name), path(round_two_alignments), path(references)
 
     output:
     tuple val(sample_name), path("reads_for_assembly*fastq.gz"), val(reference_name), emit: ref_reads, optional: true
