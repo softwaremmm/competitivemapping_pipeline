@@ -92,12 +92,14 @@ process tie_break {
     output:
     tuple val(sample_name), path(tie_break_report), emit: report_csv
     tuple val(sample_name), path(tie_break_stats), emit: stats
-    tuple val(sample_name), path("reads_for_assembly*fastq.gz"), emit: ref_reads, optional: true
+    path round_two_alignments, emit: round_two_alignments
+    path references, emit: references
 
     script:
     tie_break_report = "species_comparison.csv"
     tie_break_stats = "tie_break_stats.yaml"
-    ref_reads_root = "reads_for_assembly"
+    round_two_alignments = "round_two_alignments.csv"
+    references = "references.csv"
     """
     manifest_mapper \
         --seq_platform ${seq_platform} \
@@ -116,21 +118,74 @@ process tie_break {
 
     mv out.alignment_summary.csv ${tie_break_report}
     mv out.stats.yaml ${tie_break_stats}
-
-    # If reference_name is provided, filter reads
-    if [ "${reference_name}" != "" ]
-    then
-        extract_reads -f ${fqs} -a out.alns_round_2.csv \
-            -c out.references.csv \
-            -r ${reference_name} \
-            -o ${ref_reads_root}
-
-        gzip ${ref_reads_root}*
-    fi
+    mv out.alns_round_2.csv ${round_two_alignments}
+    mv out.references.csv ${references}
 
     # clean up large intermediate files if present
     find . -type f -name "aln.bam" -delete
     find . -type f -name "out.alns_round_*.csv" -delete
+    """
+}
+
+process filter_by_depth {
+    publishDir "${params.publish_dir}", enabled: params.publish_dir != "", mode: "copy", saveAs: { filename -> sample_name + "_" + filename }
+    container {
+        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:f0b14c5' : params.test_container_cm
+    }
+
+    cpus 1
+    memory "128MB"
+
+    debug true
+    pod label: "name", value: "competitive_mapping_pipeline:filter_by_depth"
+    pod label: "sample_id", value: "${params.sample_id}"
+    pod label: "run_id", value: "${params.run_id}"
+
+    input:
+    tuple val(sample_name), path(tie_break_report)
+    val min_depth
+
+    output:
+    tuple val(sample_name), path(high_depth_list), emit: high_depth_list
+
+    script:
+    high_depth_list = "high_depth_refs.txt"
+    """
+    filter_by_depth --tie_break_report ${tie_break_report} --min_depth ${min_depth}
+    """
+}
+
+process extract_reads {
+    publishDir "${params.publish_dir}", enabled: params.publish_dir != "", mode: "copy", saveAs: { filename -> sample_name + "_" + reference_name + "_" + filename }
+    container {
+        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:f0b14c5' : params.test_container_cm
+    }
+
+    cpus 8
+    memory { 8.GB + (4.GB * task.attempt) }
+
+    debug true
+    pod label: "name", value: "competitive_mapping_pipeline:filter_by_depth"
+    pod label: "sample_id", value: "${params.sample_id}"
+    pod label: "run_id", value: "${params.run_id}"
+
+    input:
+    tuple val(sample_name), path(fqs), val(reference_name)
+    path round_two_alignments
+    path references
+
+    output:
+    tuple val(sample_name), path("reads_for_assembly*fastq.gz"), val(reference_name), emit: ref_reads, optional: true
+
+    script:
+    ref_reads_root = "reads_for_assembly"
+    """
+    extract_reads -f ${fqs} -a ${round_two_alignments} \
+        -c ${references} \
+        -r "${reference_name}" \
+        -o ${ref_reads_root}
+
+    gzip ${ref_reads_root}*
     """
 }
 
