@@ -4,6 +4,7 @@ include { tie_break } from './process/competitive_mapping.nf'
 include { dynamic_tie_break } from './process/competitive_mapping.nf'
 include { has_enough_reads } from './process/competitive_mapping.nf'
 include { filter_by_depth } from './process/competitive_mapping.nf'
+include { extract_reads } from './process/competitive_mapping.nf'
 
 // input parameters
 params.input_dir = ''
@@ -177,17 +178,26 @@ workflow tie_break_workflow {
 
     filter_by_depth.out.high_depth_list.view()
 
-    high_depth_refs_ch = filter_by_depth.out.high_depth_list.map { sample_name, file ->
-        def items = file.text.readLines()
-        items.collect { [sample_name, it] }
-    }.join(input_files)
+    high_depth_refs_ch = filter_by_depth.out.high_depth_list.flatMap { sample_name, file ->
+        file.text
+            .readLines()
+            .collect { line ->
+                tuple(sample_name, line)
+            }
+    }
 
     high_depth_refs_ch.view()
+
+    high_depth_refs_ch = input_files.combine(high_depth_refs_ch, by: 0)
+
+    high_depth_refs_ch.view()
+
+    extract_reads(high_depth_refs_ch, tie_break.out.round_two_alignments, tie_break.out.references)
 
     emit:
     report_csv = tie_break.out.report_csv
     stats = tie_break.out.stats
-    ref_reads = tie_break.out.ref_reads
+    ref_reads = extract_reads.out.ref_reads
 }
 
 // WARNING: Experimental process
