@@ -178,23 +178,29 @@ workflow tie_break_workflow {
     high_depth_refs_ch = filter_by_depth.out.high_depth_list.flatMap { sample_name, file ->
         file.text
             .readLines()
-            .collect { line ->
-                tuple(sample_name, line)
+            .collect { reference ->
+                tuple(sample_name, reference)
             }
     }
 
-    high_depth_refs_ch.view()
+    high_depth_refs_ch.view{ "High depth references: ${it}" }
 
     high_depth_refs_ch = input_files.combine(high_depth_refs_ch, by: 0)
+    high_depth_refs_ch.view{ "Joined input_files with high_depth_refs_ch: ${it}" }
+    high_depth_refs_ch = high_depth_refs_ch.combine(tie_break.out.round_two_alignments, by: 0)
+    high_depth_refs_ch.view{ "Combined with round_two_alignments: ${it}" }
+    high_depth_refs_ch = high_depth_refs_ch.combine(tie_break.out.references, by: 0)
+    high_depth_refs_ch.view{ "Combined with references: ${it}" }
 
-    high_depth_refs_ch.view()
+    final_refs = high_depth_refs_ch.collect()
+    final_refs.subscribe { list -> println("FINAL high_depth_refs_ch: ${list}") }
 
-    extract_reads(high_depth_refs_ch, tie_break.out.round_two_alignments, tie_break.out.references)
+    extract_reads(high_depth_refs_ch)
 
     emit:
     report_csv = tie_break.out.report_csv
     stats = tie_break.out.stats
-    ref_reads = extract_reads.out.ref_reads
+    //ref_reads = extract_reads.out.ref_reads
 }
 
 // WARNING: Experimental process
