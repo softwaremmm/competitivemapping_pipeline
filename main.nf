@@ -208,6 +208,8 @@ workflow tie_break_workflow {
 
     extract_reads(high_depth_refs_ch)
 
+    extract_reads.out.ref_reads.view { "Extracted reads: ${it}" }
+
     emit:
     report_csv = tie_break.out.report_csv
     stats = tie_break.out.stats

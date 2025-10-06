@@ -173,10 +173,10 @@ process extract_reads {
     pod label: "run_id", value: "${params.run_id}"
 
     input:
-    tuple val(sample_name), path(fqs), val(reference_name), path(round_two_alignments), path(references), val(accessions)
+    tuple val(sample_name), path(fqs), val(reference_name), path(round_two_alignments), path(references), val(accession)
 
     output:
-    tuple val(sample_name), path("reads_for_assembly*fastq.gz"), val(reference_name), emit: ref_reads, optional: true
+    tuple val(sample_name), path("reads_for_assembly*fastq.gz"), val(reference_name), val(accession), emit: ref_reads, optional: true
 
     script:
     ref_reads_root = "reads_for_assembly"
