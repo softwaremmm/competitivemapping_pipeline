@@ -174,7 +174,7 @@ workflow tie_break_workflow {
 
     tie_break.out.report_csv.view()
 
-    filter_by_depth(tie_break.out.report_csv, 5)
+    filter_by_depth(tie_break.out.report_csv, species_list, 5)
 
     filter_by_depth.out.high_depth_list.view()
 
@@ -188,10 +188,21 @@ workflow tie_break_workflow {
 
     high_depth_refs_ch.view { "High depth references: ${it}" }
 
+    high_depth_accessions_ch = filter_by_depth.out.high_depth_accessions.flatMap { sample_name, file ->
+        file.text
+            .readLines()
+            .collect { accession ->
+                tuple(sample_name, accession)
+            }
+    }
+
+    high_depth_accessions_ch.view { "High depth accessions: ${it}" }
+
     high_depth_refs_ch = input_files
         .combine(high_depth_refs_ch, by: 0)
         .combine(tie_break.out.round_two_alignments, by: 0)
         .combine(tie_break.out.references, by: 0)
+        .combine(high_depth_accessions_ch, by: 0)
 
     high_depth_refs_ch.view { "Input to extract_reads process: ${it}" }
 
@@ -200,6 +211,7 @@ workflow tie_break_workflow {
     emit:
     report_csv = tie_break.out.report_csv
     stats = tie_break.out.stats
+    mapped_reads = extract_reads.out.ref_reads
 }
 
 // WARNING: Experimental process
