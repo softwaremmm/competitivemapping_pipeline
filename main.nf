@@ -1,6 +1,7 @@
 #!/usr/bin/env nextflow
 include { competitiveMapping } from './process/competitive_mapping.nf'
 include { tie_break } from './process/competitive_mapping.nf'
+include { tie_break_multi } from './process/competitive_mapping.nf'
 include { dynamic_tie_break } from './process/competitive_mapping.nf'
 include { has_enough_reads } from './process/competitive_mapping.nf'
 include { filter_by_depth } from './process/competitive_mapping.nf'
@@ -164,6 +165,35 @@ workflow tie_break_workflow {
     analyzer_params = Channel.fromPath("${moduleDir}/process/params_${seq_platform}.yml").first()
 
     tie_break(
+        input_files,
+        manifest,
+        species_list,
+        seq_platform,
+        analyzer_params,
+        reference_name,
+    )
+
+    emit:
+    report_csv = tie_break.out.report_csv
+    stats = tie_break.out.stats
+    ref_reads = tie_break.out.ref_reads
+}
+
+// WARNING: Experimental process
+workflow tie_break_multi_workflow {
+    take:
+    input_files
+    manifest
+    species_list
+    seq_platform
+    reference_name
+
+    main:
+    check_seq_platform(seq_platform)
+
+    analyzer_params = Channel.fromPath("${moduleDir}/process/params_${seq_platform}.yml").first()
+
+    tie_break_multi(
         input_files,
         manifest,
         species_list,
