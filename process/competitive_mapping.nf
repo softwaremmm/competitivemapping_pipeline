@@ -67,7 +67,6 @@ process competitiveMapping {
     """
 }
 
-// WARNING: Experimental process
 process tie_break {
     publishDir "${params.publish_dir}", enabled: params.publish_dir != "", mode: "copy", saveAs: { filename -> sample_name + "_" + filename }
     container {
@@ -76,6 +75,73 @@ process tie_break {
 
     cpus 8
     memory { 8.GB + (8.GB * task.attempt) }
+
+    pod label: "name", value: "competitive_mapping_pipeline:tie_break"
+    pod label: "sample_id", value: "${params.sample_id}"
+    pod label: "run_id", value: "${params.run_id}"
+
+    input:
+    tuple val(sample_name), path(fqs)
+    path manifest
+    path species_list
+    val seq_platform
+    path tie_break_params
+    val reference_name
+
+    output:
+    tuple val(sample_name), path(tie_break_report), emit: report_csv
+    tuple val(sample_name), path(tie_break_stats), emit: stats
+    tuple val(sample_name), path("reads_for_assembly*fastq.gz"), emit: ref_reads, optional: true
+
+    script:
+    tie_break_report = "species_comparison.csv"
+    tie_break_stats = "tie_break_stats.yaml"
+    ref_reads_root = "reads_for_assembly"
+    """
+    manifest_mapper \
+        --seq_platform ${seq_platform} \
+        --manifest ${manifest} \
+        --reads ${fqs} \
+        --cpus ${task.cpus} \
+        --sort_by_name \
+        -o aln.bam
+
+    tie_break \
+        --input-bam aln.bam \
+        --contigs ${species_list} \
+        --threads ${task.cpus} \
+        --parameters ${tie_break_params} \
+        --output-root "out."
+
+    mv out.alignment_summary.csv ${tie_break_report}
+    mv out.stats.yaml ${tie_break_stats}
+
+    # If reference_name is provided, filter reads
+    if [ "${reference_name}" != "" ]
+    then
+        extract_reads -f ${fqs} -a out.alns_round_2.csv \
+            -c out.references.csv \
+            -r ${reference_name} \
+            -o ${ref_reads_root}
+
+        gzip ${ref_reads_root}*
+    fi
+
+    # clean up large intermediate files if present
+    find . -type f -name "aln.bam" -delete
+    find . -type f -name "out.alns_round_*.csv" -delete
+    """
+}
+
+// WARNING: Experimental process
+process tie_break_multi {
+    publishDir "${params.publish_dir}", enabled: params.publish_dir != "", mode: "copy", saveAs: { filename -> sample_name + "_" + filename }
+    container {
+        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:f0b14c5' : params.test_container_cm
+    }
+
+    cpus 8
+    memory { 32.GB + (8.GB * task.attempt) }
 
     pod label: "name", value: "competitive_mapping_pipeline:tie_break"
     pod label: "sample_id", value: "${params.sample_id}"
