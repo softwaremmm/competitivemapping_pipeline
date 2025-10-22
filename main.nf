@@ -119,7 +119,11 @@ workflow {
         competitive_mapping(input_files, manifest, species_list, params.seq_platform, params.reference_name)
     else if (params.workflow == 'tie_break')
         tie_break_workflow(input_files, manifest, species_list, params.seq_platform, params.reference_name)
-    else
+    }
+    else if (params.workflow == 'tie_break_multi') {
+        tie_break_multi_workflow(input_files, manifest, species_list, params.seq_platform, params.reference_name)
+    }
+    else {
         exit(1, "error: --workflow must be one of 'comp_mapping' or 'tie_break'")
 }
 
