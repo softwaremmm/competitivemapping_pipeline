@@ -67,6 +67,7 @@ process competitiveMapping {
     """
 }
 
+// WARNING: Experimental process
 process tie_break {
     publishDir "${params.publish_dir}", enabled: params.publish_dir != "", mode: "copy", saveAs: { filename -> sample_name + "_" + filename }
     container {
