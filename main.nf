@@ -1,8 +1,11 @@
 #!/usr/bin/env nextflow
 include { competitiveMapping } from './process/competitive_mapping.nf'
 include { tie_break } from './process/competitive_mapping.nf'
+include { tie_break_multi } from './process/competitive_mapping.nf'
 include { dynamic_tie_break } from './process/competitive_mapping.nf'
 include { has_enough_reads } from './process/competitive_mapping.nf'
+include { filter_by_depth } from './process/competitive_mapping.nf'
+include { extract_reads } from './process/competitive_mapping.nf'
 
 // input parameters
 params.input_dir = ''
@@ -112,12 +115,18 @@ workflow {
     manifest = Channel.fromPath(params.manifest, checkIfExists: true).first()
     species_list = Channel.fromPath(params.species_list, checkIfExists: true).first()
 
-    if (params.workflow == 'comp_mapping') 
+    if (params.workflow == 'comp_mapping') {
         competitive_mapping(input_files, manifest, species_list, params.seq_platform, params.reference_name)
-    else if (params.workflow == 'tie_break')
+    }
+    else if (params.workflow == 'tie_break') {
         tie_break_workflow(input_files, manifest, species_list, params.seq_platform, params.reference_name)
-    else
+    }
+    else if (params.workflow == 'tie_break_multi') {
+        tie_break_multi_workflow(input_files, manifest, species_list, params.seq_platform, params.reference_name)
+    }
+    else {
         exit(1, "error: --workflow must be one of 'comp_mapping' or 'tie_break'")
+    }
 }
 
 
@@ -171,6 +180,73 @@ workflow tie_break_workflow {
     report_csv = tie_break.out.report_csv
     stats = tie_break.out.stats
     ref_reads = tie_break.out.ref_reads
+}
+
+// WARNING: Experimental process
+workflow tie_break_multi_workflow {
+    take:
+    input_files
+    manifest
+    species_list
+    seq_platform
+    reference_name
+
+    main:
+    check_seq_platform(seq_platform)
+
+    analyzer_params = Channel.fromPath("${moduleDir}/process/params_${seq_platform}.yml").first()
+
+    tie_break_multi(
+        input_files,
+        manifest,
+        species_list,
+        seq_platform,
+        analyzer_params,
+        reference_name,
+    )
+
+    tie_break.out.report_csv.view()
+
+    filter_by_depth(tie_break.out.report_csv, species_list, 5)
+
+    filter_by_depth.out.high_depth_list.view()
+
+    high_depth_refs_ch = filter_by_depth.out.high_depth_list.flatMap { sample_name, file ->
+        file.text
+            .readLines()
+            .collect { reference ->
+                tuple(sample_name, reference)
+            }
+    }
+
+    high_depth_refs_ch.view { "High depth references: ${it}" }
+
+    high_depth_accessions_ch = filter_by_depth.out.high_depth_accessions.flatMap { sample_name, file ->
+        file.text
+            .readLines()
+            .collect { accession ->
+                tuple(sample_name, accession)
+            }
+    }
+
+    high_depth_accessions_ch.view { "High depth accessions: ${it}" }
+
+    high_depth_refs_ch = input_files
+        .combine(high_depth_refs_ch, by: 0)
+        .combine(tie_break.out.round_two_alignments, by: 0)
+        .combine(tie_break.out.references, by: 0)
+        .combine(high_depth_accessions_ch, by: 0)
+
+    high_depth_refs_ch.view { "Input to extract_reads process: ${it}" }
+
+    extract_reads(high_depth_refs_ch)
+
+    extract_reads.out.ref_reads.view { "Extracted reads: ${it}" }
+
+    emit:
+    report_csv = tie_break.out.report_csv
+    stats = tie_break.out.stats
+    mapped_reads = extract_reads.out.ref_reads
 }
 
 // WARNING: Experimental process

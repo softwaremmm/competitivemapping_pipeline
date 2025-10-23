@@ -135,6 +135,129 @@ process tie_break {
 }
 
 // WARNING: Experimental process
+process tie_break_multi {
+    publishDir "${params.publish_dir}", enabled: params.publish_dir != "", mode: "copy", saveAs: { filename -> sample_name + "_" + filename }
+    container {
+        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:f0b14c5' : params.test_container_cm
+    }
+
+    cpus 8
+    memory { 32.GB + (8.GB * task.attempt) }
+
+    pod label: "name", value: "competitive_mapping_pipeline:tie_break"
+    pod label: "sample_id", value: "${params.sample_id}"
+    pod label: "run_id", value: "${params.run_id}"
+
+    input:
+    tuple val(sample_name), path(fqs)
+    path manifest
+    path species_list
+    val seq_platform
+    path tie_break_params
+    val reference_name
+
+    output:
+    tuple val(sample_name), path(tie_break_report), emit: report_csv
+    tuple val(sample_name), path(tie_break_stats), emit: stats
+    tuple val(sample_name), path(round_two_alignments), emit: round_two_alignments
+    tuple val(sample_name), path(references), emit: references
+
+    script:
+    tie_break_report = "species_comparison.csv"
+    tie_break_stats = "tie_break_stats.yaml"
+    round_two_alignments = "round_two_alignments.csv"
+    references = "references.csv"
+    """
+    manifest_mapper \
+        --seq_platform ${seq_platform} \
+        --manifest ${manifest} \
+        --reads ${fqs} \
+        --cpus ${task.cpus} \
+        --sort_by_name \
+        -o aln.bam
+
+    tie_break \
+        --input-bam aln.bam \
+        --contigs ${species_list} \
+        --threads ${task.cpus} \
+        --parameters ${tie_break_params} \
+        --output-root "out."
+
+    mv out.alignment_summary.csv ${tie_break_report}
+    mv out.stats.yaml ${tie_break_stats}
+    mv out.alns_round_2.csv ${round_two_alignments}
+    mv out.references.csv ${references}
+
+    # clean up large intermediate files if present
+    find . -type f -name "aln.bam" -delete
+    find . -type f -name "out.alns_round_*.csv" -delete
+    """
+}
+
+process filter_by_depth {
+    publishDir "${params.publish_dir}", enabled: params.publish_dir != "", mode: "copy", saveAs: { filename -> sample_name + "_" + filename }
+    container {
+        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:f0b14c5' : params.test_container_cm
+    }
+
+    cpus 1
+    memory "128MB"
+
+    debug true
+    pod label: "name", value: "competitive_mapping_pipeline:filter_by_depth"
+    pod label: "sample_id", value: "${params.sample_id}"
+    pod label: "run_id", value: "${params.run_id}"
+
+    input:
+    tuple val(sample_name), path(tie_break_report)
+    path species_list
+    val min_depth    
+
+    output:
+    tuple val(sample_name), path(high_depth_list), emit: high_depth_list
+    tuple val(sample_name), path(high_depth_accessions), emit: high_depth_accessions
+
+    script:
+    high_depth_list = "high_depth_refs.txt"
+    high_depth_accessions = "high_depth_accessions.txt"
+    """
+    filter_by_depth --tie_break_report ${tie_break_report} --species_list ${species_list} --min_depth ${min_depth}
+    """
+}
+
+process extract_reads {
+    publishDir "${params.publish_dir}", enabled: params.publish_dir != "", mode: "copy", saveAs: { filename -> sample_name + "_" + reference_name + "_" + filename }
+    container {
+        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:f0b14c5' : params.test_container_cm
+    }
+
+    cpus 8
+    memory { 8.GB + (4.GB * task.attempt) }
+
+    debug true
+    pod label: "name", value: "competitive_mapping_pipeline:filter_by_depth"
+    pod label: "sample_id", value: "${params.sample_id}"
+    pod label: "run_id", value: "${params.run_id}"
+
+    input:
+    tuple val(sample_name), path(fqs), val(reference_name), path(round_two_alignments), path(references), val(accession)
+
+    output:
+    tuple val(sample_name), path("reads_for_assembly*fastq.gz"), val(reference_name), val(accession), emit: ref_reads, optional: true
+
+    script:
+    ref_reads_root = "reads_for_assembly"
+    """
+    extract_reads -f ${fqs} -a ${round_two_alignments} \
+        -c ${references} \
+        -r "${reference_name}" \
+        -o ${ref_reads_root}
+
+    gzip ${ref_reads_root}*
+    """
+}
+
+// WARNING: Experimental process
 process dynamic_tie_break {
     publishDir "${params.publish_dir}", enabled: params.publish_dir != "", mode: "copy", saveAs: { filename -> sample_name + "_" + filename }
     container {

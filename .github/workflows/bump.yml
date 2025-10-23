@@ -11,7 +11,7 @@ on:
 jobs:
   bump:
     # Runs on non-draft PRs to develop, pushes to develop and skips commits with 'bump:' in the message to avoid infinite loops
-    if: ${{ !startsWith(github.event.head_commit.message, 'bump:') && (github.event.pull_request == null || !github.event.pull_request.draft) }}
+    if: ${{ !startsWith(github.event.head_commit.message, 'bump:') && github.event.pull_request != null && !github.event.pull_request.draft }}
     runs-on: ubuntu-latest
     permissions: write-all # Needed for automatic release
     name: "Bump version"
