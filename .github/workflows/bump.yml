@@ -12,7 +12,7 @@ jobs:
   bump:
     if: |
       github.event_name == 'push' && !startsWith(github.event.head_commit.message, 'bump:') ||
-      (github.event_name == 'pull_request' && !github.event.pull_request.draft)
+      (github.event_name == 'pull_request' && !github.event.pull_request.draft && !startsWith(github.event.head_commit.message, 'bump:')
     runs-on: ubuntu-latest
     permissions: write-all
     name: "Bump version"
