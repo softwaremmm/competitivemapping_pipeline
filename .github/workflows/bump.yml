@@ -10,10 +10,11 @@ on:
 
 jobs:
   bump:
-    # Runs on non-draft PRs to develop, pushes to develop and skips commits with 'bump:' in the message to avoid infinite loops
-    if: ${{ !startsWith(github.event.head_commit.message, 'bump:') && (github.event.pull_request == null || !github.event.pull_request.draft) }}
+    if: |
+      github.event_name == 'push' && !startsWith(github.event.head_commit.message, 'bump:') ||
+      (github.event_name == 'pull_request' && !github.event.pull_request.draft)
     runs-on: ubuntu-latest
-    permissions: write-all # Needed for automatic release
+    permissions: write-all
     name: "Bump version"
     outputs:
       version: ${{ steps.bump.outputs.version }}
@@ -34,23 +35,30 @@ jobs:
         id: get-commit-hash
         run: echo "COMMIT_HASH=$(git rev-parse --short $GITHUB_SHA)" >> $GITHUB_ENV
 
-      - name: bump version with hash
+      - name: Determine branch
+        id: branch
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "BRANCH=${{ github.head_ref }}" >> $GITHUB_ENV
+          else
+            echo "BRANCH=develop" >> $GITHUB_ENV
+          fi
+      - name: Bump version with hash
         id: bump
         run: |
           source venv/bin/activate
-
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
           bumper version
           bumper bump --active --no-tag ${{ env.COMMIT_HASH }}
           echo "version=$(bumper version --active)" >> $GITHUB_OUTPUT
 
-      - name: push changes
+      - name: Push changes
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.PAT_TOKEN }}
           tags: true
-          branch: develop
+          branch: ${{ env.BRANCH }}
 
   build_container:
     needs: bump
