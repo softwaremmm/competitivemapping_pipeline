@@ -15,7 +15,7 @@ jobs:
       BRANCH: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.branch || github.ref_name }}
     if: ${{ ! startsWith(github.event.head_commit.message, 'bump:') }}
     runs-on: ubuntu-latest
-    permissions: write-all
+    permissions: write-all # Needed for automatic release
     name: "Bump version and create changelog with commitizen"
     outputs:
       version: ${{ steps.bump.outputs.version }}
