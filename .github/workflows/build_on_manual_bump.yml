@@ -1,0 +1,31 @@
+name: Bump Version when a bump commit is pushed
+
+on:
+  push:
+    branches-ignore:
+      - main
+      - develop
+
+jobs:
+  trigger_build:
+    if: ${{ startsWith(github.event.head_commit.message, 'bump:') }}
+    runs-on: ubuntu-latest
+    name: "Build and push container if a bump commit is pushed"
+    steps:
+    - name: Check out
+      uses: actions/checkout@v4
+      with:
+        token: "${{ secrets.PAT_TOKEN }}"
+        fetch-depth: 0
+    - name: Get Short Commit SHA
+      id: get-commit-hash
+      run: echo "COMMIT_HASH=$(git rev-parse --short $GITHUB_SHA)" >> $GITHUB_OUTPUT
+  build_container:
+    needs: trigger_build
+    permissions:
+      contents: read
+      packages: write
+    uses: ./.github/workflows/build_and_push_container.yml
+    with:
+      tag: ${{ needs.trigger_build.outputs.COMMIT_HASH }}
+    secrets: inherit
