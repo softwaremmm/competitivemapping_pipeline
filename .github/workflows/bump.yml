@@ -4,17 +4,13 @@ on:
   push:
     branches:
       - develop
-  pull_request:
-    branches:
-      - develop
 
 jobs:
   bump:
-    # Runs on non-draft PRs to develop, pushes to develop and skips commits with 'bump:' in the message to avoid infinite loops
-    if: ${{ !startsWith(github.event.head_commit.message, 'bump:') && (github.event.pull_request == null || !github.event.pull_request.draft) }}
+    if: ${{ ! startsWith(github.event.head_commit.message, 'bump:') }}
     runs-on: ubuntu-latest
     permissions: write-all # Needed for automatic release
-    name: "Bump version"
+    name: "Bump version and create changelog with commitizen"
     outputs:
       version: ${{ steps.bump.outputs.version }}
     steps:
