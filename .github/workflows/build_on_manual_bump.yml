@@ -11,6 +11,8 @@ jobs:
     if: ${{ startsWith(github.event.head_commit.message, 'bump:') }}
     runs-on: ubuntu-latest
     name: "Build and push container if a bump commit is pushed"
+    outputs:
+      COMMIT_HASH: ${{ steps.get-commit-hash.outputs.COMMIT_HASH }}
     steps:
     - name: Check out
       uses: actions/checkout@v4
@@ -19,7 +21,7 @@ jobs:
         fetch-depth: 0
     - name: Get Short Commit SHA
       id: get-commit-hash
-      run: echo "COMMIT_HASH=$(git rev-parse --short $GITHUB_SHA)" >> $GITHUB_OUTPUT
+      run: echo "COMMIT_HASH=$(git rev-parse HEAD~1)" >> $GITHUB_OUTPUT
   build_container:
     needs: trigger_build
     permissions:
