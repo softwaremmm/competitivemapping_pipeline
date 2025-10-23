@@ -121,6 +121,7 @@ can be built / updated using:
 generate-schema-doc src/competitivemapping/competitivemapping.schema.json --config template_name=md
 ```
 
+
 ## Notes on Bam to Fastq
 One step in competitive mapping is to filter the bam file (created by mapping against manifest) for tb reads and unmapped reads, and extracting these to a fastq file. This is complex for paired reads!! And so leads to seeming discrepencies with the `species_comparison_report.json`
 
