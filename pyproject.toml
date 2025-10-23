@@ -28,7 +28,6 @@ manifest_builder = "competitivemapping.manifest_builder:cli_entry_point"
 manifest_builder_manual = "competitivemapping.manifest_builder_manual:cli_entry_point"
 manifest_mapper = "competitivemapping.manifest_mapper:cli_entry_point"
 extract_reads = "competitivemapping.extract_reads:cli_entry_point"
-filter_by_depth = "competitivemapping.filter_by_depth:cli_entry_point"
 
 [project.optional-dependencies]
 dev = [
