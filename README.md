@@ -153,7 +153,7 @@ pre-commit install --hook-type commit-msg
 This repo uses a standard gitflow approach, but with some changes to deal with docker containers in nextflow:
 - There is a pyproject version which should be updated to match semantic version releases (from main/release branches)
 - There is an `active_version` controlled by version_bumper which allows develop to have commit hash based versions.
-- Every push to develop will cause an action to run `bumper bump <commit-hash> --no-tag --active`. This:
+- Every push and non-draft PR to `develop` will cause an action to run `bumper bump <commit-hash> --no-tag --active`. This:
     - bumps the `active_version` in pyproject.toml
     - bumps the container tag used by nextflow processes
     - leaves the pyproject version as is
