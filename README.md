@@ -1,6 +1,3 @@
-> This is a modified prototype version that outputs mapped reads to all references with a mean depth of 5 or more, along with the accession number
-> of the reference. Testing and refactoring would be needed to progress this to production.
-
 # Competitive Mapping Pipeline
 
 Competitive Mapping is an algorithm that compares the sample reads with the references in the manifest and makes a positive selection of the reads matching a specific `rname`.
