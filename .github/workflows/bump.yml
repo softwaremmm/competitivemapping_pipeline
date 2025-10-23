@@ -1,5 +1,4 @@
 name: Bump Version based on commit hash
-
 on:
   push:
     branches:
@@ -9,17 +8,14 @@ on:
       branch:
         description: 'Branch to bump version on'
         required: true
-        default: 'develop'
 
 jobs:
   bump:
-    # Determine branch from workflow_dispatch input when present, otherwise use the ref name.
     env:
-      BRANCH: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.branch || 'develop' }}
-    # Only run when not operating on main and when the triggering commit message does not start with "bump:".
-    if: ${{ env.BRANCH != 'main' && !startsWith(github.event.head_commit.message || '', 'bump:') }}
+      BRANCH: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.branch || github.ref_name }}
+    if: ${{ ! startsWith(github.event.head_commit.message, 'bump:') }}
     runs-on: ubuntu-latest
-    permissions: write-all # Needed for automatic release
+    permissions: write-all
     name: "Bump version and create changelog with commitizen"
     outputs:
       version: ${{ steps.bump.outputs.version }}
@@ -40,18 +36,17 @@ jobs:
         id: get-commit-hash
         run: echo "COMMIT_HASH=$(git rev-parse --short $GITHUB_SHA)" >> $GITHUB_ENV
 
-      - name: bump version with hash
+      - name: Bump version with hash
         id: bump
         run: |
           source venv/bin/activate
-
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
           bumper version
           bumper bump --active --no-tag ${{ env.COMMIT_HASH }}
           echo "version=$(bumper version --active)" >> $GITHUB_OUTPUT
 
-      - name: push changes
+      - name: Push changes
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.PAT_TOKEN }}
