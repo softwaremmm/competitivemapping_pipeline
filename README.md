@@ -163,3 +163,10 @@ This repo uses a standard gitflow approach, but with some changes to deal with d
 
 - In a release branch you can create a release candidate with `bumper bump a.b.c-rcX`. This also updates the pyproject version. Pushing the changes and new tag (automatically created) will trigger a build action.
 - When release branch is ready for main run `bumper bump a.b.c --no-tag`. Push these changes to main and make a release there to build the container.
+
+## Manual build and push of Docker container images
+
+Sometimes we want to test out code in an environment (e.g. `sp3dev`)  before merging to develop. In this case, 
+manually trigger the (bump)[.github/workflows/bump.yml] action using the feature branch name as an input. This
+will bump the version on the branch to a new commit hash i.e. all the relevant container image references in the
+code will be the has, and build and push a container image with that tag.
