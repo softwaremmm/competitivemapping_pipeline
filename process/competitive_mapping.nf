@@ -215,13 +215,9 @@ process filter_by_depth {
 
     output:
     tuple val(sample_name), path(high_depth_list), emit: high_depth_list
-    tuple val(sample_name), path(high_depth_accessions), emit: high_depth_accessions
-    tuple val(sample_name), path(high_depth_refs_for_assembly), emit: high_depth_refs_for_assembly
 
     script:
     high_depth_list = "high_depth_refs.txt"
-    high_depth_accessions = "high_depth_accessions.txt"
-    high_depth_refs_for_assembly = "high_depth_refs_for_assembly.txt"
     """
     filter_by_depth --tie_break_report ${tie_break_report} --species_list ${species_list} --min_depth ${min_depth}
     """
@@ -242,7 +238,7 @@ process extract_reads {
     pod label: "run_id", value: "${params.run_id}"
 
     input:
-    tuple val(sample_name), path(fqs), val(reference_name), path(round_two_alignments), path(references), val(accession), val(ref_for_assembly)
+    tuple val(sample_name), path(fqs), val(reference_name), val(accession), val(ref_for_assembly), path(round_two_alignments), path(references)
 
     output:
     tuple val(sample_name), path("reads_for_assembly*fastq.gz"), val(reference_name), val(accession), val(ref_for_assembly), emit: ref_reads, optional: true

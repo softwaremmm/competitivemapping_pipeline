@@ -93,12 +93,14 @@ workflow {
     )
 
     if (params.seq_platform == 'ont') {
-        input_files = Channel.fromPath("${params.input_dir}/${params.input_single_suffix}", checkIfExists: true)
+        input_files = Channel
+            .fromPath("${params.input_dir}/${params.input_single_suffix}", checkIfExists: true)
             .ifEmpty { error("cannot find any reads matching ${params.input_single_suffix} in ${params.input_dir}") }
             .map { it -> tuple(it.simpleName, it) }
     }
     else if (params.seq_platform == 'illumina') {
-        input_files = Channel.fromFilePairs(
+        input_files = Channel
+            .fromFilePairs(
                 "${params.input_dir}/${params.input_paired_suffix}",
                 flat: false,
                 checkIfExists: true,
@@ -215,38 +217,15 @@ workflow tie_break_multi_workflow {
         file.text
             .readLines()
             .collect { reference ->
-                tuple(sample_name, reference)
+                def ref_items = reference.tokenize(",")
+                tuple(sample_name, ref_items[0], ref_items[1], ref_items[2])
             }
     }
-
-    high_depth_refs_ch.view { "High depth references: ${it}" }
-
-    high_depth_accessions_ch = filter_by_depth.out.high_depth_accessions.flatMap { sample_name, file ->
-        file.text
-            .readLines()
-            .collect { accession ->
-                tuple(sample_name, accession)
-            }
-    }
-
-    high_depth_accessions_ch.view { "High depth accessions: ${it}" }
-
-    high_depth_refs_for_assembly_ch = filter_by_depth.out.high_depth_refs_for_assembly.flatMap { sample_name, file ->
-        file.text
-            .readLines()
-            .collect { ref_for_assembly ->
-                tuple(sample_name, ref_for_assembly)
-            }
-    }
-
-    high_depth_refs_for_assembly_ch.view { "High depth refs for assembly: ${it}" }
 
     high_depth_refs_ch = input_files
         .combine(high_depth_refs_ch, by: 0)
         .combine(tie_break_multi.out.round_two_alignments, by: 0)
         .combine(tie_break_multi.out.references, by: 0)
-        .combine(high_depth_accessions_ch, by: 0)
-        .combine(high_depth_refs_for_assembly_ch, by: 0)
 
     high_depth_refs_ch.view { "Input to extract_reads process: ${it}" }
 
