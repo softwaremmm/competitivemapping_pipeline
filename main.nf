@@ -231,11 +231,22 @@ workflow tie_break_multi_workflow {
 
     high_depth_accessions_ch.view { "High depth accessions: ${it}" }
 
+    high_depth_refs_for_assembly_ch = filter_by_depth.out.high_depth_refs_for_assembly.flatMap { sample_name, file ->
+        file.text
+            .readLines()
+            .collect { ref_for_assembly ->
+                tuple(sample_name, ref_for_assembly)
+            }
+    }
+
+    high_depth_refs_for_assembly_ch.view { "High depth refs for assembly: ${it}" }
+
     high_depth_refs_ch = input_files
         .combine(high_depth_refs_ch, by: 0)
         .combine(tie_break_multi.out.round_two_alignments, by: 0)
         .combine(tie_break_multi.out.references, by: 0)
         .combine(high_depth_accessions_ch, by: 0)
+        .combine(high_depth_refs_for_assembly_ch, by: 0)
 
     high_depth_refs_ch.view { "Input to extract_reads process: ${it}" }
 
