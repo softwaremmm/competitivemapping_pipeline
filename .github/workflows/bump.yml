@@ -10,7 +10,7 @@ jobs:
     if: ${{ ! startsWith(github.event.head_commit.message, 'bump:') }}
     runs-on: ubuntu-latest
     permissions: write-all # Needed for automatic release
-    name: "Bump version and create changelog with commitizen"
+    name: "Bump version before triggering container build"
     outputs:
       version: ${{ steps.bump.outputs.version }}
     steps:
@@ -30,7 +30,7 @@ jobs:
         id: get-commit-hash
         run: echo "COMMIT_HASH=$(git rev-parse --short $GITHUB_SHA)" >> $GITHUB_ENV
 
-      - name: bump version with hash
+      - name: Bump version with hash
         id: bump
         run: |
           source venv/bin/activate
@@ -41,7 +41,7 @@ jobs:
           bumper bump --active --no-tag ${{ env.COMMIT_HASH }}
           echo "version=$(bumper version --active)" >> $GITHUB_OUTPUT
 
-      - name: push changes
+      - name: Push changes
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.PAT_TOKEN }}

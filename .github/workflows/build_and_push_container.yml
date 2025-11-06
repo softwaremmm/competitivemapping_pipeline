@@ -3,9 +3,7 @@ name: Build and Push Container
 on:
   push:
     tags:
-      - '*.*.*'
-      - '*.*.*-rc*'
-      - '*.*.*\+*'
+      - '*'
   workflow_call:
     inputs:
       tag:
