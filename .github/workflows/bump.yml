@@ -16,7 +16,7 @@ jobs:
     if: ${{ ! startsWith(github.event.head_commit.message, 'bump:') }}
     runs-on: ubuntu-latest
     permissions: write-all # Needed for automatic release
-    name: "Bump version and create changelog with commitizen"
+    name: "Bump version and trigger container build"
     outputs:
       ref: ${{ steps.step_longhash.outputs.COMMIT_HASH_LONG }}
     steps:
