@@ -349,6 +349,8 @@ mod tests {
         .map(|s| s.to_string())
         .collect::<Vec<_>>();
 
+        // Helps with readability
+        #[allow(clippy::useless_vec)]
         let expectation = vec![
             Alignment {
                 is_paired: false,
@@ -416,6 +418,8 @@ mod tests {
         .collect::<Vec<String>>();
         let lines = [header_lines, lines].concat();
 
+        // Helps with readability
+        #[allow(clippy::useless_vec)]
         let expectation = vec![
             CigarStats {
                 matches: 20,
