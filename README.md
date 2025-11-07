@@ -166,3 +166,12 @@ This repo uses a standard gitflow approach, but with some changes to deal with d
 
 - In a release branch you can create a release candidate with `bumper bump a.b.c-rcX`. This also updates the pyproject version. Pushing the changes and new tag (automatically created) will trigger a build action.
 - When release branch is ready for main run `bumper bump a.b.c --no-tag`. Push these changes to main and make a release there to build the container.
+
+### Using a custom tag
+If working on a branch you can bump to a custom tag. Once the tag is pushed it will build a container.
+```bash
+bumper bump -a new_feature_1.0.0
+git push
+git push --tag
+```
+Note: only the active version needs to be updated.
