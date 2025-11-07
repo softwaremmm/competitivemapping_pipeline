@@ -7,11 +7,10 @@ on:
 
 jobs:
   bump:
-    # Runs on non-draft PRs to develop, pushes to develop and skips commits with 'bump:' in the message to avoid infinite loops
-    if: ${{ !startsWith(github.event.head_commit.message, 'bump:') && (github.event.pull_request == null || !github.event.pull_request.draft) }}
+    if: ${{ ! startsWith(github.event.head_commit.message, 'bump:') }}
     runs-on: ubuntu-latest
     permissions: write-all # Needed for automatic release
-    name: "Bump version and create changelog with commitizen"
+    name: "Bump version before triggering container build"
     outputs:
       version: ${{ steps.bump.outputs.version }}
     steps:
@@ -20,7 +19,6 @@ jobs:
         with:
           token: "${{ secrets.PAT_TOKEN }}"
           fetch-depth: 0
-          ref: ${{ env.BRANCH }}
 
       - name: Install dependencies
         run: |
@@ -32,7 +30,7 @@ jobs:
         id: get-commit-hash
         run: echo "COMMIT_HASH=$(git rev-parse --short $GITHUB_SHA)" >> $GITHUB_ENV
 
-      - name: bump version with hash
+      - name: Bump version with hash
         id: bump
         run: |
           source venv/bin/activate
@@ -43,7 +41,7 @@ jobs:
           bumper bump --active --no-tag ${{ env.COMMIT_HASH }}
           echo "version=$(bumper version --active)" >> $GITHUB_OUTPUT
 
-      - name: push changes
+      - name: Push changes
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.PAT_TOKEN }}
