@@ -12,10 +12,10 @@ def test_filter_by_depth(filter_by_depth_files, test_outputs_dir):
         tie_break_report=filter_by_depth_files["tie_break_report"],
         species_list=filter_by_depth_files["species_list"],
         min_depth=filter_by_depth_files["min_depth"],
-        output_root=filter_by_depth_files["output"],
+        output_root=f"{test_outputs_dir}/filter_by_depth/high_depth",
     )
 
-    output_file = test_outputs_dir / "filter_by_depth" / "high_depth_refs.txt"
+    output_file = f"{test_outputs_dir}/filter_by_depth/high_depth_refs.txt"
 
     expectation = filter_by_depth_files["expectation"]
     check_file(output_file, expectation)
