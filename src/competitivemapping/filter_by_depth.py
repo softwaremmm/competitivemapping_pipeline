@@ -5,8 +5,8 @@ import pandas as pd
 
 
 def filter_by_depth(
-    tie_break_report: Path, species_list: Path, min_depth: float
-) -> pd.DataFrame:
+    tie_break_report: Path, species_list: Path, min_depth: float, output_root: str
+):
     """Filter references by mean depth from a tie break report. Output references and accessions."""
     tie_break = pd.read_csv(tie_break_report)
     filtered = tie_break[
@@ -26,7 +26,7 @@ def filter_by_depth(
 
     references = references[["reference", "assembly_accession", "ref_for_assembly"]]
 
-    return references
+    references.to_csv(Path(output_root + "_refs.txt"), header=False, index=False)
 
 
 def write_list(items: list[str], output_file: Path):
@@ -68,13 +68,12 @@ def cli_entry_point():
 
     args = parser.parse_args()
 
-    references = filter_by_depth(
+    filter_by_depth(
         args.tie_break_report,
         args.species_list,
         args.min_depth,
-    )
-
-    references.to_csv(Path(args.output + "_refs.txt"), header=False, index=False)
+        args.output,
+    )    
 
 
 if __name__ == "__main__":

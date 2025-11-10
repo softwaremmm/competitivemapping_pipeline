@@ -129,6 +129,18 @@ def extract_read_files() -> dict:
     }
 
 
+@pytest.fixture
+def filter_by_depth_files() -> dict:
+    prefix = "test_data/filter_by_depth/"
+    return {
+        "tie_break_report": f"{prefix}species_comparison.csv",
+        "species_list": f"{prefix}contigs_20251104.csv",
+        "min_depth": 5.0,
+        "output": f"{prefix}high_depth",
+        "expectation": f"{prefix}high_depth_refs.txt",
+    }
+
+
 TB_10K = {
     "sample": "tb_10k",
     "reads": [

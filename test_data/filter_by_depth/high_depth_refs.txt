@@ -1,0 +1,3 @@
+Mycobacterium abscessus,GCF_000069185.1,CU458896.1
+Mycobacterium intracellulare,GCF_000277125.1,CP015278.1
+Mycobacterium sp020217485,GCF_020217485.1,
