@@ -10,7 +10,7 @@ def filter_by_depth(
     """Filter references by mean depth from a tie break report. Output references and accessions."""
     tie_break = pd.read_csv(tie_break_report)
     filtered = tie_break[
-        (tie_break["mean_depth"] >= min_depth) & (tie_break["depth_type"] == "unique")
+        (tie_break["mean_depth"] >= min_depth) & (tie_break["depth_type"] == "final")
     ]
     # Print statents for debugging prototype, remove later
     pd.set_option("display.max_columns", None)
