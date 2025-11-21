@@ -211,6 +211,7 @@ process filter_by_depth {
     input:
     tuple val(sample_name), path(tie_break_report)
     path species_list
+    path assembly_refs
     val min_depth    
 
     output:
@@ -219,7 +220,7 @@ process filter_by_depth {
     script:
     high_depth_list = "high_depth_refs.txt"
     """
-    filter_by_depth --tie_break_report ${tie_break_report} --species_list ${species_list} --min_depth ${min_depth}
+    filter_by_depth --tie_break_report ${tie_break_report} --species_list ${species_list} --assembly_refs ${assembly_refs} --min_depth ${min_depth}
     """
 }
 

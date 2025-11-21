@@ -12,6 +12,7 @@ params.input_dir = ''
 params.manifest = ''
 params.seq_platform = ''
 params.reference_name = ''
+params.assembly_refs = ''
 params.workflow = 'comp_mapping'
 
 // default thresholds
@@ -42,6 +43,7 @@ workflow {
             --input_dir  Directory holding the fastq files *_{1,2}.fastq.gz
             --manifest
             --species_list
+            --assembly_refs
             --seq_platform
             --reference_name: Reference name to use for the fastq files. Default: ''. If you want to use a list of names, input a string separated by commas.
             --workflow: Workflow to run. Options are 'comp_mapping' (default) or 'tie_break'
@@ -58,6 +60,9 @@ workflow {
     }
     if (params.species_list == '') {
         exit(1, 'error: --species_list is mandatory')
+    }
+    if (params.assembly_refs == '') {
+        exit(1, 'error: --assembly_refs is mandatory')
     }
     if (params.seq_platform == '') {
         exit(1, 'error: --seq_platform is mandatory')
@@ -78,6 +83,7 @@ workflow {
         --input_dir    ${params.input_dir}
         --manifest     ${params.manifest}
         --species_list ${params.species_list}
+        --assembly_refs ${params.assembly_refs}
         --seq_platform ${params.seq_platform}
         --reference_name ${params.reference_name}
         --workflow     ${params.workflow}
@@ -116,6 +122,7 @@ workflow {
     // Using fromPath means they can be provided as relative paths
     manifest = Channel.fromPath(params.manifest, checkIfExists: true).first()
     species_list = Channel.fromPath(params.species_list, checkIfExists: true).first()
+    assembly_refs = Channel.fromPath(params.assembly_refs, checkIfExists: true).first()
 
     if (params.workflow == 'comp_mapping') {
         competitive_mapping(input_files, manifest, species_list, params.seq_platform, params.reference_name)
@@ -124,7 +131,7 @@ workflow {
         tie_break_workflow(input_files, manifest, species_list, params.seq_platform, params.reference_name)
     }
     else if (params.workflow == 'tie_break_multi') {
-        tie_break_multi_workflow(input_files, manifest, species_list, params.seq_platform, params.reference_name)
+        tie_break_multi_workflow(input_files, manifest, species_list, params.seq_platform, params.reference_name, assembly_refs)
     }
     else {
         exit(1, "error: --workflow must be one of 'comp_mapping' or 'tie_break'")
@@ -192,6 +199,7 @@ workflow tie_break_multi_workflow {
     species_list
     seq_platform
     reference_name
+    assembly_refs
 
     main:
     check_seq_platform(seq_platform)
@@ -209,7 +217,7 @@ workflow tie_break_multi_workflow {
 
     tie_break_multi.out.report_csv.view()
 
-    filter_by_depth(tie_break_multi.out.report_csv, species_list, 5)
+    filter_by_depth(tie_break_multi.out.report_csv, species_list, assembly_refs, 5)
 
     filter_by_depth.out.high_depth_list.view()
 

@@ -5,7 +5,11 @@ import pandas as pd
 
 
 def filter_by_depth(
-    tie_break_report: Path, species_list: Path, min_depth: float, output_root: str
+    tie_break_report: Path,
+    species_list: Path,
+    assembly_refs: Path,
+    min_depth: float,
+    output_root: str,
 ):
     """Filter references by mean depth from a tie break report. Output references and accessions."""
     tie_break = pd.read_csv(tie_break_report)
@@ -18,11 +22,15 @@ def filter_by_depth(
     print(filtered)
     contig_to_reference = pd.read_csv(species_list)
     contig_to_reference = contig_to_reference[
-        ["reference", "assembly_accession", "ref_for_assembly"]
+        ["reference", "assembly_accession"]
     ].drop_duplicates()
     print(contig_to_reference.dtypes)
     print(contig_to_reference)
-    references = filtered.merge(contig_to_reference, on="reference", how="left")
+    assembly_refs_df = pd.read_csv(assembly_refs)
+
+    references = filtered.merge(contig_to_reference, on="reference", how="left").merge(
+        assembly_refs_df, on="assembly_accession", how="left"
+    )
 
     references = references[["reference", "assembly_accession", "ref_for_assembly"]]
 
@@ -56,6 +64,13 @@ def cli_entry_point():
         default=None,
     )
     parser.add_argument(
+        "-a",
+        "--assembly_refs",
+        type=str,
+        required=True,
+        help="Path to the assembly references mapping file.",
+    )
+    parser.add_argument(
         "-m",
         "--min_depth",
         type=float,
@@ -71,9 +86,10 @@ def cli_entry_point():
     filter_by_depth(
         args.tie_break_report,
         args.species_list,
+        args.assembly_refs,
         args.min_depth,
         args.output,
-    )    
+    )
 
 
 if __name__ == "__main__":
