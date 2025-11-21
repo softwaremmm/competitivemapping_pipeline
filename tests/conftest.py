@@ -134,7 +134,8 @@ def filter_by_depth_files() -> dict:
     prefix = "test_data/filter_by_depth/"
     return {
         "tie_break_report": f"{prefix}species_comparison.csv",
-        "species_list": f"{prefix}contigs_20251104.csv",
+        "species_list": f"{prefix}contigs_20251121.csv",
+        "assembly_refs": f"{prefix}assembly_refs_20251121.csv",
         "min_depth": 5.0,
         "expectation": f"{prefix}high_depth_refs.txt",
     }
