@@ -1,14 +1,18 @@
 #!/usr/bin/env nextflow
 include { competitiveMapping } from './process/competitive_mapping.nf'
 include { tie_break } from './process/competitive_mapping.nf'
+include { tie_break_multi } from './process/competitive_mapping.nf'
 include { dynamic_tie_break } from './process/competitive_mapping.nf'
 include { has_enough_reads } from './process/competitive_mapping.nf'
+include { filter_by_depth } from './process/competitive_mapping.nf'
+include { extract_reads } from './process/competitive_mapping.nf'
 
 // input parameters
 params.input_dir = ''
 params.manifest = ''
 params.seq_platform = ''
 params.reference_name = ''
+params.assembly_refs = ''
 params.workflow = 'comp_mapping'
 
 // default thresholds
@@ -39,6 +43,7 @@ workflow {
             --input_dir  Directory holding the fastq files *_{1,2}.fastq.gz
             --manifest
             --species_list
+            --assembly_refs
             --seq_platform
             --reference_name: Reference name to use for the fastq files. Default: ''. If you want to use a list of names, input a string separated by commas.
             --workflow: Workflow to run. Options are 'comp_mapping' (default) or 'tie_break'
@@ -55,6 +60,9 @@ workflow {
     }
     if (params.species_list == '') {
         exit(1, 'error: --species_list is mandatory')
+    }
+    if (params.assembly_refs == '') {
+        exit(1, 'error: --assembly_refs is mandatory')
     }
     if (params.seq_platform == '') {
         exit(1, 'error: --seq_platform is mandatory')
@@ -75,6 +83,7 @@ workflow {
         --input_dir    ${params.input_dir}
         --manifest     ${params.manifest}
         --species_list ${params.species_list}
+        --assembly_refs ${params.assembly_refs}
         --seq_platform ${params.seq_platform}
         --reference_name ${params.reference_name}
         --workflow     ${params.workflow}
@@ -90,12 +99,14 @@ workflow {
     )
 
     if (params.seq_platform == 'ont') {
-        input_files = Channel.fromPath("${params.input_dir}/${params.input_single_suffix}", checkIfExists: true)
+        input_files = Channel
+            .fromPath("${params.input_dir}/${params.input_single_suffix}", checkIfExists: true)
             .ifEmpty { error("cannot find any reads matching ${params.input_single_suffix} in ${params.input_dir}") }
             .map { it -> tuple(it.simpleName, it) }
     }
     else if (params.seq_platform == 'illumina') {
-        input_files = Channel.fromFilePairs(
+        input_files = Channel
+            .fromFilePairs(
                 "${params.input_dir}/${params.input_paired_suffix}",
                 flat: false,
                 checkIfExists: true,
@@ -111,13 +122,20 @@ workflow {
     // Using fromPath means they can be provided as relative paths
     manifest = Channel.fromPath(params.manifest, checkIfExists: true).first()
     species_list = Channel.fromPath(params.species_list, checkIfExists: true).first()
+    assembly_refs = Channel.fromPath(params.assembly_refs, checkIfExists: true).first()
 
-    if (params.workflow == 'comp_mapping') 
+    if (params.workflow == 'comp_mapping') {
         competitive_mapping(input_files, manifest, species_list, params.seq_platform, params.reference_name)
-    else if (params.workflow == 'tie_break')
+    }
+    else if (params.workflow == 'tie_break') {
         tie_break_workflow(input_files, manifest, species_list, params.seq_platform, params.reference_name)
-    else
+    }
+    else if (params.workflow == 'tie_break_multi') {
+        tie_break_multi_workflow(input_files, manifest, species_list, params.seq_platform, params.reference_name, assembly_refs)
+    }
+    else {
         exit(1, "error: --workflow must be one of 'comp_mapping' or 'tie_break'")
+    }
 }
 
 
@@ -171,6 +189,62 @@ workflow tie_break_workflow {
     report_csv = tie_break.out.report_csv
     stats = tie_break.out.stats
     ref_reads = tie_break.out.ref_reads
+}
+
+// WARNING: Experimental process
+workflow tie_break_multi_workflow {
+    take:
+    input_files
+    manifest
+    species_list
+    seq_platform
+    reference_name
+    assembly_refs
+
+    main:
+    check_seq_platform(seq_platform)
+
+    analyzer_params = Channel.fromPath("${moduleDir}/process/params_${seq_platform}.yml").first()
+
+    tie_break_multi(
+        input_files,
+        manifest,
+        species_list,
+        seq_platform,
+        analyzer_params,
+        reference_name,
+    )
+
+    tie_break_multi.out.report_csv.view()
+
+    filter_by_depth(tie_break_multi.out.report_csv, species_list, assembly_refs, 5)
+
+    filter_by_depth.out.high_depth_list.view()
+
+    high_depth_refs_ch = filter_by_depth.out.high_depth_list.flatMap { sample_name, file ->
+        file.text
+            .readLines()
+            .collect { reference ->
+                def ref_items = reference.tokenize(",")
+                tuple(sample_name, ref_items[0], ref_items[1], ref_items[2])
+            }
+    }
+
+    high_depth_refs_ch = input_files
+        .combine(high_depth_refs_ch, by: 0)
+        .combine(tie_break_multi.out.round_two_alignments, by: 0)
+        .combine(tie_break_multi.out.references, by: 0)
+
+    high_depth_refs_ch.view { "Input to extract_reads process: ${it}" }
+
+    extract_reads(high_depth_refs_ch)
+
+    extract_reads.out.ref_reads.view { "Extracted reads: ${it}" }
+
+    emit:
+    report_csv = tie_break_multi.out.report_csv
+    stats = tie_break_multi.out.stats
+    mapped_reads = extract_reads.out.ref_reads
 }
 
 // WARNING: Experimental process
