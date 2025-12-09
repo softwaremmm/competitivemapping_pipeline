@@ -1,4 +1,4 @@
 reference,rname,length,totallength,ani_group,species
-GCF_000819615.1,NC_001422.1,5386,5386,1,Sinsheimervirus phiX174
-GCF_000836825.1,NC_001442.1,4697,4697,2,Epsilonpolyomavirus bovis
-GCF_000836845.1,NC_001546.1,300,300,3,Arabis mosaic virus small satellite RNA
+GCF_000819615.1,NC_001422.1,5386,5386,,Sinsheimervirus phiX174
+GCF_000836825.1,NC_001442.1,4697,4697,,Epsilonpolyomavirus bovis
+GCF_000836845.1,NC_001546.1,300,300,,Arabis mosaic virus small satellite RNA

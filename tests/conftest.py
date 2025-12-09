@@ -100,6 +100,7 @@ def sylph_db_A() -> dict:
         "sylph_report": "test_data/sylph_databases/A/sylph.tsv",
         "manifest": "test_data/sylph_databases/A/manifest.fasta.gz",
         "contigs": "test_data/sylph_databases/A/contigs.csv",
+        "contigs_with_ani_group": "test_data/sylph_databases/A/contigs_with_ani_group.csv",
         "manifest_with_whole_genus": "test_data/sylph_databases/A/manifest_with_whole_genus.fasta.gz",
         "contigs_with_whole_genus": "test_data/sylph_databases/A/contigs_with_whole_genus.csv",
     }
@@ -114,6 +115,18 @@ def sylph_db_B() -> dict:
         "sylph_report": "test_data/sylph_databases/B/sylph.tsv",
         "manifest": "test_data/sylph_databases/B/manifest.fasta.gz",
         "contigs": "test_data/sylph_databases/B/contigs.csv",
+    }
+
+
+@pytest.fixture
+def sylph_db_C() -> dict:
+    return {
+        "db": "test_data/sylph_databases/C/db.syldb",
+        "taxonomy": "test_data/sylph_databases/C/taxonomy.tsv",
+        "genomes_dir": "test_data/sylph_databases/C",
+        "sylph_report": "test_data/sylph_databases/C/sylph.tsv",
+        "manifest": "test_data/sylph_databases/C/manifest.fasta.gz",
+        "contigs": "test_data/sylph_databases/C/contigs.csv",
     }
 
 

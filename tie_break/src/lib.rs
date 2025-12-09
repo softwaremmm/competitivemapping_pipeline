@@ -101,7 +101,7 @@ pub fn make_reference_df(bam_path: &str, contigs_csv_path: &str) -> Result<DataF
         .lazy()
         .select([col("reference")])
         .unique_stable(None, UniqueKeepStrategy::First)
-        .with_row_index("ref_id", Some(0));
+        .with_row_index("ref_id", Some(1));
 
     contigs_df = contigs_df
         .lazy()
@@ -124,7 +124,17 @@ pub fn make_reference_df(bam_path: &str, contigs_csv_path: &str) -> Result<DataF
     if contigs_df.get_column_index("ani_group").is_none() {
         contigs_df = contigs_df
             .lazy()
-            .with_columns([col("ref_id").cast(DataType::Int64).alias("ani_group")])
+            .with_columns([(col("ref_id").cast(DataType::Int64) * lit(-1)).alias("ani_group")])
+            .collect()?;
+    }
+    else {
+        // need to replace null ani_group with -1 * ref_id
+        contigs_df = contigs_df
+            .lazy()
+            .with_columns([when(col("ani_group").is_null())
+                .then(col("ref_id").cast(DataType::Int64) * lit(-1))
+                .otherwise(col("ani_group"))
+                .alias("ani_group")])
             .collect()?;
     }
 
