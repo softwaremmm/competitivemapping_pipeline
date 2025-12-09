@@ -133,7 +133,7 @@ pub fn make_reference_df(bam_path: &str, contigs_csv_path: &str) -> Result<DataF
             .lazy()
             .with_columns([when(col("ani_group").is_null())
                 .then(col("ref_id").cast(DataType::Int64) * lit(-1))
-                .otherwise(col("ani_group"))
+                .otherwise(col("ani_group").cast(DataType::Int64))
                 .alias("ani_group")])
             .collect()?;
     }
