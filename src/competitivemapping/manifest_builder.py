@@ -47,23 +47,24 @@ class Config:
     output_root: str
 
 
-def read_metadata_file(filepath: str) -> pd.DataFrame:
-    """Read a metadata file and return a DataFrame"""
+def read_taxonomy_file(filepath: str) -> pd.DataFrame:
+    """Read a taxonomy file and return a DataFrame"""
     # Note that pandas will automatically handle gzipped files
     sep = "\t" if filepath.endswith(".tsv") or filepath.endswith(".tsv.gz") else ","
 
+    # Need to check if this is a headered file or a two column file such as GTDB/sylph provide by default
+
     first_row = pd.read_csv(filepath, sep=sep, nrows=1, header=None)
-    if first_row.shape[1] == 2:
-        # Then reading a two column taxonomy file
-        df = pd.read_csv(
-            filepath, sep=sep, header=None, names=["accession", "taxonomy"]
-        )
-    else:
-        # Full metadata file from custom database
-        df = pd.read_csv(
-            filepath, sep=sep, usecols=["accession", "taxonomy", "ani_group"]
-        )
-    return df
+
+    # is "accession" in first row?
+    if "accession" in first_row.values:
+        usecols = ["accession", "taxonomy"]
+        if "ani_group" in first_row.values:
+            usecols.append("ani_group")
+        return pd.read_csv(filepath, sep=sep, usecols=usecols)
+
+    # Assume a headerless file
+    return pd.read_csv(filepath, sep=sep, header=None, names=["accession", "taxonomy"])
 
 
 def read_contigs(args: tuple[str, str]) -> list[dict[str, str]]:
@@ -97,7 +98,7 @@ def select_extra_species(
 
     Args:
         sylph_species (list[str]): list of species found by sylph
-        potential_species_df (pd.DataFrame): metadata df with genomes from rest of genera.
+        potential_species_df (pd.DataFrame): df with genomes from rest of genera.
 
     Returns:
         pd.DataFrame: Filtered dataframe
@@ -180,21 +181,18 @@ def assign_ani_groups(contigs_df, ani_df, ani_threshold) -> pd.DataFrame:
             groups[accession] = group_index
         group_index += 1
 
-    # Assign to singletons
-    for accession in contigs_df["reference"].unique():
-        if accession not in groups:
-            groups[accession] = group_index
-            group_index += 1
-
     new_df = contigs_df.copy()
-    new_df["ani_group"] = new_df["reference"].map(groups)
+    # for singletons ani_group should be none
+    new_df["ani_group"] = new_df["reference"].map(groups, na_action="ignore")
+    # set to Int64 to allow NaNs
+    new_df["ani_group"] = new_df["ani_group"].astype("Int64")
 
     return new_df
 
 
 def make_manifest(
     report_path: str,
-    metadata_files: list[str],
+    taxonomy_files: list[str],
     genome_dirs: list[str],
     config: Config,
 ) -> tuple[str, pd.DataFrame]:
@@ -202,7 +200,7 @@ def make_manifest(
 
     Args:
         report_path (str): Path to the sylph report
-        metadata_files (list[str]): path to the db metadata files, with taxonomy info
+        taxonomy_files (list[str]): path to the db taxonomy files
         genome_dirs (list[str]): path to the directories with the genome fastas
         config (Config): Config object
 
@@ -243,11 +241,11 @@ def make_manifest(
         REF_FILE_SUFFIX_PATTERN, "", regex=True
     )
 
-    metadata_df = pd.concat([read_metadata_file(f) for f in metadata_files])
+    taxonomy_df = pd.concat([read_taxonomy_file(f) for f in taxonomy_files])
 
     # Can restrict to only representative genomes (those with a genome path)
-    metadata_df = metadata_df[
-        metadata_df["accession"].isin(genome_paths["accession"])
+    taxonomy_df = taxonomy_df[
+        taxonomy_df["accession"].isin(genome_paths["accession"])
     ].copy()
 
     def select_taxa_level(taxonomy: str, key: str) -> str:
@@ -257,28 +255,28 @@ def make_manifest(
                 return taxa
         return ""
 
-    metadata_df["genus"] = metadata_df["taxonomy"].apply(
+    taxonomy_df["genus"] = taxonomy_df["taxonomy"].apply(
         lambda x: select_taxa_level(x, "g__").replace("g__", "")
     )
-    metadata_df["species"] = metadata_df["taxonomy"].apply(
+    taxonomy_df["species"] = taxonomy_df["taxonomy"].apply(
         lambda x: select_taxa_level(x, "s__").replace("s__", "")
     )
 
     if config.include_whole_genus:
         # Extend accessions to include genomes from rest of the genus(/genera)
-        sylph_metadata_df = metadata_df[
-            metadata_df["accession"].isin(sylph_accessions)
+        sylph_taxonomy_df = taxonomy_df[
+            taxonomy_df["accession"].isin(sylph_accessions)
         ].copy()
 
         sylph_species = (
-            metadata_df[metadata_df["accession"].isin(sylph_accessions)]["species"]
+            taxonomy_df[taxonomy_df["accession"].isin(sylph_accessions)]["species"]
             .unique()
             .tolist()
         )
 
-        found_genera = sylph_metadata_df["genus"].unique()
+        found_genera = sylph_taxonomy_df["genus"].unique()
 
-        potential_genomes = metadata_df[metadata_df["genus"].isin(found_genera)].copy()
+        potential_genomes = taxonomy_df[taxonomy_df["genus"].isin(found_genera)].copy()
 
         potential_genomes = select_extra_species(sylph_species, potential_genomes)
 
@@ -310,21 +308,21 @@ def make_manifest(
     )
 
     # add ani information if missing
-    if "ani_group" in metadata_df.columns:
+    if "ani_group" in taxonomy_df.columns:
         # If ani_group is already present, use it
         contigs_df = contigs_df.merge(
-            metadata_df[["accession", "ani_group"]],
+            taxonomy_df[["accession", "ani_group"]],
             left_on="reference",
             right_on="accession",
             how="left",
         )
         contigs_df.drop(columns=["accession"], inplace=True)
-    else:
+    elif config.ani_threshold > 0:
         ani_df = get_ani_distances(selected_df, config)
         contigs_df = assign_ani_groups(contigs_df, ani_df, config.ani_threshold)
 
-    # add species information from metadata
-    species_lookup = metadata_df.set_index("accession")["species"].to_dict()
+    # add species information
+    species_lookup = taxonomy_df.set_index("accession")["species"].to_dict()
     contigs_df["species"] = contigs_df["reference"].map(species_lookup)
     return manifest_file, contigs_df
 
@@ -336,9 +334,9 @@ def cli_entry_point():
         "--sylph_report", required=True, help="Path to the sylph report TSV file"
     )
     parser.add_argument(
-        "--metadata_files",
+        "--taxonomy_files",
         required=True,
-        help="Path to the metadata files with taxonomy (and optionally ani) mapping. Can be gzipped",
+        help="Path to tsv files with taxonomy (and optionally ani) mapping. Can be gzipped",
         nargs="+",
     )
     # Need to provide parent directory to work with nextflow symlinks
@@ -356,8 +354,11 @@ def cli_entry_point():
     )
     parser.add_argument(
         "--ani_threshold",
-        help="ANI threshold for grouping genomes",
-        default=97.0,
+        help=(
+            "ANI threshold for grouping genomes. 0 means do not group (default). "
+            "Ignored if ani_group present in taxonomy file."
+        ),
+        default=0,
         type=float,
     )
     parser.add_argument("--cpus", help="Number of CPUs to use", default=4, type=int)
@@ -376,7 +377,7 @@ def cli_entry_point():
 
     _manifest, contigs = make_manifest(
         sylph_report,
-        args.metadata_files,
+        args.taxonomy_files,
         args.genome_dirs,
         config,
     )

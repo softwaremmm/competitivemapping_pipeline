@@ -1,7 +1,7 @@
 process competitiveMapping {
     publishDir "${params.publish_dir}", enabled: params.publish_dir != "", mode: "copy", saveAs: { filename -> sample_name + "_" + filename }
     container {
-        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:f363973' : params.test_container_cm
+        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:af536ba' : params.test_container_cm
     }
 
     cpus 4
@@ -71,7 +71,7 @@ process competitiveMapping {
 process tie_break {
     publishDir "${params.publish_dir}", enabled: params.publish_dir != "", mode: "copy", saveAs: { filename -> sample_name + "_" + filename }
     container {
-        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:f363973' : params.test_container_cm
+        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:af536ba' : params.test_container_cm
     }
 
     cpus 8
@@ -138,7 +138,7 @@ process tie_break {
 process dynamic_tie_break {
     publishDir "${params.publish_dir}", enabled: params.publish_dir != "", mode: "copy", saveAs: { filename -> sample_name + "_" + filename }
     container {
-        params.test_container_cm == "" ? 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:f363973' : params.test_container_cm
+        params.test_container_cm == "" ? 'lhr.ocir.io/lrbvkel2wjot/gpas/competitivemapping_pipeline:af536ba' : params.test_container_cm
     }
 
     cpus 4
@@ -152,7 +152,7 @@ process dynamic_tie_break {
     tuple val(sample_name), path(fqs), path(sylph_report)
     path genome_dirs
     // Pattern used to avoid name conflicts
-    path "metadata?/*"
+    path "taxonomy?/*"
     val seq_platform
     val include_whole_genus
     path tie_break_params
@@ -168,7 +168,7 @@ process dynamic_tie_break {
     """
     manifest_builder --sylph_report ${sylph_report} \
         --genome_dirs ${genome_dirs} \
-        --metadata_files metadata*/* \
+        --taxonomy_files taxonomy*/* \
         ${whole_genera_arg} \
         --cpus ${task.cpus} \
         --output_root "out."
@@ -199,7 +199,7 @@ process dynamic_tie_break {
 
 process has_enough_reads {
     container {
-        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:f363973' : params.test_container_cm
+        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:af536ba' : params.test_container_cm
     }
 
     cpus 1

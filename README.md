@@ -35,8 +35,9 @@ This is used for the metagenomic pipeline in development. Myco has a fixed manif
 parameters:
 - sylph_report: Path to the sylph query/profile output file.
 - genome_dirs: path to directory containing all the reference genomes. Must contain a `genome_paths.tsv`. Look in knowledge bucket for examples.
-- metadata_files: Either the taxonomy file tsv or the metadata csv if ani_groups should be fixed.
+- taxonomy_files: csv/tsv with taxonomy info for each reference used. Can optionally have an "ani_group" column. Accepts the taxonomy tsv provided by sylph-tax.
 - include_whole_genus: if this is set then for each species sylph finds the whole genus will be added to the manifest.
+- ani_threshold: if set, will use this threshold for grouping similar references. Will not be used if metadata file has "ani_group" column.
 
 ### manifest_mapper
 Map reads against the manifest. It will select minimap2 settings based on the seq platform provided.

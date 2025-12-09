@@ -1,5 +1,5 @@
-reference,rname,length,totallength,ani_group,species
-GCF_000819615.1,NC_001422.1,5386,5386,1,Sinsheimervirus phiX174
-GCF_000820355.1,NC_005817.1,2928,5886,2,Sclerophthora macrospora virus A
-GCF_000820355.1,NC_005818.1,1981,5886,2,Sclerophthora macrospora virus A
-GCF_000820355.1,NC_005819.1,977,5886,2,Sclerophthora macrospora virus A
+reference,rname,length,totallength,species
+GCF_000819615.1,NC_001422.1,5386,5386,Sinsheimervirus phiX174
+GCF_000820355.1,NC_005817.1,2928,5886,Sclerophthora macrospora virus A
+GCF_000820355.1,NC_005818.1,1981,5886,Sclerophthora macrospora virus A
+GCF_000820355.1,NC_005819.1,977,5886,Sclerophthora macrospora virus A
