@@ -112,7 +112,7 @@ workflow {
     manifest = Channel.fromPath(params.manifest, checkIfExists: true).first()
     species_list = Channel.fromPath(params.species_list, checkIfExists: true).first()
 
-    if (params.workflow == 'comp_mapping') 
+    if (params.workflow == 'comp_mapping')
         competitive_mapping(input_files, manifest, species_list, params.seq_platform, params.reference_name)
     else if (params.workflow == 'tie_break')
         tie_break_workflow(input_files, manifest, species_list, params.seq_platform, params.reference_name)
@@ -179,7 +179,7 @@ workflow dynamic_tie_break_workflow {
     take:
     input_files
     genome_dirs // Each directory must contain a genome_paths.tsv file
-    assembly_metadata
+    taxonomy_files
     seq_platform
 
     main:
@@ -190,7 +190,7 @@ workflow dynamic_tie_break_workflow {
     dynamic_tie_break(
         input_files,
         genome_dirs,
-        assembly_metadata,
+        taxonomy_files,
         seq_platform,
         params.use_whole_genera_in_dynamic_cm,
         analyzer_params,

@@ -75,6 +75,19 @@ const TEST_SETS: &[TestSet] = &[
             "test_data/tb_intracellulare/with_ani_grouping/alignment_summary.csv",
     },
     TestSet {
+        name: "with_partial_ani_grouping",
+        input_bam: "test_data/tb_intracellulare/aln.bam",
+        contigs: "test_data/tb_intracellulare/with_partial_ani_grouping/contigs.csv",
+        output_root: "tests/test_produced_files/tb_intracellulare_with_partial_ani_grouping/",
+        parameters: "test_data/tb_intracellulare/params.yaml",
+        depth_counts_file: "test_data/tb_intracellulare/with_partial_ani_grouping/depth_counts.csv",
+        expected_ref_tie_breaker_order_file:
+            "test_data/tb_intracellulare/with_partial_ani_grouping/ref_tie_breaker_order.csv",
+        expected_stats_file: "test_data/tb_intracellulare/with_partial_ani_grouping/stats.yaml",
+        expected_summary_file:
+            "test_data/tb_intracellulare/with_partial_ani_grouping/alignment_summary.csv",
+    },
+    TestSet {
         name: "fortuitum",
         input_bam: "test_data/fortuitum/aln.bam",
         contigs: "test_data/fortuitum/contigs.csv",

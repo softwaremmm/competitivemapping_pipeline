@@ -43,7 +43,7 @@ def cli_entry_point():
     )
     parser.add_argument(
         "metadata",
-        help="path to file with columns assembly_accession, and reference",
+        help="path to file with columns accession, and reference",
         type=str,
     )
     parser.add_argument(
@@ -90,15 +90,16 @@ def cli_entry_point():
     )
 
     # add ani information
-    ani_df = get_ani_distances(refs_df, config)
-    contigs_df = assign_ani_groups(contigs_df, ani_df, config.ani_threshold)
+    if args.ani_threshold > 0:
+        ani_df = get_ani_distances(refs_df, config)
+        contigs_df = assign_ani_groups(contigs_df, ani_df, config.ani_threshold)
 
-    contigs_df.rename(columns={"reference": "assembly_accession"}, inplace=True)
+    contigs_df.rename(columns={"reference": "accession"}, inplace=True)
 
     sep = "\t" if args.metadata.endswith(".tsv") else ","
-    meta = pd.read_csv(args.metadata, sep=sep)[["assembly_accession", "reference"]]
+    meta = pd.read_csv(args.metadata, sep=sep)[["accession", "reference"]]
 
-    contigs_df = contigs_df.merge(meta, on="assembly_accession", how="left")
+    contigs_df = contigs_df.merge(meta, on="accession", how="left")
     contigs_df.sort_values(by=["reference", "rname"], inplace=True)
     contigs_df.to_csv(f"{config.output_root}contigs.csv", index=False)
 

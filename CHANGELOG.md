@@ -4,6 +4,9 @@
 - manifest_builder now works with files ending `.fastq.gz` as well as `_genomic.fna.gz` (helps for testing and sip pipeline).
 - update skani to 0.3.0 to match version used in paper (only used in manifest building. No impact on myco)
 - use workflow param to choose workflow to run locally (quality of life for local running. No impact on myco)
+- ani_group can now be partially filled
+- default behaviour of manifest_builder is changed to not set ani_group with skani unless threshold provided. When requested it only gives an ani_group for groups with more than one reference
+
 
 ## 3.2.0
 
