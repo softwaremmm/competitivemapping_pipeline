@@ -197,6 +197,54 @@ process dynamic_tie_break {
     """
 }
 
+// WARNING: Experimental process
+process dynamic_mapping {
+    publishDir "${params.publish_dir}", enabled: params.publish_dir != "", mode: "copy", saveAs: { filename -> sample_name + "_" + filename }
+    container {
+        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:b5bc5db' : params.test_container_cm
+    }
+
+    cpus 4
+    memory { 8.GB + (12.GB * task.attempt) }
+
+    pod label: "name", value: "competitive_mapping_pipeline:dynamic_mapping"
+    pod label: "sample_id", value: "${params.sample_id}"
+    pod label: "run_id", value: "${params.run_id}"
+
+    input:
+    tuple val(sample_name), path(fqs), path(sylph_report)
+    path genome_dirs
+    // Pattern used to avoid name conflicts
+    path "taxonomy?/*"
+    val seq_platform
+    val include_whole_genus
+
+    output:
+    tuple val(sample_name), path("aln.bam"), emit: bam
+
+    script:
+    whole_genera_arg = include_whole_genus ? "--include_whole_genus" : ""
+    """
+    manifest_builder --sylph_report ${sylph_report} \
+        --genome_dirs ${genome_dirs} \
+        --taxonomy_files taxonomy*/* \
+        ${whole_genera_arg} \
+        --cpus ${task.cpus} \
+        --output_root "out."
+
+    manifest_mapper \
+        --seq_platform ${seq_platform} \
+        --manifest out.manifest.fasta.gz \
+        --reads ${fqs} \
+        --cpus ${task.cpus} \
+        --sort_by_name \
+        -o aln.bam
+
+    # clean up large intermediate files if present
+    find . -type f -name "out.manifest.fasta.gz" -delete
+    """
+}
+
 process has_enough_reads {
     container {
         params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:b5bc5db' : params.test_container_cm

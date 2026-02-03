@@ -2,6 +2,7 @@
 include { competitiveMapping } from './process/competitive_mapping.nf'
 include { tie_break } from './process/competitive_mapping.nf'
 include { dynamic_tie_break } from './process/competitive_mapping.nf'
+include { dynamic_mapping } from './process/competitive_mapping.nf'
 include { has_enough_reads } from './process/competitive_mapping.nf'
 
 // input parameters
@@ -199,6 +200,29 @@ workflow dynamic_tie_break_workflow {
     emit:
     report_csv = dynamic_tie_break.out.report_csv
     stats = dynamic_tie_break.out.stats
+}
+
+// WARNING: Experimental process
+workflow dynamic_mapping_workflow {
+    take:
+    input_files
+    genome_dirs // Each directory must contain a genome_paths.tsv file
+    taxonomy_files
+    seq_platform
+
+    main:
+    check_seq_platform(seq_platform)
+
+    dynamic_mapping(
+        input_files,
+        genome_dirs,
+        taxonomy_files,
+        seq_platform,
+        params.use_whole_genera_in_dynamic_cm,
+    )
+
+    emit:
+    bam = dynamic_mapping.out.bam
 }
 
 def check_seq_platform(seq_platform) {
