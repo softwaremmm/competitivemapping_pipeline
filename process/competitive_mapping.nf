@@ -221,6 +221,7 @@ process dynamic_mapping {
 
     output:
     tuple val(sample_name), path("aln.bam"), emit: bam
+    tuple val(sample_name), path("contigs.csv"), emit: contigs
 
     script:
     whole_genera_arg = include_whole_genus ? "--include_whole_genus" : ""
@@ -231,6 +232,8 @@ process dynamic_mapping {
         ${whole_genera_arg} \
         --cpus ${task.cpus} \
         --output_root "out."
+
+    mv out.contigs.csv contigs.csv
 
     manifest_mapper \
         --seq_platform ${seq_platform} \

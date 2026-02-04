@@ -223,6 +223,7 @@ workflow dynamic_mapping_workflow {
 
     emit:
     bam = dynamic_mapping.out.bam
+    contigs = dynamic_mapping.out.contigs
 }
 
 def check_seq_platform(seq_platform) {
