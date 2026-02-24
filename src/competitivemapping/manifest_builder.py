@@ -38,13 +38,19 @@ class Config:
         cpus (int): Number of cores to use
         include_whole_genus (bool): Whether to include all genomes from genera found
         ani_threshold (float): ANI threshold for grouping genomes
+        af_threshold (float): Alignment fraction threshold for grouping genomes
+        force_ani_groups (bool): Whether to force use of ANI groups even if present in taxonomy file
         output_root (str): Path to the output root
+        just_contigs (bool): Whether to skip manifest generation and only produce contigs.csv
     """
 
     cpus: int
     include_whole_genus: bool
     ani_threshold: float
+    af_threshold: float
+    force_ani_groups: bool
     output_root: str
+    just_contigs: bool
 
 
 def read_taxonomy_file(filepath: str) -> pd.DataFrame:
@@ -166,10 +172,16 @@ def get_ani_distances(
     return ani_df
 
 
-def assign_ani_groups(contigs_df, ani_df, ani_threshold) -> pd.DataFrame:
+def assign_ani_groups(contigs_df, ani_df, ani_threshold, af_threshold) -> pd.DataFrame:
     """Find groups of similar genomes based on ANI threshold.
     Returns copy of contigs_df with ani_group column added"""
-    ani_df = ani_df[ani_df["ANI"] >= ani_threshold]
+    ani_df = ani_df[
+        (ani_df["ANI"] >= ani_threshold)
+        & (
+            (ani_df["Align_fraction_ref"] >= af_threshold)
+            | (ani_df["Align_fraction_query"] >= af_threshold)
+        )
+    ].copy()
 
     # build graph from filtered data
     graph = nx.from_pandas_edgelist(ani_df, "Ref", "Query")
@@ -289,10 +301,11 @@ def make_manifest(
     selected_df = genome_paths[genome_paths["accession"].isin(accessions)]
 
     # Cat all genomes into a single file
-    with open(manifest_file, "wb") as outfile:
-        for filepath in selected_df["path"]:
-            with open(filepath, "rb") as infile:
-                outfile.write(infile.read())
+    if not config.just_contigs:
+        with open(manifest_file, "wb") as outfile:
+            for filepath in selected_df["path"]:
+                with open(filepath, "rb") as infile:
+                    outfile.write(infile.read())
 
     # Read contigs in parallel
     with ProcessPoolExecutor(max_workers=config.cpus) as executor:
@@ -308,7 +321,7 @@ def make_manifest(
     )
 
     # add ani information if missing
-    if "ani_group" in taxonomy_df.columns:
+    if "ani_group" in taxonomy_df.columns and not config.force_ani_groups:
         # If ani_group is already present, use it
         contigs_df = contigs_df.merge(
             taxonomy_df[["accession", "ani_group"]],
@@ -319,7 +332,9 @@ def make_manifest(
         contigs_df.drop(columns=["accession"], inplace=True)
     elif config.ani_threshold > 0:
         ani_df = get_ani_distances(selected_df, config)
-        contigs_df = assign_ani_groups(contigs_df, ani_df, config.ani_threshold)
+        contigs_df = assign_ani_groups(
+            contigs_df, ani_df, config.ani_threshold, config.af_threshold
+        )
 
     # add species information
     species_lookup = taxonomy_df.set_index("accession")["species"].to_dict()
@@ -361,8 +376,30 @@ def cli_entry_point():
         default=0,
         type=float,
     )
+    parser.add_argument(
+        "--af_threshold",
+        help=(
+            "Alignment fraction threshold for grouping genomes."
+            "Requires at least this in EITHER direction for a genome pair to be grouped."
+        ),
+        default=80,
+        type=float,
+    )
+    parser.add_argument(
+        "--force_ani_groups",
+        help=(
+            "Force use of ANI groups even if present in taxonomy file. "
+            "Will recalculate ANI groups using provided thresholds."
+        ),
+        action="store_true",
+    )
     parser.add_argument("--cpus", help="Number of CPUs to use", default=4, type=int)
     parser.add_argument("--output_root", required=True, help="Path to the output files")
+    parser.add_argument(
+        "--just_contigs",
+        help="Only output contigs.csv and skip manifest generation",
+        action="store_true",
+    )
 
     args = parser.parse_args()
 
@@ -372,7 +409,10 @@ def cli_entry_point():
         cpus=int(args.cpus),
         include_whole_genus=args.include_whole_genus,
         ani_threshold=float(args.ani_threshold),
+        af_threshold=float(args.af_threshold),
+        force_ani_groups=args.force_ani_groups,
         output_root=args.output_root,
+        just_contigs=args.just_contigs,
     )
 
     _manifest, contigs = make_manifest(
