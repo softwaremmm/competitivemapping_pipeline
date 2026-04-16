@@ -58,7 +58,7 @@ tag_format = "$version"
 
 
 [tool.version_bumper]
-active_version = "0a688cf"
+active_version = "b59c775"
 version_files = [
     "process/competitive_mapping.nf",
 ]
