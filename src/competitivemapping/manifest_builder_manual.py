@@ -2,10 +2,12 @@
 """Build manifest from directory of genomes.
 Used when making manifest manually, e.g. for Myco"""
 
+import gzip
 import argparse
 import os
 from concurrent.futures import ProcessPoolExecutor
 
+from Bio import SeqIO
 import pandas as pd
 
 from competitivemapping.manifest_builder import (
@@ -25,6 +27,7 @@ def dir_to_df(genome_directory: str) -> pd.DataFrame:
         .str.replace(".gz", "", regex=False)
         .str.replace(".fasta", "", regex=False)
         .str.replace("_genomic.fna", "", regex=False)
+        .str.replace("_contigs.fa", "", regex=False)
     )
     df["path"] = df["path"].apply(lambda x: os.path.join(genome_directory, x))
     return df
@@ -53,6 +56,11 @@ def cli_entry_point():
         type=float,
     )
     parser.add_argument(
+        "--rename_contigs",
+        help="Whether to rename contigs to include reference and contig number",
+        action="store_true",
+    )
+    parser.add_argument(
         "-c", "--cpus", help="Number of CPUs to use", default=4, type=int
     )
     parser.add_argument(
@@ -69,14 +77,6 @@ def cli_entry_point():
     )
 
     refs_df = dir_to_df(args.genome_directory)
-    with open(f"{config.output_root}manifest.fasta.gz", "wb") as outfile:
-        for filepath in refs_df["path"]:
-            if not filepath.endswith(".gz"):
-                raise ValueError(
-                    f"Expected gzipped files, but found {filepath} without .gz extension."
-                )
-            with open(filepath, "rb") as infile:
-                outfile.write(infile.read())
 
     # Read contigs in parallel
     with ProcessPoolExecutor(max_workers=config.cpus) as executor:
@@ -88,6 +88,37 @@ def cli_entry_point():
     contigs_df["totallength"] = contigs_df.groupby("reference")["length"].transform(
         "sum"
     )
+
+    print(f"Read {len(contigs_df)} contigs from {len(refs_df)} genomes.")
+
+    if args.rename_contigs:
+        contigs_df["counter"] = contigs_df.groupby("reference").cumcount().astype(str)
+        contigs_df["rname"] = (
+            contigs_df["reference"].astype(str) + "_" + contigs_df["counter"]
+        )
+        contigs_df.drop(columns=["counter"], inplace=True)
+
+        with open(
+            f"{config.output_root}manifest.fasta", "w", encoding="utf-8"
+        ) as outfile:
+            for reference, filepath in zip(refs_df["accession"], refs_df["path"]):
+                with gzip.open(filepath, "rt") as infile:
+                    for index, record in enumerate(SeqIO.parse(infile, "fasta")):
+                        record.id = f"{reference}_{index}"
+                        record.name = record.id
+                        record.description = ""
+                        SeqIO.write(record, outfile, "fasta")
+        print(f"Wrote manifest fasta to {config.output_root}manifest.fasta")
+    else:
+        with open(f"{config.output_root}manifest.fasta.gz", "wb") as outfile:
+            for filepath in refs_df["path"]:
+                if not filepath.endswith(".gz"):
+                    raise ValueError(
+                        f"Expected gzipped files, but found {filepath} without .gz extension."
+                    )
+                with open(filepath, "rb") as infile:
+                    outfile.write(infile.read())
+        print(f"Wrote manifest fasta to {config.output_root}manifest.fasta.gz")
 
     # add ani information
     ani_df = get_ani_distances(refs_df, config)
