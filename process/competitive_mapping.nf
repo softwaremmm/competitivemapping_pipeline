@@ -1,8 +1,6 @@
 process competitiveMapping {
     publishDir "${params.publish_dir}", enabled: params.publish_dir != "", mode: "copy", saveAs: { filename -> sample_name + "_" + filename }
-    container {
-        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:b5bc5db' : params.test_container_cm
-    }
+    container params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:b5bc5db' : params.test_container_cm
 
     cpus 4
     memory { 12.GB + (4.GB * task.attempt) }
@@ -70,9 +68,7 @@ process competitiveMapping {
 // WARNING: Experimental process
 process tie_break {
     publishDir "${params.publish_dir}", enabled: params.publish_dir != "", mode: "copy", saveAs: { filename -> sample_name + "_" + filename }
-    container {
-        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:b5bc5db' : params.test_container_cm
-    }
+    container params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:b5bc5db' : params.test_container_cm
 
     cpus 8
     memory { 8.GB + (8.GB * task.attempt) }
@@ -137,9 +133,7 @@ process tie_break {
 // WARNING: Experimental process
 process dynamic_tie_break {
     publishDir "${params.publish_dir}", enabled: params.publish_dir != "", mode: "copy", saveAs: { filename -> sample_name + "_" + filename }
-    container {
-        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:b5bc5db' : params.test_container_cm
-    }
+    container params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:b5bc5db' : params.test_container_cm
 
     cpus 4
     memory { 8.GB + (12.GB * task.attempt) }
@@ -200,9 +194,7 @@ process dynamic_tie_break {
 // WARNING: Experimental process
 process dynamic_mapping {
     publishDir "${params.publish_dir}", enabled: params.publish_dir != "", mode: "copy", saveAs: { filename -> sample_name + "_" + filename }
-    container {
-        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:b5bc5db' : params.test_container_cm
-    }
+    container params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:b5bc5db' : params.test_container_cm
 
     cpus 4
     memory { 8.GB + (12.GB * task.attempt) }
@@ -249,9 +241,7 @@ process dynamic_mapping {
 }
 
 process has_enough_reads {
-    container {
-        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:b5bc5db' : params.test_container_cm
-    }
+    container params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:b5bc5db' : params.test_container_cm
 
     cpus 1
     memory "128MB"
