@@ -1,5 +1,5 @@
 # ---- Rust Build Stage ----
-FROM rust:1.86 AS chef
+FROM rust:1.91 AS chef
 
 RUN apt-get update && apt-get install -y clang llvm-dev
 RUN cargo install cargo-chef
