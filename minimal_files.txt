@@ -1,4 +1,5 @@
 process/competitive_mapping.nf
+process/sylph.nf
 process/params_illumina.yml
 process/params_ont.yml
 main.nf
