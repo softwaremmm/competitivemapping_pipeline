@@ -86,6 +86,8 @@ process dynamic_mapping {
     path ref_genome_dirs
     // Pattern used to avoid name conflicts
     path "taxonomy?/*"
+    // optional comma-separated list of accessions to always include as references
+    val fixed_refs
     val seq_platform
 
     output:
@@ -95,8 +97,10 @@ process dynamic_mapping {
     script:
     competitive_mapping_report = "species_comparison_report.json"
     competitive_mapping_csv = "species_comparison.csv"
+    fixed_refs_arg = fixed_refs ? "--fixed_refs " + fixed_refs : ""
     """
     manifest_builder --sylph_report ${sylph_report} \
+        ${fixed_refs_arg} \
         --genome_dirs ${ref_genome_dirs} \
         --taxonomy_files taxonomy*/* \
         --cpus ${task.cpus} \

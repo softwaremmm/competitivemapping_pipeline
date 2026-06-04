@@ -100,9 +100,8 @@ def sylph_db_A() -> dict:
         "sylph_report": "test_data/sylph_databases/A/sylph.tsv",
         "manifest": "test_data/sylph_databases/A/manifest.fasta.gz",
         "contigs": "test_data/sylph_databases/A/contigs.csv",
+        "contigs_with_fixed_refs": "test_data/sylph_databases/A/contigs_with_fixed_refs.csv",
         "contigs_with_ani_group": "test_data/sylph_databases/A/contigs_with_ani_group.csv",
-        "manifest_with_whole_genus": "test_data/sylph_databases/A/manifest_with_whole_genus.fasta.gz",
-        "contigs_with_whole_genus": "test_data/sylph_databases/A/contigs_with_whole_genus.csv",
     }
 
 

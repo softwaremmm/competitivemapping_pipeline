@@ -51,7 +51,6 @@ def read_taxonomy_file(filepath: str) -> pd.DataFrame:
     sep = "\t" if filepath.endswith(".tsv") or filepath.endswith(".tsv.gz") else ","
 
     # Need to check if this is a headered file or a two column file such as GTDB/sylph provide by default
-
     first_row = pd.read_csv(filepath, sep=sep, nrows=1, header=None)
 
     # is "accession" in first row?
@@ -146,6 +145,7 @@ def assign_ani_groups(contigs_df, ani_df, ani_threshold) -> pd.DataFrame:
 
 def make_manifest(
     report_path: str,
+    fixed_refs: list[str],
     taxonomy_files: list[str],
     genome_dirs: list[str],
     config: Config,
@@ -154,6 +154,7 @@ def make_manifest(
 
     Args:
         report_path (str): Path to the sylph report
+        fixed_refs (list[str]): list of accessions to always include as references
         taxonomy_files (list[str]): path to the db taxonomy files
         genome_dirs (list[str]): path to the directories with the genome fastas
         config (Config): Config object
@@ -164,8 +165,20 @@ def make_manifest(
     logging.info("Creating manifest and reading contigs")
     manifest_file = f"{config.output_root}manifest.fasta.gz"
 
+    accessions = set(fixed_refs) if fixed_refs else set()
+
+    sylph_df = pd.read_csv(report_path, sep="\t")
+    if not sylph_df.empty:
+        sylph_df["accession"] = (
+            sylph_df["Genome_file"]
+            .str.split("/")
+            .str[-1]
+            .str.replace(REF_FILE_SUFFIX_PATTERN, "", regex=True)
+        )
+        accessions.update(sylph_df["accession"].tolist())
+
     # Check if the sylph report is empty
-    if os.stat(report_path).st_size == 0 or pd.read_csv(report_path, sep="\t").empty:
+    if len(accessions) == 0:
         logging.warning("Sylph report is empty, producing empty outputs")
         with gzip.open(manifest_file, "wb") as _outfile:
             pass
@@ -180,15 +193,6 @@ def make_manifest(
             ]
         )
         return manifest_file, contigs_df
-
-    sylph_df = pd.read_csv(report_path, sep="\t")
-    sylph_df["accession"] = (
-        sylph_df["Genome_file"]
-        .str.split("/")
-        .str[-1]
-        .str.replace(REF_FILE_SUFFIX_PATTERN, "", regex=True)
-    )
-    sylph_accessions = sylph_df["accession"].tolist()
 
     genome_paths = pd.concat(get_genome_paths(genome_dir) for genome_dir in genome_dirs)
     genome_paths["accession"] = genome_paths["filename"].str.replace(
@@ -209,15 +213,12 @@ def make_manifest(
                 return taxa
         return ""
 
-    taxonomy_df["genus"] = taxonomy_df["taxonomy"].apply(
-        lambda x: select_taxa_level(x, "g__").replace("g__", "")
-    )
     taxonomy_df["species"] = taxonomy_df["taxonomy"].apply(
         lambda x: select_taxa_level(x, "s__").replace("s__", "")
     )
 
     # Now look up the genome paths
-    selected_df = genome_paths[genome_paths["accession"].isin(sylph_accessions)]
+    selected_df = genome_paths[genome_paths["accession"].isin(accessions)]
 
     # Cat all genomes into a single file
     with open(manifest_file, "wb") as outfile:
@@ -287,12 +288,19 @@ def cli_entry_point():
         default=0,
         type=float,
     )
+    parser.add_argument(
+        "--fixed_refs",
+        type=str,
+        help="comma separated list of accessions to always include as references.",
+    )
     parser.add_argument("--cpus", help="Number of CPUs to use", default=4, type=int)
     parser.add_argument("--output_root", required=True, help="Path to the output files")
 
     args = parser.parse_args()
 
     sylph_report = args.sylph_report
+
+    fixed_refs = args.fixed_refs.split(",") if args.fixed_refs else []
 
     config = Config(
         cpus=int(args.cpus),
@@ -302,6 +310,7 @@ def cli_entry_point():
 
     _manifest, contigs = make_manifest(
         sylph_report,
+        fixed_refs,
         args.taxonomy_files,
         args.genome_dirs,
         config,

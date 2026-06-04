@@ -74,6 +74,7 @@ workflow {
             ref_genome_dirs_ch,
             sylph_dbs_ch,
             taxonomy_files_ch,
+            params.fixed_refs,
             params.seq_platform,
         )
     }
@@ -113,6 +114,7 @@ workflow dynamic_competitive_mapping_wf {
     ref_genome_dirs // Each directory must contain a genome_paths.tsv file
     sylph_dbs // Paths .syldb files
     taxonomy_files // Paths to taxonomy tsv filse
+    fixed_refs // optional comma-separated list of accessions to always include as references
     seq_platform
 
     main:
@@ -131,6 +133,7 @@ workflow dynamic_competitive_mapping_wf {
         input_files.join(sylph.out.sylph_report),
         ref_genome_dirs,
         taxonomy_files,
+        fixed_refs,
         seq_platform,
     )
 
