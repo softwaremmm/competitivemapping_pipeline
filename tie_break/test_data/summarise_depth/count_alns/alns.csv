@@ -1,6 +1,0 @@
-query_name,target_id,query_length,ref_start,ref_end,signal
-1,1,1,1,1,0
-2,1,1,1,1,0
-3,2,1,1,1,0
-4,3,1,1,1,0
-5,1,1,1,1,1

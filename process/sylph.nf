@@ -3,7 +3,7 @@ process sylph {
     maxRetries 5
 
     container {
-        params.test_container_gatekeeper == "" ? params.container_prefix + '/gpas/gatekeeper_pipeline:cbb5fdb' : params.test_container_gatekeeper
+        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:b59c775' : params.test_container_cm
     }
     cpus 4
     memory { 14.GB * task.attempt }
@@ -20,12 +20,12 @@ process sylph {
     path "taxonomies?/*"
     val seq_platform
     val query_ani_threshold
-    // normally 90
     val profile_ani_threshold
+    // normally 90 for query and 95 for profile
 
     output:
-    tuple val(sample_name), path(sylph_query), emit: sylph_query
     tuple val(sample_name), path(sylph_report), emit: sylph_report
+    tuple val(sample_name), path(sylph_query), emit: sylph_query
     tuple val(sample_name), path(taxonomy_report), emit: taxonomy_report
 
     script:

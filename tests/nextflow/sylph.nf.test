@@ -1,0 +1,189 @@
+nextflow_process {
+    name "Test Process Sylph"
+    script "process/sylph.nf"
+    process "sylph"
+
+    test("Illumina - sylph should run on a sample") {
+        tag 'illumina'
+        when {
+            process{
+                """
+                input[0] = ['sample_test', [file("$projectDir/test_data/samples/illumina/viral_mix/reads_1.fastq.gz"), file("$projectDir/test_data/samples/illumina/viral_mix/reads_2.fastq.gz")]]
+                input[1] = [file("$projectDir/test_data/virus_refs_db/part_1/viral_db1_c100.syldb")]
+                input[2] = [file("$projectDir/test_data/virus_refs_db/part_1/taxonomy.tsv")]
+                input[3] = 'illumina'
+                input[4] = 90
+                input[5] = 95
+                """
+            }
+        }
+
+        then {
+            assert process.success
+
+            with(process.out.sylph_report.get(0)) {
+                assert get(1).contains("sylph_report.tsv")
+            }
+            with(process.out.taxonomy_report.get(0)) {
+                assert get(1).contains("taxonomy_report.tsv")
+            }
+            with(process.out.sylph_query.get(0)) {
+                assert get(1).contains("sylph_query.tsv")
+            }
+        }
+    }
+
+
+    test("Illumina - sylph should run on an empty sample") {
+        tag 'illumina'
+        when {
+            process{
+                """
+                input[0] = ['sample_test', [file("$projectDir/test_data/samples/empty_samples/reads_1.fastq.gz"), file("$projectDir/test_data/samples/empty_samples/reads_2.fastq.gz")]]
+                input[1] = [file("$projectDir/test_data/virus_refs_db/part_1/viral_db1_c100.syldb")]
+                input[2] = [file("$projectDir/test_data/virus_refs_db/part_1/taxonomy.tsv")]
+                input[3] = 'illumina'
+                input[4] = 90
+                input[5] = 95
+                """
+            }
+        }
+
+        then {
+            assert process.success
+
+            with(process.out.sylph_report.get(0)) {
+                assert get(1).contains("sylph_report.tsv")
+            }
+            with(process.out.taxonomy_report.get(0)) {
+                assert get(1).contains("taxonomy_report.tsv")
+            }
+        }
+    }
+
+    test("Illumina - sylph should run on multiple dbs") {
+        tag 'illumina'
+        when {
+            process{
+                """
+                input[0] = ['sample_test', [file("$projectDir/test_data/samples/illumina/viral_mix/reads_1.fastq.gz"), file("$projectDir/test_data/samples/illumina/viral_mix/reads_2.fastq.gz")]]
+                input[1] = [file("$projectDir/test_data/virus_refs_db/part_1/viral_db1_c100.syldb"), file("$projectDir/test_data/virus_refs_db/part_2/viral_db2_c100.syldb")]
+                input[2] = [file("$projectDir/test_data/virus_refs_db/part_1/taxonomy.tsv"), file("$projectDir/test_data/virus_refs_db/part_2/taxonomy.tsv")]
+                input[3] = 'illumina'
+                input[4] = 90
+                input[5] = 95
+                """
+            }
+        }
+
+        then {
+            assert process.success
+
+            with(process.out.sylph_report.get(0)) {
+                assert get(1).contains("sylph_report.tsv")
+                assert (path(get(1)).md5 == path("$projectDir/test_data/samples/illumina/viral_mix/sylph_profile.tsv").md5)
+            }
+            with(process.out.sylph_query.get(0)) {
+                assert get(1).contains("sylph_query.tsv")
+                assert (path(get(1)).md5 == path("$projectDir/test_data/samples/illumina/viral_mix/sylph_query.tsv").md5)
+            }
+            with(process.out.taxonomy_report.get(0)) {
+                assert get(1).contains("taxonomy_report.tsv")
+                assert (path(get(1)).md5 == path("$projectDir/test_data/samples/illumina/viral_mix/sylph_taxonomy_report.tsv").md5)
+            }
+        }
+    }
+
+    test("ONT - should run on a sample") {
+        tag 'ont'
+        when {
+            process{
+                """
+                input[0] = ['sample_test', file("$projectDir/test_data/samples/ont/viral_mix/reads.fastq.gz")]
+                input[1] = [file("$projectDir/test_data/virus_refs_db/part_1/viral_db1_c100.syldb")]
+                input[2] = [file("$projectDir/test_data/virus_refs_db/part_1/taxonomy.tsv")]
+                input[3] = 'ont'
+                input[4] = 90
+                input[5] = 95
+                """
+            }
+        }
+
+        then {
+            assert process.success
+
+            with(process.out.sylph_report.get(0)) {
+                assert get(1).contains("sylph_report.tsv")
+            }
+            with(process.out.sylph_query.get(0)) {
+                assert get(1).contains("sylph_query.tsv")
+            }
+            with(process.out.taxonomy_report.get(0)) {
+                assert get(1).contains("taxonomy_report.tsv")
+            }
+        }
+    }
+
+    test("ONT - sylph should run on an empty sample") {
+        tag 'ont'
+        when {
+            process{
+                """
+                input[0] = ['sample_test', file("$projectDir/test_data/samples/empty_samples/reads_1.fastq.gz")]
+                input[1] = [file("$projectDir/test_data/virus_refs_db/part_1/viral_db1_c100.syldb")]
+                input[2] = [file("$projectDir/test_data/virus_refs_db/part_1/taxonomy.tsv")]
+                input[3] = 'ont'
+                input[4] = 90
+                input[5] = 95
+                """
+            }
+        }
+
+        then {
+            assert process.success
+
+            with(process.out.sylph_report.get(0)) {
+                assert get(1).contains("sylph_report.tsv")
+            }
+            with(process.out.sylph_query.get(0)) {
+                assert get(1).contains("sylph_query.tsv")
+            }
+            with(process.out.taxonomy_report.get(0)) {
+                assert get(1).contains("taxonomy_report.tsv")
+            }
+        }
+    }
+
+    test("ONT - sylph should run on multiple dbs") {
+        tag 'ont'
+        when {
+            process{
+                """
+                input[0] = ['sample_test', file("$projectDir/test_data/samples/ont/viral_mix/reads.fastq.gz")]
+                input[1] = [file("$projectDir/test_data/virus_refs_db/part_1/viral_db1_c100.syldb"), file("$projectDir/test_data/virus_refs_db/part_2/viral_db2_c100.syldb")]
+                input[2] = [file("$projectDir/test_data/virus_refs_db/part_1/taxonomy.tsv"), file("$projectDir/test_data/virus_refs_db/part_2/taxonomy.tsv")]
+                input[3] = 'ont'
+                input[4] = 90
+                input[5] = 95
+                """
+            }
+        }
+
+        then {
+            assert process.success
+
+            with(process.out.sylph_report.get(0)) {
+                assert get(1).contains("sylph_report.tsv")
+                assert (path(get(1)).md5 == path("$projectDir/test_data/samples/ont/viral_mix/sylph_profile.tsv").md5)
+            }
+            with(process.out.sylph_query.get(0)) {
+                assert get(1).contains("sylph_query.tsv")
+                assert (path(get(1)).md5 == path("$projectDir/test_data/samples/ont/viral_mix/sylph_query.tsv").md5)
+            }
+            with(process.out.taxonomy_report.get(0)) {
+                assert get(1).contains("taxonomy_report.tsv")
+                assert (path(get(1)).md5 == path("$projectDir/test_data/samples/ont/viral_mix/sylph_taxonomy_report.tsv").md5)
+            }
+        }
+    }
+}

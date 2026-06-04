@@ -1,0 +1,33 @@
+#SampleID	reads.fastq.gz	Taxonomies_used:['taxonomies1/taxonomy.tsv', 'taxonomies2/taxonomy.tsv']
+clade_name	relative_abundance	sequence_abundance	ANI (if strain-level)	Coverage (if strain-level)
+x__Viruses	100.0	99.9999	NA	NA
+x__Viruses|x__Riboviria	87.5291	26.6218	NA	NA
+x__Viruses|x__Varidnaviria	12.4709	73.3781	NA	NA
+x__Viruses|x__Riboviria|x__Orthornavirae	87.5291	26.6218	NA	NA
+x__Viruses|x__Varidnaviria|x__Bamfordvirae	12.4709	73.3781	NA	NA
+x__Viruses|x__Riboviria|x__Orthornavirae|p__Kitrinoviricota	67.2409	19.3863	NA	NA
+x__Viruses|x__Riboviria|x__Orthornavirae|p__Negarnaviricota	20.2882	7.2355	NA	NA
+x__Viruses|x__Varidnaviria|x__Bamfordvirae|p__Nucleocytoviricota	12.4709	73.3781	NA	NA
+x__Viruses|x__Riboviria|x__Orthornavirae|p__Kitrinoviricota|c__Flasuviricetes	67.2409	19.3863	NA	NA
+x__Viruses|x__Riboviria|x__Orthornavirae|p__Negarnaviricota|x__Haploviricotina	20.2882	7.2355	NA	NA
+x__Viruses|x__Varidnaviria|x__Bamfordvirae|p__Nucleocytoviricota|c__Pokkesviricetes	12.4709	73.3781	NA	NA
+x__Viruses|x__Riboviria|x__Orthornavirae|p__Kitrinoviricota|c__Flasuviricetes|o__Amarillovirales	67.2409	19.3863	NA	NA
+x__Viruses|x__Riboviria|x__Orthornavirae|p__Negarnaviricota|x__Haploviricotina|c__Monjiviricetes	20.2882	7.2355	NA	NA
+x__Viruses|x__Varidnaviria|x__Bamfordvirae|p__Nucleocytoviricota|c__Pokkesviricetes|o__Chitovirales	12.4709	73.3781	NA	NA
+x__Viruses|x__Riboviria|x__Orthornavirae|p__Kitrinoviricota|c__Flasuviricetes|o__Amarillovirales|f__Flaviviridae	67.2409	19.3863	NA	NA
+x__Viruses|x__Riboviria|x__Orthornavirae|p__Negarnaviricota|x__Haploviricotina|c__Monjiviricetes|o__Mononegavirales	20.2882	7.2355	NA	NA
+x__Viruses|x__Varidnaviria|x__Bamfordvirae|p__Nucleocytoviricota|c__Pokkesviricetes|o__Chitovirales|f__Poxviridae	12.4709	73.3781	NA	NA
+x__Viruses|x__Riboviria|x__Orthornavirae|p__Kitrinoviricota|c__Flasuviricetes|o__Amarillovirales|f__Flaviviridae|g__Hepacivirus	67.2409	19.3863	NA	NA
+x__Viruses|x__Riboviria|x__Orthornavirae|p__Negarnaviricota|x__Haploviricotina|c__Monjiviricetes|o__Mononegavirales|f__Rhabdoviridae	20.2882	7.2355	NA	NA
+x__Viruses|x__Varidnaviria|x__Bamfordvirae|p__Nucleocytoviricota|c__Pokkesviricetes|o__Chitovirales|f__Poxviridae|x__Chordopoxvirinae	12.4709	73.3781	NA	NA
+x__Viruses|x__Riboviria|x__Orthornavirae|p__Kitrinoviricota|c__Flasuviricetes|o__Amarillovirales|f__Flaviviridae|g__Hepacivirus|s__Hepacivirus hominis	67.2409	19.3863	NA	NA
+x__Viruses|x__Riboviria|x__Orthornavirae|p__Negarnaviricota|x__Haploviricotina|c__Monjiviricetes|o__Mononegavirales|f__Rhabdoviridae|x__Alpharhabdovirinae	20.2882	7.2355	NA	NA
+x__Viruses|x__Varidnaviria|x__Bamfordvirae|p__Nucleocytoviricota|c__Pokkesviricetes|o__Chitovirales|f__Poxviridae|x__Chordopoxvirinae|g__Orthopoxvirus	12.4709	73.3781	NA	NA
+x__Viruses|x__Riboviria|x__Orthornavirae|p__Kitrinoviricota|c__Flasuviricetes|o__Amarillovirales|f__Flaviviridae|g__Hepacivirus|s__Hepacivirus hominis|x__Hepatitis C virus genotype 1	67.2409	19.3863	NA	NA
+x__Viruses|x__Riboviria|x__Orthornavirae|p__Negarnaviricota|x__Haploviricotina|c__Monjiviricetes|o__Mononegavirales|f__Rhabdoviridae|x__Alpharhabdovirinae|g__Lyssavirus	20.2882	7.2355	NA	NA
+x__Viruses|x__Varidnaviria|x__Bamfordvirae|p__Nucleocytoviricota|c__Pokkesviricetes|o__Chitovirales|f__Poxviridae|x__Chordopoxvirinae|g__Orthopoxvirus|s__Orthopoxvirus monkeypox	12.4709	73.3781	NA	NA
+x__Viruses|x__Riboviria|x__Orthornavirae|p__Kitrinoviricota|c__Flasuviricetes|o__Amarillovirales|f__Flaviviridae|g__Hepacivirus|s__Hepacivirus hominis|x__Hepatitis C virus genotype 1|t__GCF_000861845.1	67.2409	19.3863	96.79	20.443
+x__Viruses|x__Riboviria|x__Orthornavirae|p__Negarnaviricota|x__Haploviricotina|c__Monjiviricetes|o__Mononegavirales|f__Rhabdoviridae|x__Alpharhabdovirinae|g__Lyssavirus|s__Lyssavirus rabies	20.2882	7.2355	NA	NA
+x__Viruses|x__Varidnaviria|x__Bamfordvirae|p__Nucleocytoviricota|c__Pokkesviricetes|o__Chitovirales|f__Poxviridae|x__Chordopoxvirinae|g__Orthopoxvirus|s__Orthopoxvirus monkeypox|x__Monkeypox virus	12.4709	73.3781	NA	NA
+x__Viruses|x__Riboviria|x__Orthornavirae|p__Negarnaviricota|x__Haploviricotina|c__Monjiviricetes|o__Mononegavirales|f__Rhabdoviridae|x__Alpharhabdovirinae|g__Lyssavirus|s__Lyssavirus rabies|t__GCF_000859625.1	20.2882	7.2355	100.0	6.168
+x__Viruses|x__Varidnaviria|x__Bamfordvirae|p__Nucleocytoviricota|c__Pokkesviricetes|o__Chitovirales|f__Poxviridae|x__Chordopoxvirinae|g__Orthopoxvirus|s__Orthopoxvirus monkeypox|x__Monkeypox virus|t__GCF_000857045.1	12.4709	73.3781	99.36	3.791
