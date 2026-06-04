@@ -6,7 +6,7 @@ WORKDIR /app
 
 # Needed by nextflow
 RUN apt-get update && \
-    apt-get install -y procps && \
+    apt-get install -y procps git && \
     rm -rf /var/lib/apt/lists/*
 
 # Set up bioconda
