@@ -1,0 +1,74 @@
+{
+    "total_read_counts": {
+        "mapped_reads": 15,
+        "unmapped_reads": 0
+    },
+    "references": [
+        {
+            "species": "Lyssavirus rabies",
+            "genome_name": "GCF_000859625.1",
+            "length": 11932,
+            "numreads": 3,
+            "coverage": 98.79320000000001,
+            "meandepth": 1.35635,
+            "coverage_including_secondary": 98.79320000000001,
+            "meandepth_including_secondary": 1.35635,
+            "total_reads": 3,
+            "total_alns": 3,
+            "exclusive_reads": 3,
+            "primary_reads": 3,
+            "secondary_reads": 0,
+            "supplementary_reads": 0,
+            "supplementary_alns": 0
+        },
+        {
+            "species": "Hepacivirus hominis",
+            "genome_name": "GCF_000861845.1",
+            "length": 9646,
+            "numreads": 2,
+            "coverage": 98.4553,
+            "meandepth": 1.16991,
+            "coverage_including_secondary": 98.4553,
+            "meandepth_including_secondary": 1.16991,
+            "total_reads": 2,
+            "total_alns": 2,
+            "exclusive_reads": 2,
+            "primary_reads": 2,
+            "secondary_reads": 0,
+            "supplementary_reads": 0,
+            "supplementary_alns": 0
+        },
+        {
+            "species": "Orthopoxvirus monkeypox",
+            "genome_name": "GCF_000857045.1",
+            "length": 196858,
+            "numreads": 10,
+            "coverage": 42.0841,
+            "meandepth": 0.63365,
+            "coverage_including_secondary": 43.346,
+            "meandepth_including_secondary": 0.646268,
+            "total_reads": 10,
+            "total_alns": 12,
+            "exclusive_reads": 10,
+            "primary_reads": 10,
+            "secondary_reads": 0,
+            "supplementary_reads": 0,
+            "supplementary_alns": 1
+        }
+    ],
+    "definitions": {
+        "length": "Length of all contigs in reference",
+        "numreads": "Number of reads which map well to this reference (primary + supplementary)",
+        "coverage": "Percentage of reference covered by reads (not including secondary alignments)",
+        "meandepth": "Mean depth of coverage of reference (not including secondary alignments)",
+        "coverage_including_secondary": "Percentage of reference covered by reads (including secondary alignments)",
+        "meandepth_including_secondary": "Mean depth of coverage of reference (including secondary alignments)",
+        "total_reads": "Total number of reads which map (in any way) to chrom",
+        "total_alns": "Total number of alignments, so will count supplementary separately",
+        "exclusive_reads": "reads which only maps to this chrom",
+        "primary_reads": "reads which map best to this chrom",
+        "secondary_reads": "reads which map to this chrom but not with primary",
+        "supplementary_reads": "reads which have supplementary alignments but not primary",
+        "supplementary_alns": "number of supplementary alignments"
+    }
+}

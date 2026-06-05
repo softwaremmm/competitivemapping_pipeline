@@ -36,13 +36,11 @@ class Config:
 
     Args:
         cpus (int): Number of cores to use
-        include_whole_genus (bool): Whether to include all genomes from genera found
         ani_threshold (float): ANI threshold for grouping genomes
         output_root (str): Path to the output root
     """
 
     cpus: int
-    include_whole_genus: bool
     ani_threshold: float
     output_root: str
 
@@ -81,50 +79,6 @@ def read_contigs(args: tuple[str, str]) -> list[dict[str, str]]:
                 }
             )
     return contigs
-
-
-def get_base_species_name(species: str) -> str:
-    """removes _AB etc from species names if present.
-    Should not effect genus names"""
-    return re.sub(r"_[A-Z]+$", "", species)
-
-
-def select_extra_species(
-    sylph_species: list[str], potential_species_df: pd.DataFrame
-) -> pd.DataFrame:
-    """Filter extra species to include in manifest.
-    Want to include one reference for each named species.
-    So exlucde sp12345678 and only include one of <species>_A and <species>_B
-
-    Args:
-        sylph_species (list[str]): list of species found by sylph
-        potential_species_df (pd.DataFrame): df with genomes from rest of genera.
-
-    Returns:
-        pd.DataFrame: Filtered dataframe
-    """
-    sylph_base_species = [get_base_species_name(species) for species in sylph_species]
-    potential_species_df["base_species"] = potential_species_df["species"].apply(
-        get_base_species_name
-    )
-    potential_species_df = potential_species_df[
-        ~potential_species_df["base_species"].isin(sylph_base_species)
-    ]
-
-    # Remove species which have sp followed by 8 digits
-    potential_species_df = potential_species_df[
-        ~potential_species_df["species"].str.contains(r"sp\d{8}", na=False)
-    ]
-
-    # Now group by base_species and select the first alphabetically
-    potential_species_df = (
-        potential_species_df.sort_values("species")
-        .groupby("base_species")
-        .first()
-        .reset_index()
-    )
-
-    return potential_species_df.copy()
 
 
 def get_genome_paths(genome_dir: str) -> pd.DataFrame:
@@ -262,31 +216,8 @@ def make_manifest(
         lambda x: select_taxa_level(x, "s__").replace("s__", "")
     )
 
-    if config.include_whole_genus:
-        # Extend accessions to include genomes from rest of the genus(/genera)
-        sylph_taxonomy_df = taxonomy_df[
-            taxonomy_df["accession"].isin(sylph_accessions)
-        ].copy()
-
-        sylph_species = (
-            taxonomy_df[taxonomy_df["accession"].isin(sylph_accessions)]["species"]
-            .unique()
-            .tolist()
-        )
-
-        found_genera = sylph_taxonomy_df["genus"].unique()
-
-        potential_genomes = taxonomy_df[taxonomy_df["genus"].isin(found_genera)].copy()
-
-        potential_genomes = select_extra_species(sylph_species, potential_genomes)
-
-        # Now add these to the accessions
-        accessions = sylph_accessions + potential_genomes["accession"].tolist()
-    else:
-        accessions = sylph_accessions
-
     # Now look up the genome paths
-    selected_df = genome_paths[genome_paths["accession"].isin(accessions)]
+    selected_df = genome_paths[genome_paths["accession"].isin(sylph_accessions)]
 
     # Cat all genomes into a single file
     with open(manifest_file, "wb") as outfile:
@@ -348,11 +279,6 @@ def cli_entry_point():
         nargs="+",
     )
     parser.add_argument(
-        "--include_whole_genus",
-        help="Include all genomes from genera found in the sylph report",
-        action="store_true",
-    )
-    parser.add_argument(
         "--ani_threshold",
         help=(
             "ANI threshold for grouping genomes. 0 means do not group (default). "
@@ -370,7 +296,6 @@ def cli_entry_point():
 
     config = Config(
         cpus=int(args.cpus),
-        include_whole_genus=args.include_whole_genus,
         ani_threshold=float(args.ani_threshold),
         output_root=args.output_root,
     )

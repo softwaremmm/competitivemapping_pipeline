@@ -2,7 +2,7 @@ nextflow_process {
 
     name "Test Process competitiveMapping with Flu"
     script "process/competitive_mapping.nf"
-    process "competitiveMapping"
+    process "competitive_mapping"
 
 
     test("Flu Illumina - Process should succeed when sample files and a manifest are provided") {

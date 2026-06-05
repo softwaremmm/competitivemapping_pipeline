@@ -41,7 +41,7 @@ dev = [
     "mypy",
     "pandas-stubs",
     "types-jsonschema",
-    "version_bumper @ git+https://github.com/GlobalPathogenAnalysisService/version_bumper.git",
+    "version_bumper @ git+https://github.com/softwaremmm/version_bumper.git",
 ]
 docs = ["json-schema-for-humans"]
 

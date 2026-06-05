@@ -6,6 +6,10 @@
 - use workflow param to choose workflow to run locally (quality of life for local running. No impact on myco)
 - ani_group can now be partially filled
 - default behaviour of manifest_builder is changed to not set ani_group with skani unless threshold provided. When requested it only gives an ani_group for groups with more than one reference
+- remove tie-break
+- remove "include_whole_genus" option when building manifest (add too many refs)
+- add sylph process
+- add dynamic workflow which runs sylph, builds manifest and the uses standard comp mapping"
 
 
 ## 3.2.0

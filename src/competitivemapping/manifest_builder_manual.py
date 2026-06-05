@@ -63,7 +63,6 @@ def cli_entry_point():
 
     config = Config(
         cpus=args.cpus,
-        include_whole_genus=False,
         ani_threshold=args.ani_threshold,
         output_root=args.output_root,
     )

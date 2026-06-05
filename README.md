@@ -1,8 +1,13 @@
 # Competitive Mapping Pipeline
 
-Competitive Mapping is an algorithm that compares the sample reads with the references in the manifest and makes a positive selection of the reads matching a specific `rname`.
+Competitive Mapping uses Minimap2 to map fastq reads against multiple references at the same time, in order to assign reads to their correct reference.
+Competitive Mapping will produce a summary csv and json file detailing how many reads each reference got as well as the resulting coverage.
 
-The pipeline for competitive mapping takes a pair of FASTQ files and outputs the positive filtering of the h37_rv reads (i.e. those reads that are judged to map to the *Mycobacterium tuberculosis* H37RV reference genome) along with unmapped reads, a report with the mapping rank (a list of species in the manifest to which reads have mapped `competitivemapping_report.json`).
+Within the Myco pipeline the reads assigned to TB (The H37RV reference) and unmapped reads get put into a fastq file to be used for later assembly.
+
+There are two workflows:
+1. Standard: This takes a fixed manifest (multi fasta file) of references and a csv mapping the contigs (`rname`) to the actual reference names.
+2. Dynamic: This takes a larger database and uses sylph (profile) to select likely references before mapping.
 
 ### Dependencies
 * Docker
@@ -15,81 +20,11 @@ conda activate competitive_mapping
 pip install -e .[dev]
 ```
 
-### Needed data
-* All data for testing is included in `$projectDir/test_data`.
-* Myco manifest can be found in the knowledge bucket under `manifest`. See [extra readme](data/manifest/README.md) for details about manifest.
-* Flu manifest is under `influenza_virus/manifest`.
-* (for sylph) reference databases are found in the knowledge bucket under `sylph`.
-
-
-## Overview
-Competitive mapping uses minimap2 to map reads against manifest (multifasta of reference genomes) and then analyse the resulting bam file.
-A species list file is required to match contigs (`rnames`) in the multifasta manifest to a reference as some references have many contigs.
-
-This is co-ordinated by three scripts:
-
-### manifest_builder [In development]
-This takes a sylph query report and builds a manifest from it.
-This is used for the metagenomic pipeline in development. Myco has a fixed manifest.
-
-parameters:
-- sylph_report: Path to the sylph query/profile output file.
-- genome_dirs: path to directory containing all the reference genomes. Must contain a `genome_paths.tsv`. Look in knowledge bucket for examples.
-- taxonomy_files: csv/tsv with taxonomy info for each reference used. Can optionally have an "ani_group" column. Accepts the taxonomy tsv provided by sylph-tax.
-- include_whole_genus: if this is set then for each species sylph finds the whole genus will be added to the manifest.
-- ani_threshold: if set, will use this threshold for grouping similar references. Will not be used if metadata file has "ani_group" column.
-
-### manifest_mapper
-Map reads against the manifest. It will select minimap2 settings based on the seq platform provided.
-This step produces a bam file.
-
-parameters:
-- manifest: path to multifasta
-- reads: path to input fastqs
-- seq_platform: `ont` or `illumina`
-- filter_secondary/filter_supplementary: Will exclude secondary/supplementary alignments from resulting bam.
-- sort_by_name: this sorts the bam file by name rather than position. (Used for development)
-- equality_in_cigar: add more equality information to CIGAR strings in bam file. (Used for development)
-
-### competitive_mapping
-This takes the bam file and calculates various coverage stats for the references in the manifest. It:
-- Run samtools coverage and aggregate results with `process_coverage.py`
-- Calculate alignment stats from bam file use `process_aln_stats.py`
-- Produce overall csv and report json
-
-parameters:
-- input_bam: bam from previous step
-- contigs: the species list file
-- seq_platform: `ont` or `illumina`
-- ref_for_fastq: If set then the reads which mapped to the provided reference will be extracted from the bam file. Used in myco to select TB reads.
-- reference_name (optional): Set this to the name of the reference you want to filter reads for e.g. `M.tuberculosis` to output filtered _M. tuberculosis_ reads. Can also take a comma seperated list.
-Note: currently unmapped reads will also be extracted by default
-
-### Tie break
-This is a rust based replacement to the competitive mapping python script.
-See its [readme](tie_break/README.md) for more info.
-
-
-## Running Nextflow
-The workflow takes the following inputs
-- input_dir. Path to directory containing input fastq files
-- seq_platform. `illumina` or `ont`.
-- manifest. Path to manifest file
-- species_list. Path to csv which has the contig to genome mapping
+### Running Nextflow
+The [Makefile](Makefile) includes several examples of how to run the nextflow.
 
 When running locally can save outputs by using `--publish_dir`.
 And to use locally built container add `-profile local_docker`.
-
-Example using test data:
-```bash
-nextflow run . \
-  --seq_platform illumina \
-  --input_dir test_data/samples/illumina/chloro \
-  --manifest test_data/myco_manifest/manifest.fasta.gz \
-  --species_list test_data/myco_manifest/contigs.csv \
-  --publish_dir results \
-  -resume
-```
 
 
 By default it will look for files in the input directory based on the following params:
@@ -101,8 +36,55 @@ but these can be overriden. e.g.
 nextflow run ... --input_paired_suffix "tb_sample*_{1,2}.fna.gz"
 ```
 
+The dynamic workflow can take lists of databases. When running locally this means that you can set `--ref_genome_dirs`, `--sylph_dbs` and `--taxonomy_files` to a comma separated list of file paths. Alternatively, you can set the params to a list within a `nextflow.config`.
+
+### Needed data
+* All data for testing is included in `$projectDir/test_data`.
+* (Myco) Myco manifest can be found in the knowledge bucket under `manifest`. See [extra readme](data/manifest/README.md) for details about manifest.
+* (Flu) Flu manifest is under `influenza_virus/manifest`.
+* (Dynamic) reference databases are found in the knowledge bucket under `sylph`. For more details and how to create them see [reference_set_manager](https://github.com/softwaremmm/reference_set_manager).
+
+
+## Overview
+1. (Dynamic) Run sylph against database to produce a sylph profile and query report
+2. (Dynamic) Use `manifest_builder` to create a manifest fasta and contigs csv from a sylph report
+3. Use `manifest_mapper` to run minimap2 with the desired settings
+4. Use `competitive_mapping` to investigate the bam file and calculate the output stats
+
+### manifest_builder
+Builds the manifest from a sylph report.
+
+parameters:
+- sylph_report: Path to the sylph query/profile output file.
+- genome_dirs: path to directory containing all the reference genomes. Must contain a `genome_paths.tsv`. Look in knowledge bucket for examples.
+- taxonomy_files: csv/tsv with taxonomy info for each reference used. Can optionally have an "ani_group" column.
+- ani_threshold: if set, will use this threshold for grouping similar references. Will not be used if taxonomy file has "ani_group" column already.
+
+### manifest_mapper
+Map reads against the manifest using Minimap2.
+
+parameters:
+- manifest: path to multifasta
+- reads: path to input fastqs
+- seq_platform: `ont` or `illumina`
+- filter_secondary/filter_supplementary: Will exclude secondary/supplementary alignments from resulting bam.
+
+### competitive_mapping
+This takes the bam file and calculates various coverage stats for the references in the manifest. It:
+- Run samtools coverage and aggregate results with `process_coverage.py`
+- Calculate alignment stats from bam file use `process_aln_stats.py`
+- Produce overall csv and report json
+
+parameters:
+- input_bam: bam from previous step
+- contigs: file with mapping from contigs to reference. Often called species_list.
+- seq_platform: `ont` or `illumina`
+- ref_for_fastq: If set then the reads which mapped to the provided reference will be extracted from the bam file. Used in myco to select TB reads.
+Note: currently unmapped reads will also be extracted by default
+
+
 ## Testing
-There a tests for tie_break, python and nextflow using [nf-test](https://github.com/askimed/nf-test).
+There a tests for python and nextflow using [nf-test](https://github.com/askimed/nf-test).
 All test data is included in the repo.
 
 They are all triggered by running:
@@ -137,7 +119,7 @@ The result of this is that reads are only converted to fastq if
 1. Both in a pair are unmapped
 2. Both in a pair have a primary or supplementary mapping to h37rv
 
-In the future we could change this to out put a read pair as long as **either** read in a pair map to h37rv.
+In the future we could change this to output a read pair as long as **either** read in a pair map to h37rv.
 
 
 ## Manifest remarks

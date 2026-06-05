@@ -13,58 +13,6 @@ from test_utils import check_file, check_gzipped_file, get_cpus
 from competitivemapping import manifest_builder
 
 
-def test_get_base_species_name():
-    assert (
-        manifest_builder.get_base_species_name("Streptococcus mitis")
-        == "Streptococcus mitis"
-    )
-    assert (
-        manifest_builder.get_base_species_name("Haemophilus_D parainfluenzae_Y")
-        == "Haemophilus_D parainfluenzae"
-    )
-    assert (
-        manifest_builder.get_base_species_name("Aerococcus urinae_E")
-        == "Aerococcus urinae"
-    )
-    assert (
-        manifest_builder.get_base_species_name("Haemophilus_D sp015255025")
-        == "Haemophilus_D sp015255025"
-    )
-
-
-def test_select_extra_species():
-    df = pd.DataFrame(
-        {
-            "species": [
-                "sp12345678",
-                "Streptococcus mitis_CU",
-                "Streptococcus mitis",
-                "Streptococcus oralis_V",
-                "Streptococcus oralis_E",
-                "Streptococcus halitosis",
-                "Streptococcus sp943736975",
-            ]
-        }
-    )
-
-    assert set(
-        manifest_builder.select_extra_species(["other"], df)["species"].tolist()
-    ) == {
-        "Streptococcus mitis",
-        "Streptococcus oralis_E",
-        "Streptococcus halitosis",
-    }
-
-    assert set(
-        manifest_builder.select_extra_species(["Streptococcus mitis_CU", "other"], df)[
-            "species"
-        ].tolist()
-    ) == {
-        "Streptococcus oralis_E",
-        "Streptococcus halitosis",
-    }
-
-
 def test_get_genome_paths(test_outputs_dir):
     test_dir = os.path.join(test_outputs_dir, "test_get_genome_paths")
     os.makedirs(test_dir, exist_ok=True)
@@ -178,40 +126,6 @@ def test_build_manifest_A_with_ani_groups(sylph_db_A, test_outputs_dir, mocker):
     # check that manifest and contigs are the same
     check_gzipped_file(sylph_db_A["manifest"], output_root + "manifest.fasta.gz")
     check_file(sylph_db_A["contigs_with_ani_group"], output_root + "contigs.csv")
-
-
-def test_build_manifest_A_with_whole_genus(sylph_db_A, test_outputs_dir, mocker):
-    output_dir = os.path.join(
-        test_outputs_dir, "test_build_manifest_A_with_whole_genus"
-    )
-    os.makedirs(output_dir, exist_ok=True)
-    output_root = str(output_dir) + "/"
-
-    mocker.patch(
-        "sys.argv",
-        [
-            "manifest_builder",
-            "--sylph_report",
-            sylph_db_A["sylph_report"],
-            "--genome_dirs",
-            sylph_db_A["genomes_dir"],
-            "--taxonomy_files",
-            sylph_db_A["taxonomy"],
-            "--output_root",
-            output_root,
-            "--cpus",
-            str(get_cpus()),
-            "--include_whole_genus",
-        ],
-    )
-
-    manifest_builder.cli_entry_point()
-
-    # check that manifest and contigs are the same
-    check_gzipped_file(
-        sylph_db_A["manifest_with_whole_genus"], output_root + "manifest.fasta.gz"
-    )
-    check_file(sylph_db_A["contigs_with_whole_genus"], output_root + "contigs.csv")
 
 
 def test_build_manifest_A_metadata(sylph_db_A, test_outputs_dir, mocker):

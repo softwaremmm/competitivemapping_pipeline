@@ -1,12 +1,13 @@
 #!/usr/bin/env nextflow
-include { competitiveMapping } from './process/competitive_mapping.nf'
-include { tie_break } from './process/competitive_mapping.nf'
-include { dynamic_tie_break } from './process/competitive_mapping.nf'
+include { competitive_mapping } from './process/competitive_mapping.nf'
+include { dynamic_mapping } from './process/competitive_mapping.nf'
 include { has_enough_reads } from './process/competitive_mapping.nf'
+include { sylph } from './process/sylph.nf'
 
 // input parameters
 params.input_dir = ''
 params.manifest = ''
+params.species_list = ''
 params.seq_platform = ''
 params.reference_name = ''
 params.workflow = 'comp_mapping'
@@ -14,88 +15,23 @@ params.workflow = 'comp_mapping'
 // default thresholds
 params.illumina_threshold = 100000
 params.ont_threshold = 1000
-params.use_whole_genera_in_dynamic_cm = true
+params.query_ani_threshold = 90
+params.profile_ani_threshold = 95
 
 // input defaults
 params.input_paired_suffix = "*_{1,2}.fastq.gz"
 params.input_single_suffix = "*.fastq.gz"
 
 workflow {
-    //Define ANSI colours for ease
-    ANSI_GREEN = '\033[1;32m'
-    ANSI_RESET = '\033[0m'
 
-    if (params.help) {
-        log.info(
-            '''
-            ========================================================================
-            Competitive Mapping
-
-            Determination of species by Competitive Mapping using minimap2.
-
-            Parameters:
-            ------------------------------------------------------------------------
-
-            --input_dir  Directory holding the fastq files *_{1,2}.fastq.gz
-            --manifest
-            --species_list
-            --seq_platform
-            --reference_name: Reference name to use for the fastq files. Default: ''. If you want to use a list of names, input a string separated by commas.
-            --workflow: Workflow to run. Options are 'comp_mapping' (default) or 'tie_break'
-            '''.stripIndent()
-        )
-        exit(0)
-    }
-
-    if (params.input_dir == '') {
-        exit(1, 'error: --input_dir is mandatory')
-    }
-    if (params.manifest == '') {
-        exit(1, 'error: --manifest is mandatory')
-    }
-    if (params.species_list == '') {
-        exit(1, 'error: --species_list is mandatory')
-    }
-    if (params.seq_platform == '') {
-        exit(1, 'error: --seq_platform is mandatory')
-    }
-
-
-    log.info(
-        """
-        ========================================================================
-
-        Competitive Mapping
-
-        Determination of species by Competitive Mapping using minimap2.
-
-        Parameters:
-        ------------------------------------------------------------------------
-
-        --input_dir    ${params.input_dir}
-        --manifest     ${params.manifest}
-        --species_list ${params.species_list}
-        --seq_platform ${params.seq_platform}
-        --reference_name ${params.reference_name}
-        --workflow     ${params.workflow}
-
-        Runtime data:
-        ------------------------------------------------------------------------
-
-        Running with profile  ${ANSI_GREEN}${workflow.profile}${ANSI_RESET}
-        Running as user       ${ANSI_GREEN}${workflow.userName}${ANSI_RESET}
-        Launch directory      ${ANSI_GREEN}${workflow.launchDir}${ANSI_RESET}
-        Project directory     ${ANSI_GREEN}${projectDir}${ANSI_RESET}
-        """.stripIndent()
-    )
-
+    // Get input fastqs
     if (params.seq_platform == 'ont') {
-        input_files = Channel.fromPath("${params.input_dir}/${params.input_single_suffix}", checkIfExists: true)
+        input_files = channel.fromPath("${params.input_dir}/${params.input_single_suffix}", checkIfExists: true)
             .ifEmpty { error("cannot find any reads matching ${params.input_single_suffix} in ${params.input_dir}") }
             .map { it -> tuple(it.simpleName, it) }
     }
     else if (params.seq_platform == 'illumina') {
-        input_files = Channel.fromFilePairs(
+        input_files = channel.fromFilePairs(
                 "${params.input_dir}/${params.input_paired_suffix}",
                 flat: false,
                 checkIfExists: true,
@@ -108,22 +44,48 @@ workflow {
     // Show first 3 in channel so user can check if they are correct
     input_files.take(3).view()
 
-    // Using fromPath means they can be provided as relative paths
-    manifest = Channel.fromPath(params.manifest, checkIfExists: true).first()
-    species_list = Channel.fromPath(params.species_list, checkIfExists: true).first()
+    if (params.workflow == 'comp_mapping') {
+        // Using fromPath means they can be provided as relative paths
+        manifest = channel.fromPath(params.manifest, checkIfExists: true).first()
+        species_list = channel.fromPath(params.species_list, checkIfExists: true).first()
 
-    if (params.workflow == 'comp_mapping')
-        competitive_mapping(input_files, manifest, species_list, params.seq_platform, params.reference_name)
-    else if (params.workflow == 'tie_break')
-        tie_break_workflow(input_files, manifest, species_list, params.seq_platform, params.reference_name)
-    else
-        exit(1, "error: --workflow must be one of 'comp_mapping' or 'tie_break'")
+        competitive_mapping_wf(
+            input_files,
+            manifest,
+            species_list,
+            params.seq_platform,
+            params.reference_name,
+        )
+    }
+    else if (params.workflow == 'dynamic') {
+
+        // Some params could be provided as comma-separated strings or lists, so we handle both cases here
+        ref_genome_dirs_list = params.ref_genome_dirs instanceof List ? params.ref_genome_dirs : params.ref_genome_dirs.split(',').collect { it -> it.trim() }
+        ref_genome_dirs_ch = channel.fromList(ref_genome_dirs_list).map { it -> file(it) }.collect()
+
+        sylph_dbs_list = params.sylph_dbs instanceof List ? params.sylph_dbs : params.sylph_dbs.split(',').collect { it -> it.trim() }
+        sylph_dbs_ch = channel.fromList(sylph_dbs_list).map { it -> file(it) }.collect()
+
+        taxonomy_files_list = params.taxonomy_files instanceof List ? params.taxonomy_files : params.taxonomy_files.split(',').collect { it -> it.trim() }
+        taxonomy_files_ch = channel.fromList(taxonomy_files_list).map { it -> file(it) }.collect()
+
+        dynamic_competitive_mapping_wf(
+            input_files,
+            ref_genome_dirs_ch,
+            sylph_dbs_ch,
+            taxonomy_files_ch,
+            params.seq_platform,
+        )
+    }
+    else {
+        exit(1, "error: --workflow must be one of 'comp_mapping' or 'dynamic'")
+    }
 }
 
 
-workflow competitive_mapping {
+workflow competitive_mapping_wf {
     take:
-    input_files
+    input_files // tuple of sample name and list of fastq paths
     manifest
     species_list
     seq_platform
@@ -133,7 +95,7 @@ workflow competitive_mapping {
 
     check_seq_platform(seq_platform)
 
-    competitive_mapping_output = competitiveMapping(input_files, manifest, species_list, seq_platform, reference_name)
+    competitive_mapping_output = competitive_mapping(input_files, manifest, species_list, seq_platform, reference_name)
     threshold = seq_platform == 'illumina' ? params.illumina_threshold : params.ont_threshold
     has_enough_reads(competitive_mapping_output.report_json, threshold)
 
@@ -144,61 +106,40 @@ workflow competitive_mapping {
     cm_enough_reads = has_enough_reads.out
 }
 
-// WARNING: Experimental process
-workflow tie_break_workflow {
+
+workflow dynamic_competitive_mapping_wf {
     take:
-    input_files
-    manifest
-    species_list
-    seq_platform
-    reference_name
-
-    main:
-    check_seq_platform(seq_platform)
-
-    analyzer_params = Channel.fromPath("${moduleDir}/process/params_${seq_platform}.yml").first()
-
-    tie_break(
-        input_files,
-        manifest,
-        species_list,
-        seq_platform,
-        analyzer_params,
-        reference_name,
-    )
-
-    emit:
-    report_csv = tie_break.out.report_csv
-    stats = tie_break.out.stats
-    ref_reads = tie_break.out.ref_reads
-}
-
-// WARNING: Experimental process
-// currently also runs standard workflow for comparison
-workflow dynamic_tie_break_workflow {
-    take:
-    input_files
-    genome_dirs // Each directory must contain a genome_paths.tsv file
-    taxonomy_files
+    input_files // tuple of sample name and list of fastq paths
+    ref_genome_dirs // Each directory must contain a genome_paths.tsv file
+    sylph_dbs // Paths .syldb files
+    taxonomy_files // Paths to taxonomy tsv filse
     seq_platform
 
     main:
     check_seq_platform(seq_platform)
 
-    analyzer_params = Channel.fromPath("${moduleDir}/process/params_${seq_platform}.yml").first()
-
-    dynamic_tie_break(
+    sylph(
         input_files,
-        genome_dirs,
+        sylph_dbs,
         taxonomy_files,
         seq_platform,
-        params.use_whole_genera_in_dynamic_cm,
-        analyzer_params,
+        params.query_ani_threshold,
+        params.profile_ani_threshold,
+    )
+
+    dynamic_mapping(
+        input_files.join(sylph.out.sylph_report),
+        ref_genome_dirs,
+        taxonomy_files,
+        seq_platform,
     )
 
     emit:
-    report_csv = dynamic_tie_break.out.report_csv
-    stats = dynamic_tie_break.out.stats
+    report_csv = dynamic_mapping.out.report_csv
+    report_json = dynamic_mapping.out.report_json
+    sylph_report = sylph.out.sylph_report
+    sylph_query = sylph.out.sylph_query
+    sylph_taxonomy_report = sylph.out.taxonomy_report
 }
 
 def check_seq_platform(seq_platform) {
