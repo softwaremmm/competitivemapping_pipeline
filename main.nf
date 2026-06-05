@@ -1,6 +1,6 @@
 #!/usr/bin/env nextflow
 include { competitive_mapping } from './process/competitive_mapping.nf'
-include { dynamic_mapping } from './process/competitive_mapping.nf'
+include { build_manifest } from './process/competitive_mapping.nf'
 include { has_enough_reads } from './process/competitive_mapping.nf'
 include { sylph } from './process/sylph.nf'
 
@@ -9,7 +9,7 @@ params.input_dir = ''
 params.manifest = ''
 params.species_list = ''
 params.seq_platform = ''
-params.reference_name = ''
+params.ref_for_fastqs = ''
 params.workflow = 'comp_mapping'
 
 // default thresholds
@@ -54,7 +54,7 @@ workflow {
             manifest,
             species_list,
             params.seq_platform,
-            params.reference_name,
+            params.ref_for_fastqs,
         )
     }
     else if (params.workflow == 'dynamic') {
@@ -75,6 +75,7 @@ workflow {
             sylph_dbs_ch,
             taxonomy_files_ch,
             params.fixed_refs,
+            params.ref_for_fastqs,
             params.seq_platform,
         )
     }
@@ -90,20 +91,34 @@ workflow competitive_mapping_wf {
     manifest
     species_list
     seq_platform
-    reference_name
+    ref_for_fastqs
 
     main:
 
     check_seq_platform(seq_platform)
 
-    competitive_mapping_output = competitive_mapping(input_files, manifest, species_list, seq_platform, reference_name)
+    // converting strings/paths to channels if needed (allows for more flexible input)
+    if (manifest instanceof Path || manifest instanceof String) {
+        print("converting manifest to channel\n")
+        manifest = channel.fromPath(manifest, checkIfExists: true).first()
+    }
+    if (species_list instanceof Path || species_list instanceof String) {
+        print("converting species_list to channel\n")
+        species_list = channel.fromPath(species_list, checkIfExists: true).first()
+    }
+
+    input_files_with_manifest = input_files
+        .combine(manifest)
+        .combine(species_list)
+
+    competitive_mapping_output = competitive_mapping(input_files_with_manifest, seq_platform, ref_for_fastqs)
     threshold = seq_platform == 'illumina' ? params.illumina_threshold : params.ont_threshold
-    has_enough_reads(competitive_mapping_output.report_json, threshold)
+    has_enough_reads(competitive_mapping_output.report_json, ref_for_fastqs, threshold)
 
     emit:
-    ref_reads = competitive_mapping_output.ref_reads
     report_json = competitive_mapping_output.report_json
     report_csv = competitive_mapping_output.report_csv
+    ref_reads = competitive_mapping_output.ref_reads
     cm_enough_reads = has_enough_reads.out
 }
 
@@ -115,6 +130,7 @@ workflow dynamic_competitive_mapping_wf {
     sylph_dbs // Paths .syldb files
     taxonomy_files // Paths to taxonomy tsv filse
     fixed_refs // optional comma-separated list of accessions to always include as references
+    ref_for_fastqs // optional reference to extract reads for from comp mapping
     seq_platform
 
     main:
@@ -129,20 +145,30 @@ workflow dynamic_competitive_mapping_wf {
         params.profile_ani_threshold,
     )
 
-    dynamic_mapping(
-        input_files.join(sylph.out.sylph_report),
+    build_manifest(
+        sylph.out.sylph_report,
         ref_genome_dirs,
         taxonomy_files,
         fixed_refs,
-        seq_platform,
     )
 
+    input_files_with_manifest = input_files
+        .join(build_manifest.out.manifest)
+        .join(build_manifest.out.contigs)
+
+    competitive_mapping(input_files_with_manifest, seq_platform, ref_for_fastqs)
+
+    threshold = seq_platform == 'illumina' ? params.illumina_threshold : params.ont_threshold
+    has_enough_reads(competitive_mapping.out.report_json, ref_for_fastqs, threshold)
+
     emit:
-    report_csv = dynamic_mapping.out.report_csv
-    report_json = dynamic_mapping.out.report_json
+    report_csv = competitive_mapping.out.report_csv
+    report_json = competitive_mapping.out.report_json
     sylph_report = sylph.out.sylph_report
     sylph_query = sylph.out.sylph_query
     sylph_taxonomy_report = sylph.out.taxonomy_report
+    ref_reads = competitive_mapping.out.ref_reads
+    cm_enough_reads = has_enough_reads.out
 }
 
 def check_seq_platform(seq_platform) {

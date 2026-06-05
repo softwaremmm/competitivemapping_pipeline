@@ -12,11 +12,9 @@ process competitive_mapping {
     pod label: "run_id", value: "${params.run_id}"
 
     input:
-    tuple val(sample_name), path(fqs)
-    path manifest
-    path species_list
+    tuple val(sample_name), path(fqs), path(manifest), path(species_list)
     val seq_platform
-    val reference_name
+    val ref_for_fastq
 
     output:
     tuple val(sample_name), path("reads_for_assembly*fastq.gz"), emit: ref_reads, optional: true
@@ -24,12 +22,12 @@ process competitive_mapping {
     tuple val(sample_name), path(competitive_mapping_csv), emit: report_csv
 
     script:
-    tb_reads = "reads_for_assembly.fastq.gz"
+    ref_reads = "reads_for_assembly.fastq.gz"
     ref_reads_1 = "reads_for_assembly_1.fastq.gz"
     ref_reads_2 = "reads_for_assembly_2.fastq.gz"
     competitive_mapping_report = "species_comparison_report.json"
     competitive_mapping_csv = "species_comparison.csv"
-    ref_for_fastq = reference_name == "" ? "" : "--ref_for_fastq " + reference_name
+    ref_for_fastq_arg = ref_for_fastq == "" ? "" : "--ref_for_fastq " + ref_for_fastq
     """
     manifest_mapper \
         --seq_platform ${seq_platform} \
@@ -42,7 +40,7 @@ process competitive_mapping {
         --input_bam aln.bam \
         --seq_platform ${seq_platform} \
         --contigs ${species_list} \
-        ${ref_for_fastq} \
+        ${ref_for_fastq_arg} \
         --cpus ${task.cpus} \
         --output_root "out."
 
@@ -50,11 +48,11 @@ process competitive_mapping {
     mv out.species_comparison.csv ${competitive_mapping_csv}
 
     # Rename filtered fastqs if we're filtering reads
-    if [ ${reference_name} != '' ]
+    if [ ${ref_for_fastq} != '' ]
     then
         if [ ${seq_platform} == 'ont' ]
         then
-            mv out.reads.fastq.gz ${tb_reads}
+            mv out.reads.fastq.gz ${ref_reads}
         elif [ ${seq_platform} == 'illumina' ]
         then
             mv out.reads_1.fastq.gz ${ref_reads_1}
@@ -67,8 +65,7 @@ process competitive_mapping {
     """
 }
 
-
-process dynamic_mapping {
+process build_manifest {
     publishDir "${params.publish_dir}", enabled: params.publish_dir != "", mode: "copy", saveAs: { filename -> sample_name + "_" + filename }
     container {
         params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:b59c775' : params.test_container_cm
@@ -77,26 +74,23 @@ process dynamic_mapping {
     cpus 4
     memory { 8.GB * task.attempt }
 
-    pod label: "name", value: "competitive_mapping_pipeline:dynamic_mapping"
+    pod label: "name", value: "competitive_mapping_pipeline:build_manifest"
     pod label: "sample_id", value: "${params.sample_id}"
     pod label: "run_id", value: "${params.run_id}"
 
     input:
-    tuple val(sample_name), path(fqs), path(sylph_report)
+    tuple val(sample_name), path(sylph_report)
     path ref_genome_dirs
     // Pattern used to avoid name conflicts
     path "taxonomy?/*"
     // optional comma-separated list of accessions to always include as references
     val fixed_refs
-    val seq_platform
 
     output:
-    tuple val(sample_name), path(competitive_mapping_report), emit: report_json
-    tuple val(sample_name), path(competitive_mapping_csv), emit: report_csv
+    tuple val(sample_name), path("out.manifest.fasta.gz"), emit: manifest
+    tuple val(sample_name), path("out.contigs.csv"), emit: contigs
 
     script:
-    competitive_mapping_report = "species_comparison_report.json"
-    competitive_mapping_csv = "species_comparison.csv"
     fixed_refs_arg = fixed_refs ? "--fixed_refs " + fixed_refs : ""
     """
     manifest_builder --sylph_report ${sylph_report} \
@@ -105,27 +99,6 @@ process dynamic_mapping {
         --taxonomy_files taxonomy*/* \
         --cpus ${task.cpus} \
         --output_root "out."
-
-    manifest_mapper \
-        --seq_platform ${seq_platform} \
-        --manifest out.manifest.fasta.gz \
-        --reads ${fqs} \
-        --cpus ${task.cpus} \
-        -o aln.bam
-
-    competitive_mapping \
-        --input_bam aln.bam \
-        --seq_platform ${seq_platform} \
-        --contigs out.contigs.csv \
-        --cpus ${task.cpus} \
-        --output_root "out."
-
-    mv out.species_comparison.json ${competitive_mapping_report}
-    mv out.species_comparison.csv ${competitive_mapping_csv}
-
-    # clean up large intermediate files if present
-    find . -type f -name "aln.bam" -delete
-    find . -type f -name "out.manifest.fasta.gz" -delete
     """
 }
 
@@ -144,13 +117,15 @@ process has_enough_reads {
 
     input:
     tuple val(sample_name), path(json)
+    val ref_name
     val threshold
 
     output:
     tuple val(sample_name), stdout
 
     script:
+    ref_name_arg = ref_name == "" ? "--genome_name no_ref" : "--genome_name " + ref_name
     """
-    check_read_count --json_file_path ${json} --read_threshold ${threshold}
+    check_read_count --json_file_path ${json} --read_threshold ${threshold} ${ref_name_arg}
     """
 }

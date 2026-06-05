@@ -10,12 +10,12 @@ nextflow_process {
         when {
             process{
                 """
-                input[0] = ['sample_test', [file("$projectDir/test_data/samples/illumina/flu/SRR29182379_1.fastq.gz"),
-                                            file("$projectDir/test_data/samples/illumina/flu/SRR29182379_2.fastq.gz")]]
-                input[1] = file("$projectDir/test_data/flu_manifest/manifest.fasta.gz")
-                input[2] = file("$projectDir/test_data/flu_manifest/contigs.csv")
-                input[3] = 'illumina'
-                input[4] = ''
+                input[0] = channel.of(['sample_test', [file("$projectDir/test_data/samples/illumina/flu/SRR29182379_1.fastq.gz"),
+                                            file("$projectDir/test_data/samples/illumina/flu/SRR29182379_2.fastq.gz")],
+                                            file("$projectDir/test_data/flu_manifest/manifest.fasta.gz"),
+                                            file("$projectDir/test_data/flu_manifest/contigs.csv"),])
+                input[1] = 'illumina'
+                input[2] = ''
                 """
             }
         }

@@ -13,7 +13,7 @@ nextflow_workflow {
                 """
                 input[0] = Channel.of(['sample_test', [file("$projectDir/test_data/samples/illumina/TB/TB_1.fastq.gz"), file("$projectDir/test_data/samples/illumina/TB/TB_2.fastq.gz")]])
                 input[1] = file("$projectDir/test_data/myco_manifest/manifest.fasta.gz")
-                input[2] = file("$projectDir/test_data/myco_manifest/contigs.csv")
+                input[2] = Channel.of(file("$projectDir/test_data/myco_manifest/contigs.csv"))
                 input[3] = 'illumina'
                 input[4] = 'M.tuberculosis'
                 """
@@ -53,7 +53,7 @@ nextflow_workflow {
             workflow {
                 """
                 input[0] = Channel.of(['sample_test', [file("$projectDir/test_data/samples/illumina/chloro/chloro_1.fastq.gz"), file("$projectDir/test_data/samples/illumina/chloro/chloro_2.fastq.gz")]])
-                input[1] = file("$projectDir/test_data/myco_manifest/manifest.fasta.gz")
+                input[1] = "$projectDir/test_data/myco_manifest/manifest.fasta.gz"
                 input[2] = file("$projectDir/test_data/myco_manifest/contigs.csv")
                 input[3] = 'illumina'
                 input[4] = 'M.tuberculosis'
@@ -93,7 +93,7 @@ nextflow_workflow {
             }
             workflow {
                 """
-                input[0] = ['sample_test', file("$projectDir/test_data/samples/ont/TB/lin4_10.fastq.gz")]
+                input[0] = Channel.of(['sample_test', file("$projectDir/test_data/samples/ont/TB/lin4_10.fastq.gz")])
                 input[1] = file("$projectDir/test_data/myco_manifest/manifest.fasta.gz")
                 input[2] = file("$projectDir/test_data/myco_manifest/contigs.csv")
                 input[3] = 'ont'
