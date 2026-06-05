@@ -7,7 +7,7 @@ Within the Myco pipeline the reads assigned to TB (The H37RV reference) and unma
 
 There are two workflows:
 1. Standard: This takes a fixed manifest (multi fasta file) of references and a csv mapping the contigs (`rname`) to the actual reference names.
-2. Dynamic: This takes a larger database and uses sylph (profile) to select likely references before mapping.
+2. Dynamic: This takes a larger database and uses sylph (profile) to select likely references before mapping. The param `fixed_refs` can be used to provide a comma separated list of accessions to always include.
 
 ### Dependencies
 * Docker
@@ -59,6 +59,7 @@ parameters:
 - genome_dirs: path to directory containing all the reference genomes. Must contain a `genome_paths.tsv`. Look in knowledge bucket for examples.
 - taxonomy_files: csv/tsv with taxonomy info for each reference used. Can optionally have an "ani_group" column.
 - ani_threshold: if set, will use this threshold for grouping similar references. Will not be used if taxonomy file has "ani_group" column already.
+- fixed_refs: optional comma separated list of references to always include.
 
 ### manifest_mapper
 Map reads against the manifest using Minimap2.

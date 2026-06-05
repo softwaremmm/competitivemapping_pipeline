@@ -10,6 +10,9 @@
 - remove "include_whole_genus" option when building manifest (add too many refs)
 - add sylph process
 - add dynamic workflow which runs sylph, builds manifest and the uses standard comp mapping"
+- enable fixed refs to be set even during dynamic workflow
+- move building manifest to its own process
+- allow fastqs to be extracted from one ref in dynamic mode
 
 
 ## 3.2.0

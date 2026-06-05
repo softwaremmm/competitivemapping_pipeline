@@ -96,6 +96,35 @@ def test_build_manifest_A(sylph_db_A, test_outputs_dir, mocker):
     check_file(sylph_db_A["contigs"], output_root + "contigs.csv")
 
 
+def test_build_manifest_A_with_fixed_ref(sylph_db_A, test_outputs_dir, mocker):
+    output_dir = os.path.join(test_outputs_dir, "test_build_manifest_A_with_fixed_ref")
+    os.makedirs(output_dir, exist_ok=True)
+    output_root = str(output_dir) + "/"
+
+    mocker.patch(
+        "sys.argv",
+        [
+            "manifest_builder",
+            "--sylph_report",
+            sylph_db_A["sylph_report"],
+            "--fixed_refs",
+            "GCF_000820495.2",
+            "--genome_dirs",
+            sylph_db_A["genomes_dir"],
+            "--taxonomy_files",
+            sylph_db_A["taxonomy"],
+            "--output_root",
+            output_root,
+            "--cpus",
+            str(get_cpus()),
+        ],
+    )
+
+    manifest_builder.cli_entry_point()
+
+    check_file(sylph_db_A["contigs_with_fixed_refs"], output_root + "contigs.csv")
+
+
 def test_build_manifest_A_with_ani_groups(sylph_db_A, test_outputs_dir, mocker):
     """The two refs are not related at all so should be blank column"""
     output_dir = os.path.join(test_outputs_dir, "test_build_manifest_A")

@@ -10,7 +10,8 @@ nextflow_process {
             process{
                 """
                 input[0] = ["sample", file("$projectDir/test_data/check_read_count/enough_tb.json")]
-                input[1] = 100000
+                input[1] = "M.tuberculosis"
+                input[2] = 100000
                 """
             }
         }
@@ -30,7 +31,8 @@ nextflow_process {
             process{
                 """
                 input[0] = ["sample", file("$projectDir/test_data/check_read_count/not_enough_tb.json")]
-                input[1] = 100000
+                input[1] = "M.tuberculosis"
+                input[2] = 100000
                 """
             }
         }
@@ -49,7 +51,8 @@ nextflow_process {
             process{
                 """
                 input[0] = ["sample", file("$projectDir/test_data/check_read_count/no_mb_value.json")]
-                input[1] = 100000
+                input[1] = "M.tuberculosis"
+                input[2] = 100000
                 """
             }
         }
@@ -67,7 +70,27 @@ nextflow_process {
             process{
                 """
                 input[0] = ["sample", file("$projectDir/test_data/check_read_count/no_genome_name_key.json")]
-                input[1] = 100000
+                input[1] = "M.tuberculosis"
+                input[2] = 100000
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert process.exitStatus == 0
+            assert process.out[0][0][1] == 'false'
+        }
+    }
+
+    test("Should return false if genome_name provided") {
+
+        when {
+            process{
+                """
+                input[0] = ["sample", file("$projectDir/test_data/check_read_count/enough_tb.json")]
+                input[1] = ""
+                input[2] = 100000
                 """
             }
         }

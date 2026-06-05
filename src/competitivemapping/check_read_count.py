@@ -11,15 +11,13 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def check_threshold(
-    json_file_path: str, threshold: int, genome_name: str = "M.tuberculosis"
-) -> str:
+def check_threshold(json_file_path: str, threshold: int, genome_name: str) -> str:
     """Check if the number of reads is above a certain threshold.
 
     Args:
         json_file_path (str): Path to the JSON file.
         threshold (int): Threshold value.
-        genome_name (str): Name of the genome. Default is "M.tuberculosis".
+        genome_name (str): Name of the genome.
 
     Returns:
         str: "true" if the number of reads is above the threshold, "false" otherwise.
@@ -62,6 +60,11 @@ def cli_entry_point():
     parser.add_argument(
         "--read_threshold", help="Threshold number of reads", required=True
     )
+    parser.add_argument(
+        "--genome_name",
+        help="Name of the genome to check in the JSON file (default: M.tuberculosis)",
+        default="M.tuberculosis",
+    )
     args = parser.parse_args()
 
     logger.info(
@@ -70,10 +73,15 @@ def cli_entry_point():
 
     # Using print statements as Nextflow expects output on stdout, without a newline
     # Nextflow expects the output to be in lowercase
+
+    if args.genome_name in ["no_ref", ""]:
+        print("false", end="")
+
     print(
         check_threshold(
             args.json_file_path,
             int(args.read_threshold),
+            args.genome_name,
         ),
         end="",
     )
