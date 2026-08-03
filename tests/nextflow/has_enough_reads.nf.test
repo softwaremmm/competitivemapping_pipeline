@@ -83,7 +83,7 @@ nextflow_process {
         }
     }
 
-    test("Should return false if genome_name provided") {
+    test("Should return false if no genome_name provided") {
 
         when {
             process{

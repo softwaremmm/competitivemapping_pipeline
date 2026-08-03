@@ -64,11 +64,11 @@ def test_cli_entry_point(samples, myco_manifest, test_outputs_dir, mocker):
             check_length(output_root + "reads_2.fastq.gz", 13)
             check_order(
                 output_root + "reads_1.fastq.gz",
-                "8d024fa8e54867f64c1f78b3882fc148bef1e967d2ff503e1c02e254117b287e",
+                "5a36937177ce534d20988350a583c445b3dca532f8c359c285da324f95f75346",
             )
             check_order(
                 output_root + "reads_2.fastq.gz",
-                "8d024fa8e54867f64c1f78b3882fc148bef1e967d2ff503e1c02e254117b287e",
+                "5a36937177ce534d20988350a583c445b3dca532f8c359c285da324f95f75346",
             )
         case "tb_10k":
             check_length(output_root + "reads_1.fastq.gz", 5235)
@@ -158,7 +158,7 @@ def test_output_fastqs_single_reference(mock_run, mock_contigs_df, temp_output_d
     )
     # Check that the correct rname was used
     mock_run.assert_any_call(
-        f"samtools view -h {aln_bam} -u r1 | samtools sort -n -@ 1 -o {temp_output_dir}.0.bam",
+        f"samtools view -h {aln_bam} -u r1 | samtools sort -n -@ 1 -o {temp_output_dir}output_aln.bam",
         shell=True,
         check=True,
         stdout=subprocess.PIPE,
@@ -191,13 +191,7 @@ def test_output_fastqs_multiple_references(mock_run, mock_contigs_df, temp_outpu
     # Verify
     # Check that both rnames were used
     mock_run.assert_any_call(
-        f"samtools view -h {aln_bam} -u r1 | samtools sort -n -@ 1 -o {temp_output_dir}.0.bam",
-        shell=True,
-        check=True,
-        stdout=subprocess.PIPE,
-    )
-    mock_run.assert_any_call(
-        f"samtools view -h {aln_bam} -u r2 | samtools sort -n -@ 1 -o {temp_output_dir}.1.bam",
+        f"samtools view -h {aln_bam} -u r1 r2 | samtools sort -n -@ 1 -o {temp_output_dir}output_aln.bam",
         shell=True,
         check=True,
         stdout=subprocess.PIPE,
@@ -230,7 +224,7 @@ def test_output_fastqs_with_unmapped(mock_run, mock_contigs_df, temp_output_dir)
     # Verify
     # Check that unmapped reads were included
     mock_run.assert_any_call(
-        f'samtools view -h {aln_bam} -u "*" | samtools sort -n -@ 1 -o {temp_output_dir}.1.bam',
+        f'samtools view -h {aln_bam} -u r1 "*" | samtools sort -n -@ 1 -o {temp_output_dir}output_aln.bam',
         shell=True,
         check=True,
         stdout=subprocess.PIPE,

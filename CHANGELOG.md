@@ -13,6 +13,7 @@
 - enable fixed refs to be set even during dynamic workflow
 - move building manifest to its own process
 - allow fastqs to be extracted from one ref in dynamic mode
+- simplify bam to fastq code by fetching all rnames in one command. Note: this changes order of fastqs slightly
 
 
 ## 3.2.0

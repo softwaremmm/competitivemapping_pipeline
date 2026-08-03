@@ -76,6 +76,7 @@ def cli_entry_point():
 
     if args.genome_name in ["no_ref", ""]:
         print("false", end="")
+        return
 
     print(
         check_threshold(
