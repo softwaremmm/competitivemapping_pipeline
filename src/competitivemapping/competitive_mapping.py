@@ -173,28 +173,8 @@ def output_fastqs(
     )
 
     # Note: At some point can change to much simpler, but will slightly alter ordering of bam file
-    # rnames_string = " ".join(rnames)
-    # command = f"samtools view -h {aln_bam} -u {rnames_string} | samtools sort -n -@ {config.cpus} -o {sorted_ref_bam}"
-
-    for i, rname in enumerate(rnames):
-        # In future could add flag -P to always include read pairs
-        # But note that this fails to fetch the pair for supplementary alignments
-        command = (
-            f"samtools view -h {aln_bam} -u {rname}"
-            + f" | samtools sort -n -@ {config.cpus} -o {config.output_root}.{i}.bam"
-        )
-        logging.info("Running command: %s", command)
-        subprocess.run(
-            command,
-            shell=True,
-            check=True,
-            stdout=subprocess.PIPE,
-        )
-
-    command = (
-        f"samtools merge -fo {sorted_ref_bam}"
-        + f" {' '.join([f'{config.output_root}.{i}.bam' for i in range(len(rnames))])}"
-    )
+    rnames_string = " ".join(rnames)
+    command = f"samtools view -h {aln_bam} -u {rnames_string} | samtools sort -n -@ {config.cpus} -o {sorted_ref_bam}"
     logging.info("Running command: %s", command)
     subprocess.run(
         command,
@@ -208,9 +188,6 @@ def output_fastqs(
     # So we need to exclude secondary alignments (0x100) only
     # Note that singletons will be discarded;
     # this is where only one of the read pair is in the bam or passes the flags
-
-    # So for paired reads, only output if both are unmapped, or both map
-    # (maybe with supplementary) to the reference
     command = f"samtools fastq --excl-flags 0x100 -@ {config.cpus} "
     if config.seq_platform == "ont":
         command += f"-0 {config.output_root}reads.fastq.gz {sorted_ref_bam}"

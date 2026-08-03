@@ -61,7 +61,7 @@ process competitive_mapping {
     fi
 
     # clean up large intermediate files
-    rm aln.bam
+    rm *.bam
     """
 }
 
