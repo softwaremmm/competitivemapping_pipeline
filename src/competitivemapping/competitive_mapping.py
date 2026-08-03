@@ -161,6 +161,14 @@ def output_fastqs(
     rnames = contigs_df[contigs_df["reference"].isin(references)]["rname"].tolist()
     if include_unmapped:
         rnames.append('"*"')
+
+    if not rnames:
+        logging.warning(
+            "No rnames found for references %s. No FASTQs will be output.",
+            references,
+        )
+        return
+
     logging.info(f"Extracting reads for reference {references} using rnames: {rnames}")
 
     sorted_ref_bam = f"{config.output_root}output_aln.bam"
