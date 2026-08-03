@@ -3,7 +3,7 @@ process sylph {
     maxRetries 5
 
     container {
-        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:b59c775' : params.test_container_cm
+        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:ccd624c' : params.test_container_cm
     }
     cpus 4
     memory { 14.GB * task.attempt }
