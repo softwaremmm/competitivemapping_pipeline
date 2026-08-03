@@ -61,6 +61,7 @@ tag_format = "$version"
 active_version = "ccd624c"
 version_files = [
     "process/competitive_mapping.nf",
+    "process/sylph.nf",
 ]
 
 [tool.black]
