@@ -5,7 +5,7 @@ process competitive_mapping {
     }
 
     cpus 4
-    memory { 12.GB + (4.GB * task.attempt) }
+    memory { 10.GB + (5.GB * task.attempt) }
 
     pod label: "name", value: "competitive_mapping_pipeline:competitive_mapping"
     pod label: "sample_id", value: "${params.sample_id}"
