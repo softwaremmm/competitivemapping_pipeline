@@ -111,7 +111,7 @@ workflow competitive_mapping_wf {
         .combine(manifest)
         .combine(species_list)
 
-    competitive_mapping_output = competitive_mapping(input_files_with_manifest, seq_platform, ref_for_fastqs)
+    competitive_mapping_output = competitive_mapping(input_files_with_manifest, seq_platform, ref_for_fastqs, "false")
     threshold = seq_platform == 'illumina' ? params.illumina_threshold : params.ont_threshold
     has_enough_reads(competitive_mapping_output.report_json, ref_for_fastqs, threshold)
 
@@ -156,7 +156,7 @@ workflow dynamic_competitive_mapping_wf {
         .join(build_manifest.out.manifest)
         .join(build_manifest.out.contigs)
 
-    competitive_mapping(input_files_with_manifest, seq_platform, ref_for_fastqs)
+    competitive_mapping(input_files_with_manifest, seq_platform, ref_for_fastqs, "true")
 
     threshold = seq_platform == 'illumina' ? params.illumina_threshold : params.ont_threshold
     has_enough_reads(competitive_mapping.out.report_json, ref_for_fastqs, threshold)
@@ -169,6 +169,7 @@ workflow dynamic_competitive_mapping_wf {
     sylph_taxonomy_report = sylph.out.taxonomy_report
     ref_reads = competitive_mapping.out.ref_reads
     cm_enough_reads = has_enough_reads.out
+    depth_plot = competitive_mapping.out.depth_plot
 }
 
 def check_seq_platform(seq_platform) {
