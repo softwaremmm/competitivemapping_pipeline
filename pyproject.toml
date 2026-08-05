@@ -10,6 +10,7 @@ dependencies = [
     "jsonschema~=4.19",
     "pysam~=0.22",
     "pyarrow~=15.0",
+    "plotnine~=0.15.7",
 ]
 classifiers = [
     "Environment :: Console",
@@ -28,6 +29,7 @@ manifest_builder = "competitivemapping.manifest_builder:cli_entry_point"
 manifest_builder_manual = "competitivemapping.manifest_builder_manual:cli_entry_point"
 manifest_mapper = "competitivemapping.manifest_mapper:cli_entry_point"
 extract_reads = "competitivemapping.extract_reads:cli_entry_point"
+plot_depth = "competitivemapping.plot_depth:cli_entry_point"
 
 [project.optional-dependencies]
 dev = [

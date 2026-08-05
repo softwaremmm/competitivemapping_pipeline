@@ -44,6 +44,10 @@ nextflow_workflow {
             with(workflow.out.sylph_taxonomy_report.get(0)) {
                 assert (path(get(1)).md5 == path("$projectDir/test_data/samples/illumina/viral_mix/sylph_taxonomy_report.tsv").md5)
             }
+            with(workflow.out.depth_plot.get(0)) {
+                // pdfs are not deterministic, so we can't check the md5, but we can check that the file exists and is non-empty
+                assert path(get(1)).size() > 0
+            }
 
         }
     }
@@ -87,6 +91,10 @@ nextflow_workflow {
             }
             with(workflow.out.sylph_taxonomy_report.get(0)) {
                 assert (path(get(1)).md5 == path("$projectDir/test_data/samples/ont/viral_mix/sylph_taxonomy_report.tsv").md5)
+            }
+            with(workflow.out.depth_plot.get(0)) {
+                // pdfs are not deterministic, so we can't check the md5, but we can check that the file exists and is non-empty
+                assert path(get(1)).size() > 0
             }
 
         }

@@ -12,14 +12,16 @@ process competitive_mapping {
     pod label: "run_id", value: "${params.run_id}"
 
     input:
-    tuple val(sample_name), path(fqs), path(manifest), path(species_list)
+    tuple val(sample_name), path(fqs), path(manifest), path(contigs)
     val seq_platform
     val ref_for_fastq
+    val make_depth_plot
 
     output:
     tuple val(sample_name), path("reads_for_assembly*fastq.gz"), emit: ref_reads, optional: true
     tuple val(sample_name), path(competitive_mapping_report), emit: report_json
     tuple val(sample_name), path(competitive_mapping_csv), emit: report_csv
+    tuple val(sample_name), path("depth_plot.pdf"), emit: depth_plot, optional: true
 
     script:
     ref_reads = "reads_for_assembly.fastq.gz"
@@ -39,7 +41,7 @@ process competitive_mapping {
     competitive_mapping \
         --input_bam aln.bam \
         --seq_platform ${seq_platform} \
-        --contigs ${species_list} \
+        --contigs ${contigs} \
         ${ref_for_fastq_arg} \
         --cpus ${task.cpus} \
         --output_root "out."
@@ -58,6 +60,17 @@ process competitive_mapping {
             mv out.reads_1.fastq.gz ${ref_reads_1}
             mv out.reads_2.fastq.gz ${ref_reads_2}
         fi
+    fi
+
+    # Plot depths
+    if [ ${make_depth_plot} == 'true' ]
+    then
+        samtools depth -aa aln.bam > depth.txt
+        plot_depth \
+            -i depth.txt \
+            --contigs ${contigs} \
+            -o depth_plot.pdf
+        rm depth.txt
     fi
 
     # clean up large intermediate files
