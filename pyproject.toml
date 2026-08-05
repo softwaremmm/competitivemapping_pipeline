@@ -18,7 +18,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
 ]
 requires-python = "~=3.11"
-version = "3.2.0"
+version = "4.0.0"
 
 [project.scripts]
 process_coverage = "competitivemapping.process_coverage:cli_entry_point"
@@ -60,7 +60,7 @@ tag_format = "$version"
 
 
 [tool.version_bumper]
-active_version = "9c3ea31"
+active_version = "4.0.0"
 version_files = [
     "process/competitive_mapping.nf",
     "process/sylph.nf",
