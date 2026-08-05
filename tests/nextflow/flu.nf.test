@@ -16,6 +16,7 @@ nextflow_process {
                                             file("$projectDir/test_data/flu_manifest/contigs.csv"),])
                 input[1] = 'illumina'
                 input[2] = ''
+                input[3] = 'false'
                 """
             }
         }
