@@ -2,7 +2,7 @@ nextflow_process {
 
     name "Test Process competitiveMapping with Flu"
     script "process/competitive_mapping.nf"
-    process "competitiveMapping"
+    process "competitive_mapping"
 
 
     test("Flu Illumina - Process should succeed when sample files and a manifest are provided") {
@@ -10,11 +10,13 @@ nextflow_process {
         when {
             process{
                 """
-                input[0] = ['sample_test', [file("$projectDir/influenza/SRR29182379_1.fastq.gz"), file("$projectDir/test_data/influenza/SRR29182379_2.fastq.gz")]]
-                input[1] = file("$projectDir/data/manifest_flu/test_multifasta.fasta.gz")
-                input[2] = file("$projectDir/test_data/flu_contigs_20250513.csv")
-                input[3] = 'illumina'
-                input[4] = ''
+                input[0] = channel.of(['sample_test', [file("$projectDir/test_data/samples/illumina/flu/SRR29182379_1.fastq.gz"),
+                                            file("$projectDir/test_data/samples/illumina/flu/SRR29182379_2.fastq.gz")],
+                                            file("$projectDir/test_data/flu_manifest/manifest.fasta.gz"),
+                                            file("$projectDir/test_data/flu_manifest/contigs.csv"),])
+                input[1] = 'illumina'
+                input[2] = ''
+                input[3] = 'false'
                 """
             }
         }
@@ -26,6 +28,7 @@ nextflow_process {
             with(process.out.report_json) {
                 assert size() == 1
                 assert get(0)[1].contains("species_comparison_report.json")
+                assert path(get(0)[1]).json == path("$projectDir/test_data/samples/illumina/flu/species_comparison_report.json").json
             }
 
             with(process.out.report_csv) {

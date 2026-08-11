@@ -1,47 +1,74 @@
 # Competitive Mapping Pipeline
 
-Competitive Mapping is an algorithm that compares the sample reads with the references in the manifest and makes a positive selection of the reads matching a specific `rname`.
+Competitive Mapping uses Minimap2 to map fastq reads against multiple references at the same time, in order to assign reads to their correct reference.
+Competitive Mapping will produce a summary csv and json file detailing how many reads each reference got as well as the resulting coverage.
 
-The pipeline for competitive mapping takes a pair of FASTQ files and outputs the positive filtering of the h37_rv reads (i.e. those reads that are judged to map to the *Mycobacterium tuberculosis* H37RV reference genome) along with unmapped reads, a report with the mapping rank (a list of species in the manifest to which reads have mapped `competitivemapping_report.json`).
+Within the Myco pipeline the reads assigned to TB (The H37RV reference) and unmapped reads get put into a fastq file to be used for later assembly.
+
+There are two workflows:
+1. Standard: This takes a fixed manifest (multi fasta file) of references and a csv mapping the contigs (`rname`) to the actual reference names.
+2. Dynamic: This takes a larger database and uses sylph (profile) to select likely references before mapping. The param `fixed_refs` can be used to provide a comma separated list of accessions to always include.
 
 ### Dependencies
 * Docker
 * Nextflow
 
-### Needed data
-* you will need to download manifest to: `$projectDir/data/manifest/manifest_20231001`. See [extra readme](data/manifest/README.md) for details about manifest.
-* species list is provided at `$projectDir/test_data/species_list_manifest_20250324.csv`
-* (for sylph) should have GTDB representative genomes at path: `$projectDir/data/sylph/gtdb_genomes_reps_r220`. Can be found [here](https://data.ace.uq.edu.au/public/gtdb/data/releases/release220/220.0/genomic_files_reps/)
+To install the for development:
+```bash
+conda env create -f env.yml
+conda activate competitive_mapping
+pip install -e .[dev]
+```
 
-These can all be found in the (dev) knowledge bucket.
+### Running Nextflow
+The [Makefile](Makefile) includes several examples of how to run the nextflow.
+
+When running locally can save outputs by using `--publish_dir`.
+And to use locally built container add `-profile local_docker`.
+
+
+By default it will look for files in the input directory based on the following params:
+- `params.input_paired_suffix = "*_{1,2}.fastq.gz"`
+- `params.input_single_suffix = "*.fastq.gz"`
+
+but these can be overriden. e.g.
+```bash
+nextflow run ... --input_paired_suffix "tb_sample*_{1,2}.fna.gz"
+```
+
+The dynamic workflow can take lists of databases. When running locally this means that you can set `--ref_genome_dirs`, `--sylph_dbs` and `--taxonomy_files` to a comma separated list of file paths. Alternatively, you can set the params to a list within a `nextflow.config`.
+
+### Needed data
+* All data for testing is included in `$projectDir/test_data`.
+* (Myco) Myco manifest can be found in the knowledge bucket under `manifest`. See [extra readme](data/manifest/README.md) for details about manifest.
+* (Flu) Flu manifest is under `influenza_virus/manifest`.
+* (Dynamic) reference databases are found in the knowledge bucket under `sylph`. For more details and how to create them see [reference_set_manager](https://github.com/softwaremmm/reference_set_manager).
+
 
 ## Overview
-Competitive mapping uses minimap2 to map reads against manifest (multifasta of reference genomes) and then analyse the resulting bam file.
-A species list file is required to match contigs (`rnames`) in the multifasta manifest to a reference as some references have many contigs.
+1. (Dynamic) Run sylph against database to produce a sylph profile and query report
+2. (Dynamic) Use `manifest_builder` to create a manifest fasta and contigs csv from a sylph report
+3. Use `manifest_mapper` to run minimap2 with the desired settings
+4. Use `competitive_mapping` to investigate the bam file and calculate the output stats
 
-This is co-ordinated by three scripts:
-
-### manifest_builder [In development]
-This takes a sylph query report and builds a manifest from it.
-This is used for the metagenomic pipeline in development. Myco has a fixed manifest.
+### manifest_builder
+Builds the manifest from a sylph report.
 
 parameters:
 - sylph_report: Path to the sylph query/profile output file.
-- genome_dirs: path to directory containing all the reference genomes. Must contain a genome_paths.tsv matching what you find in gtdb_genomes_reps (see note on data needed earlier)
-- metadata_files: file with taxonomy mapping for each reference
-- include_whole_genus: if this is set then for each species sylph finds the whole genus will be added to the manifest
+- genome_dirs: path to directory containing all the reference genomes. Must contain a `genome_paths.tsv`. Look in knowledge bucket for examples.
+- taxonomy_files: csv/tsv with taxonomy info for each reference used. Can optionally have an "ani_group" column.
+- ani_threshold: if set, will use this threshold for grouping similar references. Will not be used if taxonomy file has "ani_group" column already.
+- fixed_refs: optional comma separated list of references to always include.
 
 ### manifest_mapper
-Map reads against the manifest. It will select minimap2 settings based on the seq platform provided.
-This step produces a bam file.
+Map reads against the manifest using Minimap2.
 
 parameters:
 - manifest: path to multifasta
 - reads: path to input fastqs
 - seq_platform: `ont` or `illumina`
 - filter_secondary/filter_supplementary: Will exclude secondary/supplementary alignments from resulting bam.
-- sort_by_name: this sorts the bam file by name rather than position. (Used for development)
-- equality_in_cigar: add more equality information to CIGAR strings in bam file. (Used for development)
 
 ### competitive_mapping
 This takes the bam file and calculates various coverage stats for the references in the manifest. It:
@@ -51,11 +78,32 @@ This takes the bam file and calculates various coverage stats for the references
 
 parameters:
 - input_bam: bam from previous step
-- contigs: the species list file
+- contigs: file with mapping from contigs to reference. Often called species_list.
 - seq_platform: `ont` or `illumina`
 - ref_for_fastq: If set then the reads which mapped to the provided reference will be extracted from the bam file. Used in myco to select TB reads.
-- reference_name (optional): Set this to the name of the reference you want to filter reads for e.g. `M.tuberculosis` to output filtered _M. tuberculosis_ reads. Can also take a comma seperated list.
 Note: currently unmapped reads will also be extracted by default
+
+
+## Testing
+There a tests for python and nextflow using [nf-test](https://github.com/askimed/nf-test).
+All test data is included in the repo.
+
+They are all triggered by running:
+```bash
+make test
+# Or for local container building
+make test_local
+```
+
+### Outputs
+
+The output from the Python CLI is
+validated against a [JSON Schema](src/competitivemapping/competitivemapping.schema.json). [Documentation for the schema](schema_doc.md)
+can be built / updated using:
+
+```bash
+generate-schema-doc src/competitivemapping/competitivemapping.schema.json --config template_name=md
+```
 
 ## Notes on Bam to Fastq
 One step in competitive mapping is to filter the bam file (created by mapping against manifest) for tb reads and unmapped reads, and extracting these to a fastq file. This is complex for paired reads!! And so leads to seeming discrepencies with the `species_comparison_report.json`
@@ -72,87 +120,7 @@ The result of this is that reads are only converted to fastq if
 1. Both in a pair are unmapped
 2. Both in a pair have a primary or supplementary mapping to h37rv
 
-In the future we could change this to out put a read pair as long as **either** read in a pair map to h37rv.
-
-## Running Nextflow
-The workflow takes the following inputs
-- input_dir. Path to directory containing input fastq files
-- seq_platform. `illumina` or `ont`.
-- manifest. Path to manifest file
-- species_list. Patht to species list file which has the contig to genome mapping
-
-When running locally can save outputs by using `--publish_dir`.
-
-Example using test data:
-```bash
-nextflow run . \
-		--seq_platform illumina \
-		--input_dir test_data/chloro_10k \
-		--manifest data/manifest/manifest_20231001 \
-		--species_list test_data/species_list_manifest_20250324.csv \
-    --publish_dir results
-```
-
-
-By default it will look for files in the input directory based on the following params:
-- `params.input_paired_suffix = "*_{1,2}.fastq.gz"`
-- `params.input_single_suffix = "*.fastq.gz"`
-
-but these can be overriden. e.g.
-```
-nextflow run ... --input_paired_suffix "tb_sample*_{1,2}.fna.gz"
-```
-
-
-### Running Tests
-The tests are executed using [nf-test](https://github.com/askimed/nf-test).
-
-Before running the tests check that you have [needed data](#needed-data).
-
-To run tests, run the following command
-
-```bash
-nf-test test tests/nextflow/*.test
-```
-
-If you have made changes to the python code, you may need to build a local test container:
-```bash
-docker build -t test_container_cm .
-nf-test test tests/nextflow/*.test --profile local_docker
-```
-
-## Python
-
-A Python package that processes the output from command line tools orchestrated by NextFlow is included in this repository. This gets installed in the docker image used by nextflow.
-
-### Installation
-
-Clone the repo as described above. Create a virtual environment and install the package using `pip install -e .[dev]`. Set up pre-commit with `pre-commit install`.
-
-
-### Execution
-
-Each python module can be run individually. Check arguments with `--help`, e.g. `process_coverage --help` .
-
-### Testing
-The tests take 3 minutes as they include running the full process of mapping reads as well.
-```
-pytest tests/
-```
-
-### Outputs
-
-The output from the Python CLI is
-validated against a [JSON Schema](src/competitivemapping/competitivemapping.schema.json). [Documentation for the schema](schema_doc.md)
-can be built / updated using:
-
-```
-generate-schema-doc src/competitivemapping/competitivemapping.schema.json --config template_name=md
-```
-
-## Integrating to a pipeline
-
-If you want to use the Competitive Mapping Pipeline as subworkflow in your pipeline, use the competitive_mapping named workflow.
+In the future we could change this to output a read pair as long as **either** read in a pair map to h37rv.
 
 
 ## Manifest remarks
@@ -179,3 +147,12 @@ This repo uses a standard gitflow approach, but with some changes to deal with d
 
 - In a release branch you can create a release candidate with `bumper bump a.b.c-rcX`. This also updates the pyproject version. Pushing the changes and new tag (automatically created) will trigger a build action.
 - When release branch is ready for main run `bumper bump a.b.c --no-tag`. Push these changes to main and make a release there to build the container.
+
+### Using a custom tag
+If working on a branch you can bump to a custom tag. Once the tag is pushed it will build a container.
+```bash
+bumper bump -a new_feature_1.0.0
+git push
+git push --tag
+```
+Note: only the active version needs to be updated.

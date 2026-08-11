@@ -1,0 +1,4 @@
+Sample_file	Genome_file	Taxonomic_abundance	Sequence_abundance	Adjusted_ANI	True_cov	ANI_5-95_percentile	Eff_lambda	Lambda_5-95_percentile	Median_cov	Mean_cov_geq1	Containment_ind	Naive_ANI	kmers_reassigned	Contig_name
+reads.fastq.gz	genomes/GCF_000861845.1.fasta.gz	67.2409	19.3863	96.79	20.443	NA-NA	LOW	NA-NA	1	1.036	28/77	96.79	0	NC_004102.1 Hepatitis C virus genotype 1, complete genome
+reads.fastq.gz	genomes/GCF_000859625.1.fasta.gz	20.2882	7.2355	100.00	6.168	98.86-103.20	0.312	0.16-0.62	1	1.135	37/100	96.84	0	NC_001542.1 Rabies virus, complete genome
+reads.fastq.gz	genomes/GCF_000857045.1.fasta.gz	12.4709	73.3781	99.36	3.791	98.16-100.73	0.192	0.12-0.29	1	1.117	197/1375	93.92	0	NC_003310.1 Monkeypox virus, complete genome

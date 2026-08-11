@@ -7,17 +7,24 @@ on:
 
 jobs:
   bump:
-    if: ${{ ! startsWith(github.event.head_commit.message, 'bump:') }}
+    if: ${{ !startsWith(github.event.head_commit.message, 'bump:') }}
+    name: "Bump version before triggering container build"
     runs-on: ubuntu-latest
-    permissions: write-all # Needed for automatic release
-    name: "Bump version and create changelog with commitizen"
+    permissions: write-all
     outputs:
       version: ${{ steps.bump.outputs.version }}
     steps:
-      - name: Check out
-        uses: actions/checkout@v4
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v1
         with:
-          token: "${{ secrets.PAT_TOKEN }}"
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          owner: softwaremmm
+
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ steps.app-token.outputs.token }}
           fetch-depth: 0
 
       - name: Install dependencies
@@ -27,26 +34,20 @@ jobs:
           python3 -m pip install .[dev]
 
       - name: Get Short Commit SHA
-        id: get-commit-hash
         run: echo "COMMIT_HASH=$(git rev-parse --short $GITHUB_SHA)" >> $GITHUB_ENV
 
-      - name: bump version with hash
+      - name: Bump version with hash
         id: bump
         run: |
           source venv/bin/activate
-
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git config --global user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
           bumper version
           bumper bump --active --no-tag ${{ env.COMMIT_HASH }}
           echo "version=$(bumper version --active)" >> $GITHUB_OUTPUT
 
-      - name: push changes
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.PAT_TOKEN }}
-          tags: true
-          branch: develop
+      - name: Push changes
+        run: git push origin develop
 
   build_container:
     needs: bump

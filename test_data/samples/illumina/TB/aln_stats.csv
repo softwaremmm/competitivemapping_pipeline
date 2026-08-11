@@ -1,0 +1,5 @@
+genome_name,total_reads,total_alns,exclusive_reads,primary_reads,secondary_reads,supplementary_reads,supplementary_alns
+M.tuberculosis,19854,21762,870,13445,6409,6,18
+M.canetti,19006,19986,22,6429,12577,11,16
+M.pyrenivorans,18,22,0,4,14,0,0
+M.chlorophenolicum,16,16,0,0,16,0,0

@@ -10,6 +10,7 @@ dependencies = [
     "jsonschema~=4.19",
     "pysam~=0.22",
     "pyarrow~=15.0",
+    "plotnine~=0.15.7",
 ]
 classifiers = [
     "Environment :: Console",
@@ -17,7 +18,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
 ]
 requires-python = "~=3.11"
-version = "3.2.0"
+version = "4.0.0"
 
 [project.scripts]
 process_coverage = "competitivemapping.process_coverage:cli_entry_point"
@@ -28,6 +29,7 @@ manifest_builder = "competitivemapping.manifest_builder:cli_entry_point"
 manifest_builder_manual = "competitivemapping.manifest_builder_manual:cli_entry_point"
 manifest_mapper = "competitivemapping.manifest_mapper:cli_entry_point"
 extract_reads = "competitivemapping.extract_reads:cli_entry_point"
+plot_depth = "competitivemapping.plot_depth:cli_entry_point"
 
 [project.optional-dependencies]
 dev = [
@@ -41,7 +43,7 @@ dev = [
     "mypy",
     "pandas-stubs",
     "types-jsonschema",
-    "version_bumper @ git+https://github.com/GlobalPathogenAnalysisService/version_bumper.git",
+    "version_bumper @ git+https://github.com/softwaremmm/version_bumper.git",
 ]
 docs = ["json-schema-for-humans"]
 
@@ -58,9 +60,10 @@ tag_format = "$version"
 
 
 [tool.version_bumper]
-active_version = "3.2.0"
+active_version = "4.0.0"
 version_files = [
     "process/competitive_mapping.nf",
+    "process/sylph.nf",
 ]
 
 [tool.black]

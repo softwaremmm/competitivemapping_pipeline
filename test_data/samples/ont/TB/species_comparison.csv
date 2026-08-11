@@ -1,0 +1,6 @@
+genome_name,length,numreads,coverage,meandepth,coverage_including_secondary,meandepth_including_secondary,total_reads,total_alns,exclusive_reads,primary_reads,secondary_reads,supplementary_reads,supplementary_alns
+M.tuberculosis,4411532,438,15.1924,0.164014,16.5872,0.17983,479,534,52,434,45,4,21
+M.canetti,4482059,55,0.950925,0.00950925,13.7432,0.148626,430,459,3,48,382,7,7
+M.chlorophenolicum,7330216,0,0.0,0.0,0.0,0.0,0,0,0,0,0,0,0
+M.pyrenivorans,6688400,0,0.0,0.0,0.0,0.0,0,0,0,0,0,0,0
+unmapped,0,0,0.0,0.0,0.0,0.0,0,0,0,0,0,0,0

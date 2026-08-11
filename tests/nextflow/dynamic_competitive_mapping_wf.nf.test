@@ -1,0 +1,103 @@
+nextflow_workflow {
+    name "Test dynamic_competitive_mapping_wf Workflow"
+    script "main.nf"
+    workflow "dynamic_competitive_mapping_wf"
+
+    test("Illumina - Should succeed") {
+        tag 'illumina'
+        when {
+            workflow {
+                """
+                input[0] = Channel.of(['sample_test',
+                            [file("$projectDir/test_data/samples/illumina/viral_mix/reads_1.fastq.gz"),
+                             file("$projectDir/test_data/samples/illumina/viral_mix/reads_2.fastq.gz")]])
+                input[1] = [file("$projectDir/test_data/virus_refs_db/part_1/"),
+                            file("$projectDir/test_data/virus_refs_db/part_2/")]
+                input[2] = [file("$projectDir/test_data/virus_refs_db/part_1/viral_db1_c100.syldb"),
+                            file("$projectDir/test_data/virus_refs_db/part_2/viral_db2_c100.syldb")]
+                input[3] = [file("$projectDir/test_data/virus_refs_db/part_1/taxonomy.tsv"),
+                            file("$projectDir/test_data/virus_refs_db/part_2/taxonomy.tsv")]
+                input[4] = ''
+                input[5] = ''
+                input[6] = 'illumina'
+                """
+            }
+        }
+
+        then {
+            assert workflow.success
+
+            with(workflow.out.report_csv) {
+                assert size() == 1
+                assert path(get(0)[1]).md5 == path("$projectDir/test_data/samples/illumina/viral_mix/species_comparison.csv").md5
+            }
+            with(workflow.out.report_json) {
+                assert size() == 1
+                assert path(get(0)[1]).json == path("$projectDir/test_data/samples/illumina/viral_mix/species_comparison_report.json").json
+            }
+            with(workflow.out.sylph_report.get(0)) {
+                assert (path(get(1)).md5 == path("$projectDir/test_data/samples/illumina/viral_mix/sylph_profile.tsv").md5)
+            }
+            with(workflow.out.sylph_query.get(0)) {
+                assert (path(get(1)).md5 == path("$projectDir/test_data/samples/illumina/viral_mix/sylph_query.tsv").md5)
+            }
+            with(workflow.out.sylph_taxonomy_report.get(0)) {
+                assert (path(get(1)).md5 == path("$projectDir/test_data/samples/illumina/viral_mix/sylph_taxonomy_report.tsv").md5)
+            }
+            with(workflow.out.depth_plot.get(0)) {
+                // pdfs are not deterministic, so we can't check the md5, but we can check that the file exists and is non-empty
+                assert path(get(1)).size() > 0
+            }
+
+        }
+    }
+
+    test("ONT - Should succeed") {
+        tag 'ont'
+        when {
+            workflow {
+                """
+                input[0] = Channel.of(['sample_test',
+                            file("$projectDir/test_data/samples/ont/viral_mix/reads.fastq.gz")])
+                input[1] = [file("$projectDir/test_data/virus_refs_db/part_1/"),
+                            file("$projectDir/test_data/virus_refs_db/part_2/")]
+                input[2] = [file("$projectDir/test_data/virus_refs_db/part_1/viral_db1_c100.syldb"),
+                            file("$projectDir/test_data/virus_refs_db/part_2/viral_db2_c100.syldb")]
+                input[3] = [file("$projectDir/test_data/virus_refs_db/part_1/taxonomy.tsv"),
+                            file("$projectDir/test_data/virus_refs_db/part_2/taxonomy.tsv")]
+                input[4] = ''
+                input[5] = ''
+                input[6] = 'ont'
+                """
+            }
+        }
+
+        then {
+            assert workflow.success
+
+            with(workflow.out.report_csv) {
+                assert size() == 1
+                assert path(get(0)[1]).md5 == path("$projectDir/test_data/samples/ont/viral_mix/species_comparison.csv").md5
+            }
+            with(workflow.out.report_json) {
+                assert size() == 1
+                assert path(get(0)[1]).json == path("$projectDir/test_data/samples/ont/viral_mix/species_comparison_report.json").json
+            }
+            with(workflow.out.sylph_report.get(0)) {
+                assert (path(get(1)).md5 == path("$projectDir/test_data/samples/ont/viral_mix/sylph_profile.tsv").md5)
+            }
+            with(workflow.out.sylph_query.get(0)) {
+                assert (path(get(1)).md5 == path("$projectDir/test_data/samples/ont/viral_mix/sylph_query.tsv").md5)
+            }
+            with(workflow.out.sylph_taxonomy_report.get(0)) {
+                assert (path(get(1)).md5 == path("$projectDir/test_data/samples/ont/viral_mix/sylph_taxonomy_report.tsv").md5)
+            }
+            with(workflow.out.depth_plot.get(0)) {
+                // pdfs are not deterministic, so we can't check the md5, but we can check that the file exists and is non-empty
+                assert path(get(1)).size() > 0
+            }
+
+        }
+    }
+
+}

@@ -8,42 +8,20 @@ on:
 jobs:
   build_and_test:
     name: nf-test
-    runs-on: self-hosted # Uses https://github.com/GlobalPathogenAnalysisService/git_runners
+    runs-on: ubuntu-latest
     steps:
-      - name: print debug data
-        run: |
-          whoami
-          pwd
-          echo java_cmd=$JAVA_CMD
-          printenv
-      - name: clean up # nf-test needs to sudo to remove, so will fail automatic cleanup
-        run: |
-          sudo rm -rf .nf-test || true
-          sudo rm -rf tests || true
 
       - uses: actions/checkout@v4
         with:
-          token: "${{ secrets.PAT_TOKEN }}"
           fetch-depth: 0
 
-      - name: echo versions
-        run: |
-          nextflow -v
-          nf-test version
+      - name: Setup Nextflow
+        uses: nf-core/setup-nextflow@v1
 
-      - name: softlink reference data # This has already been downloaded to the runner
+      - name: Install nf-test
         run: |
-          mkdir -p data/manifest && \
-          ln -s /mnt/portal-sp3dev-knowledge/manifest/* ./data/manifest/ && \
-          tree data/manifest
-          ln -s /mnt/portal-sp3dev-knowledge/sylph ./data/sylph
-
-      - name: Login to OCR
-        uses: docker/login-action@v2
-        with:
-          registry: lhr.ocir.io
-          username: ${{ secrets.OCR_USERNAME }}
-          password: ${{ secrets.OCR_TOKEN }}
+          wget -qO- https://get.nf-test.com | bash
+          sudo mv nf-test /usr/local/bin/
 
       # cargo test is run within the build process
       - name: Build docker container
@@ -58,15 +36,7 @@ jobs:
         run: |
           docker run -v ${{ github.workspace }}/tests:/app/tests \
             -v ${{ github.workspace }}/test_data:/app/test_data \
-            -v /mnt/portal-sp3dev-knowledge/manifest:/app/data/manifest \
-            -v /mnt/portal-sp3dev-knowledge/sylph:/app/data/sylph \
             test_container_cm pytest /app/tests
 
       - name: Run nf-test
         run: nf-test test tests/nextflow/*.test --profile local_docker
-
-      - name: clean up 2
-        if: always()
-        run: |
-          sudo rm -rf .nf-test || true
-          sudo rm -rf tests || true

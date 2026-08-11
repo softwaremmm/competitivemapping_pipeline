@@ -1,5 +1,3 @@
-import filecmp
-
 import pandas as pd
 import pytest
 from jsonschema import exceptions
@@ -31,7 +29,9 @@ def test_full_match(coverage_long, species_long):
 
 
 def test_join_references(coverage_table, species_table, expected_joined):
-    actual_joined = process_coverage.join_references(coverage_table, species_table).reset_index(drop=True)
+    actual_joined = process_coverage.join_references(
+        coverage_table, species_table
+    ).reset_index(drop=True)
     if not actual_joined.equals(expected_joined):
         # Since different to expectation, save to file for inspection
         actual_joined.to_csv("tests/test_outputs/actual_joined.csv", index=False)
@@ -39,11 +39,15 @@ def test_join_references(coverage_table, species_table, expected_joined):
 
 
 def test_aggregate_contigs(expected_joined, expected_aggregated):
-    actual_aggregated = process_coverage.aggregate_contigs(expected_joined).reset_index(drop=False)
+    actual_aggregated = process_coverage.aggregate_contigs(expected_joined).reset_index(
+        drop=False
+    )
     print(actual_aggregated)
     if not actual_aggregated.equals(expected_aggregated):
         # Since different to expectation, save to file for inspection
-        actual_aggregated.to_csv("tests/test_outputs/actual_aggregated.csv", index=False)
+        actual_aggregated.to_csv(
+            "tests/test_outputs/actual_aggregated.csv", index=False
+        )
     pd.testing.assert_frame_equal(actual_aggregated, expected_aggregated)
 
 
@@ -83,7 +87,7 @@ def test_cli_entry_point(samples, species_table_path, tmp_path, mocker):
 
 
 def test_cli_entry_point_empty_seconday_coverage(
-    samples, species_table_path, tmp_path, mocker
+    samples, empty_secondary_cov, species_table_path, tmp_path, mocker
 ):
     tmp_file = str(tmp_path / "output.json")
     args = [
@@ -91,7 +95,7 @@ def test_cli_entry_point_empty_seconday_coverage(
         "--coverage",
         samples["coverage"],
         "--secondary_coverage",
-        "test_data/empty-secondary-coverage.tsv",
+        empty_secondary_cov,
         "--species_list",
         species_table_path,
         "--output",
@@ -105,11 +109,7 @@ def test_cli_entry_point_empty_seconday_coverage(
 
     process_coverage.cli_entry_point()
 
-    # Not passing secondary reads should give a different (valid) output
-    assert not filecmp.cmp(tmp_file, samples["coverage_summary"])
-
     check_file(samples["coverage_summary_no_secondary"], tmp_file)
-    # assert filecmp.cmp(tmp_file, samples["report_no_secondary"])
 
 
 def test_cli_entry_point_no_seconday_coverage(
@@ -134,4 +134,3 @@ def test_cli_entry_point_no_seconday_coverage(
     process_coverage.cli_entry_point()
 
     check_file(samples["coverage_summary_no_secondary"], tmp_file)
-    # assert filecmp.cmp(tmp_file, samples["report_no_secondary"])

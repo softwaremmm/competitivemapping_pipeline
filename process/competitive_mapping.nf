@@ -1,35 +1,35 @@
-process competitiveMapping {
+process competitive_mapping {
     publishDir "${params.publish_dir}", enabled: params.publish_dir != "", mode: "copy", saveAs: { filename -> sample_name + "_" + filename }
     container {
-        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:3.2.0' : params.test_container_cm
+        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:4.0.0' : params.test_container_cm
     }
 
     cpus 4
-    memory { 12.GB + (4.GB * task.attempt) }
+    memory { 10.GB + (5.GB * task.attempt) }
 
-    pod label: "name", value: "competitive_mapping_pipeline:competitiveMapping"
+    pod label: "name", value: "competitive_mapping_pipeline:competitive_mapping"
     pod label: "sample_id", value: "${params.sample_id}"
     pod label: "run_id", value: "${params.run_id}"
 
     input:
-    tuple val(sample_name), path(fqs)
-    path manifest
-    path species_list
+    tuple val(sample_name), path(fqs), path(manifest), path(contigs)
     val seq_platform
-    val reference_name
+    val ref_for_fastq
+    val make_depth_plot
 
     output:
     tuple val(sample_name), path("reads_for_assembly*fastq.gz"), emit: ref_reads, optional: true
     tuple val(sample_name), path(competitive_mapping_report), emit: report_json
     tuple val(sample_name), path(competitive_mapping_csv), emit: report_csv
+    tuple val(sample_name), path("depth_plot.pdf"), emit: depth_plot, optional: true
 
     script:
-    tb_reads = "reads_for_assembly.fastq.gz"
+    ref_reads = "reads_for_assembly.fastq.gz"
     ref_reads_1 = "reads_for_assembly_1.fastq.gz"
     ref_reads_2 = "reads_for_assembly_2.fastq.gz"
     competitive_mapping_report = "species_comparison_report.json"
     competitive_mapping_csv = "species_comparison.csv"
-    ref_for_fastq = reference_name == "" ? "" : "--ref_for_fastq " + reference_name
+    ref_for_fastq_arg = ref_for_fastq == "" ? "" : "--ref_for_fastq " + ref_for_fastq
     """
     manifest_mapper \
         --seq_platform ${seq_platform} \
@@ -41,8 +41,8 @@ process competitiveMapping {
     competitive_mapping \
         --input_bam aln.bam \
         --seq_platform ${seq_platform} \
-        --contigs ${species_list} \
-        ${ref_for_fastq} \
+        --contigs ${contigs} \
+        ${ref_for_fastq_arg} \
         --cpus ${task.cpus} \
         --output_root "out."
 
@@ -50,11 +50,11 @@ process competitiveMapping {
     mv out.species_comparison.csv ${competitive_mapping_csv}
 
     # Rename filtered fastqs if we're filtering reads
-    if [ ${reference_name} != '' ]
+    if [ ${ref_for_fastq} != '' ]
     then
         if [ ${seq_platform} == 'ont' ]
         then
-            mv out.reads.fastq.gz ${tb_reads}
+            mv out.reads.fastq.gz ${ref_reads}
         elif [ ${seq_platform} == 'illumina' ]
         then
             mv out.reads_1.fastq.gz ${ref_reads_1}
@@ -62,143 +62,62 @@ process competitiveMapping {
         fi
     fi
 
-    # clean up large intermediate files
-    rm aln.bam
-    """
-}
-
-// WARNING: Experimental process
-process tie_break {
-    publishDir "${params.publish_dir}", enabled: params.publish_dir != "", mode: "copy", saveAs: { filename -> sample_name + "_" + filename }
-    container {
-        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:3.2.0' : params.test_container_cm
-    }
-
-    cpus 4
-    memory { 5.GB + (8.GB * task.attempt) }
-
-    pod label: "name", value: "competitive_mapping_pipeline:tie_break"
-    pod label: "sample_id", value: "${params.sample_id}"
-    pod label: "run_id", value: "${params.run_id}"
-
-    input:
-    tuple val(sample_name), path(fqs)
-    path manifest
-    path species_list
-    val seq_platform
-    path tie_break_params
-    val reference_name
-
-    output:
-    tuple val(sample_name), path(tie_break_report), emit: report_csv
-    tuple val(sample_name), path(tie_break_stats), emit: stats
-    tuple val(sample_name), path("reads_for_assembly*fastq.gz"), emit: ref_reads, optional: true
-
-    script:
-    tie_break_report = "species_comparison.csv"
-    tie_break_stats = "tie_break_stats.yaml"
-    ref_reads_root = "reads_for_assembly"
-    """
-    manifest_mapper \
-        --seq_platform ${seq_platform} \
-        --manifest ${manifest} \
-        --reads ${fqs} \
-        --cpus ${task.cpus} \
-        --sort_by_name \
-        -o aln.bam
-
-    tie_break \
-        --input-bam aln.bam \
-        --contigs ${species_list} \
-        --threads ${task.cpus} \
-        --parameters ${tie_break_params} \
-        --output-root "out."
-
-    mv out.alignment_summary.csv ${tie_break_report}
-    mv out.stats.yaml ${tie_break_stats}
-
-    # If reference_name is provided, filter reads
-    if [ "${reference_name}" != "" ]
+    # Plot depths
+    if [ ${make_depth_plot} == 'true' ]
     then
-        extract_reads -f ${fqs} -a out.alns_round_2.csv \
-            -c out.references.csv \
-            -r ${reference_name} \
-            -o ${ref_reads_root}
-
-        gzip ${ref_reads_root}*
+        samtools depth -aa aln.bam > depth.txt
+        plot_depth \
+            -i depth.txt \
+            --contigs ${contigs} \
+            -o depth_plot.pdf
+        rm depth.txt
     fi
 
     # clean up large intermediate files
-    rm aln.bam
+    rm *.bam
     """
 }
 
-// WARNING: Experimental process
-process dynamic_tie_break {
+process build_manifest {
     publishDir "${params.publish_dir}", enabled: params.publish_dir != "", mode: "copy", saveAs: { filename -> sample_name + "_" + filename }
     container {
-        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:3.2.0' : params.test_container_cm
+        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:4.0.0' : params.test_container_cm
     }
 
     cpus 4
-    memory { 8.GB + (12.GB * task.attempt) }
+    memory { 8.GB * task.attempt }
 
-    pod label: "name", value: "competitive_mapping_pipeline:dynamic_tie_break"
+    pod label: "name", value: "competitive_mapping_pipeline:build_manifest"
     pod label: "sample_id", value: "${params.sample_id}"
     pod label: "run_id", value: "${params.run_id}"
 
     input:
-    tuple val(sample_name), path(fqs), path(sylph_report)
-    path genome_dirs
+    tuple val(sample_name), path(sylph_report)
+    path ref_genome_dirs
     // Pattern used to avoid name conflicts
-    path "metadata?/*"
-    val seq_platform
-    val include_whole_genus
-    path tie_break_params
+    path "taxonomy?/*"
+    // optional comma-separated list of accessions to always include as references
+    val fixed_refs
 
     output:
-    tuple val(sample_name), path(tie_break_report), emit: report_csv
-    tuple val(sample_name), path(tie_break_stats), emit: stats
+    tuple val(sample_name), path("out.manifest.fasta.gz"), emit: manifest
+    tuple val(sample_name), path("out.contigs.csv"), emit: contigs
 
     script:
-    whole_genera_arg = include_whole_genus ? "--include_whole_genus" : ""
-    tie_break_report = "species_comparison.csv"
-    tie_break_stats = "tie_break_stats.yaml"
+    fixed_refs_arg = fixed_refs ? "--fixed_refs " + fixed_refs : ""
     """
     manifest_builder --sylph_report ${sylph_report} \
-        --genome_dirs ${genome_dirs} \
-        --metadata_files metadata*/* \
-        ${whole_genera_arg} \
+        ${fixed_refs_arg} \
+        --genome_dirs ${ref_genome_dirs} \
+        --taxonomy_files taxonomy*/* \
         --cpus ${task.cpus} \
         --output_root "out."
-
-    manifest_mapper \
-        --seq_platform ${seq_platform} \
-        --manifest out.manifest.fasta.gz \
-        --reads ${fqs} \
-        --cpus ${task.cpus} \
-        --sort_by_name \
-        -o aln.bam
-
-    tie_break \
-        --input-bam aln.bam \
-        --contigs out.contigs.csv \
-        --threads ${task.cpus} \
-        --parameters ${tie_break_params} \
-        --output-root "out."
-
-    mv out.alignment_summary.csv ${tie_break_report}
-    mv out.stats.yaml ${tie_break_stats}
-
-    # clean up large intermediate files
-    rm aln.bam
-    rm out.manifest.fasta.gz
     """
 }
 
 process has_enough_reads {
     container {
-        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:3.2.0' : params.test_container_cm
+        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:4.0.0' : params.test_container_cm
     }
 
     cpus 1
@@ -211,13 +130,15 @@ process has_enough_reads {
 
     input:
     tuple val(sample_name), path(json)
+    val ref_name
     val threshold
 
     output:
     tuple val(sample_name), stdout
 
     script:
+    ref_name_arg = ref_name == "" ? "--genome_name no_ref" : "--genome_name " + ref_name
     """
-    check_read_count --json_file_path ${json} --read_threshold ${threshold}
+    check_read_count --json_file_path ${json} --read_threshold ${threshold} ${ref_name_arg}
     """
 }

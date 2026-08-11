@@ -21,7 +21,6 @@ data/manifest/ncbi_taxonomy
 data/manifest/reference_genomes
 data/manifest/assembly_summary_refseq.txt
 
-
 # nf-tests
 .nf-test/*
 .nf.test*
@@ -33,7 +32,8 @@ test_data/**/*.new
 test_data/**/*.bai
 tests/test_outputs/*
 !tests/test_outputs/.gitkeep
-results/
+results*/
+flu_results/
 
 # Linter
 !.groovylintrc.json

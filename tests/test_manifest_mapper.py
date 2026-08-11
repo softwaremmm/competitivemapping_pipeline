@@ -5,13 +5,13 @@ from test_utils import check_bam_files
 from competitivemapping import manifest_mapper
 
 
-def test_if_manifest_empty(manifest, empty_sylph):
+def test_if_manifest_empty(myco_manifest, empty_files):
     """Test if the manifest is empty"""
-    assert not manifest_mapper.is_manifest_empty(manifest)
-    assert manifest_mapper.is_manifest_empty(empty_sylph["manifest"])
+    assert not manifest_mapper.is_manifest_empty(myco_manifest["manifest"])
+    assert manifest_mapper.is_manifest_empty(empty_files["manifest"])
 
 
-def test_manifest_mapper(samples, manifest, test_outputs_dir, mocker):
+def test_manifest_mapper(samples, myco_manifest, test_outputs_dir, mocker):
     output_dir = os.path.join(test_outputs_dir, "test_mapper")
     os.makedirs(output_dir, exist_ok=True)
     outfile = os.path.join(output_dir, samples["sample"] + ".mapped.bam")
@@ -21,7 +21,7 @@ def test_manifest_mapper(samples, manifest, test_outputs_dir, mocker):
     args = [
         "manifest_mapper",
         "--manifest",
-        manifest,
+        myco_manifest["manifest"],
         "--reads",
         " ".join(samples["reads"]),
         "--seq_platform",
@@ -42,7 +42,7 @@ def test_manifest_mapper(samples, manifest, test_outputs_dir, mocker):
     check_bam_files(samples["bam"], outfile)
 
 
-def test_empty_manifest(empty_sylph, test_outputs_dir, mocker):
+def test_empty_manifest(empty_files, test_outputs_dir, mocker):
     output_dir = os.path.join(test_outputs_dir, "test_mapper")
     os.makedirs(output_dir, exist_ok=True)
     outfile = os.path.join(output_dir, "empty" + ".mapped.bam")
@@ -50,14 +50,14 @@ def test_empty_manifest(empty_sylph, test_outputs_dir, mocker):
     if os.path.exists(outfile):
         os.remove(outfile)
 
-    seq_platform = "ont" if len(empty_sylph["reads"]) == 1 else "illumina"
+    seq_platform = "ont" if len(empty_files["reads"]) == 1 else "illumina"
 
     args = [
         "manifest_mapper",
         "--manifest",
-        empty_sylph["manifest"],
+        empty_files["manifest"],
         "--reads",
-        " ".join(empty_sylph["reads"]),
+        " ".join(empty_files["reads"]),
         "--seq_platform",
         seq_platform,
         "--cpus",

@@ -1,0 +1,5 @@
+species,genome_name,length,numreads,coverage,meandepth,coverage_including_secondary,meandepth_including_secondary,total_reads,total_alns,exclusive_reads,primary_reads,secondary_reads,supplementary_reads,supplementary_alns
+Lyssavirus rabies,GCF_000859625.1,11932,3,98.79320000000001,1.35635,98.79320000000001,1.35635,3,3,3,3,0,0,0
+Hepacivirus hominis,GCF_000861845.1,9646,2,98.4553,1.16991,98.4553,1.16991,2,2,2,2,0,0,0
+Orthopoxvirus monkeypox,GCF_000857045.1,196858,10,42.0841,0.63365,43.346,0.646268,10,12,10,10,0,0,1
+unmapped,unmapped,0,0,0.0,0.0,0.0,0.0,0,0,0,0,0,0,0

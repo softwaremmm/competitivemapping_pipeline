@@ -14,7 +14,7 @@ from competitivemapping import competitive_mapping
 from competitivemapping.competitive_mapping import Config, output_fastqs
 
 
-def test_cli_entry_point(samples, species_table_path, test_outputs_dir, mocker):
+def test_cli_entry_point(samples, myco_manifest, test_outputs_dir, mocker):
     output_root = os.path.join(test_outputs_dir, samples["sample"] + ".")
 
     seq_platform = "ont" if len(samples["reads"]) == 1 else "illumina"
@@ -28,7 +28,7 @@ def test_cli_entry_point(samples, species_table_path, test_outputs_dir, mocker):
         "--ref_for_fastq",
         "M.tuberculosis",
         "--contigs",
-        species_table_path,
+        myco_manifest["contigs"],
         "--output_root",
         output_root,
         "--cpus",
@@ -60,37 +60,35 @@ def test_cli_entry_point(samples, species_table_path, test_outputs_dir, mocker):
 
     match samples["sample"]:
         case "chloro_10k":
-            check_length(output_root + "reads_1.fastq.gz", 2736)
-            check_length(output_root + "reads_2.fastq.gz", 2736)
+            check_length(output_root + "reads_1.fastq.gz", 13)
+            check_length(output_root + "reads_2.fastq.gz", 13)
             check_order(
                 output_root + "reads_1.fastq.gz",
-                "729a5634addf363b4848f38ffc1bc9a9edbd10538b45669a7ac2719a6e2d61c2",
+                "5a36937177ce534d20988350a583c445b3dca532f8c359c285da324f95f75346",
             )
             check_order(
                 output_root + "reads_2.fastq.gz",
-                "729a5634addf363b4848f38ffc1bc9a9edbd10538b45669a7ac2719a6e2d61c2",
+                "5a36937177ce534d20988350a583c445b3dca532f8c359c285da324f95f75346",
             )
         case "tb_10k":
-            check_length(output_root + "reads_1.fastq.gz", 9711)
-            check_length(output_root + "reads_2.fastq.gz", 9711)
+            check_length(output_root + "reads_1.fastq.gz", 5235)
+            check_length(output_root + "reads_2.fastq.gz", 5235)
         case "tb_ont":
-            check_length(output_root + "reads.fastq.gz", 998)
+            check_length(output_root + "reads.fastq.gz", 438)
 
 
-def test_empty_contigs(empty_sylph, test_outputs_dir, mocker):
-    output_root = os.path.join(
-        test_outputs_dir, "cm_sylph", empty_sylph["sample"] + "."
-    )
-    os.makedirs(os.path.join(test_outputs_dir, "cm_sylph"), exist_ok=True)
+def test_empty_contigs(empty_files, test_outputs_dir, mocker):
+    output_root = os.path.join(test_outputs_dir, "cm", empty_files["sample"] + ".")
+    os.makedirs(os.path.join(test_outputs_dir, "cm"), exist_ok=True)
 
-    seq_platform = "ont" if len(empty_sylph["reads"]) == 1 else "illumina"
+    seq_platform = "ont" if len(empty_files["reads"]) == 1 else "illumina"
 
     args = [
         "competitive_mapping",
         "--input_bam",
-        empty_sylph["bam"],
+        "path_to_nothing.bam",
         "--contigs",
-        empty_sylph["contigs"],
+        empty_files["contigs"],
         "--seq_platform",
         seq_platform,
         "--output_root",
@@ -107,11 +105,12 @@ def test_empty_contigs(empty_sylph, test_outputs_dir, mocker):
     competitive_mapping.cli_entry_point()
 
     check_file(
-        empty_sylph["sylph_species_comparison"], output_root + "species_comparison.json"
+        empty_files["species_comparison"], output_root + "species_comparison.json"
     )
-    check_file(
-        empty_sylph["sylph_csv_comparison"], output_root + "species_comparison.csv"
-    )
+    check_file(empty_files["csv_comparison"], output_root + "species_comparison.csv")
+
+
+## Test cases for output_fastqs function
 
 
 @pytest.fixture
@@ -159,7 +158,7 @@ def test_output_fastqs_single_reference(mock_run, mock_contigs_df, temp_output_d
     )
     # Check that the correct rname was used
     mock_run.assert_any_call(
-        f"samtools view -h {aln_bam} -u r1 | samtools sort -n -@ 1 -o {temp_output_dir}.0.bam",
+        f"samtools view -h {aln_bam} -u r1 | samtools sort -n -@ 1 -o {temp_output_dir}output_aln.bam",
         shell=True,
         check=True,
         stdout=subprocess.PIPE,
@@ -192,13 +191,7 @@ def test_output_fastqs_multiple_references(mock_run, mock_contigs_df, temp_outpu
     # Verify
     # Check that both rnames were used
     mock_run.assert_any_call(
-        f"samtools view -h {aln_bam} -u r1 | samtools sort -n -@ 1 -o {temp_output_dir}.0.bam",
-        shell=True,
-        check=True,
-        stdout=subprocess.PIPE,
-    )
-    mock_run.assert_any_call(
-        f"samtools view -h {aln_bam} -u r2 | samtools sort -n -@ 1 -o {temp_output_dir}.1.bam",
+        f"samtools view -h {aln_bam} -u r1 r2 | samtools sort -n -@ 1 -o {temp_output_dir}output_aln.bam",
         shell=True,
         check=True,
         stdout=subprocess.PIPE,
@@ -231,7 +224,7 @@ def test_output_fastqs_with_unmapped(mock_run, mock_contigs_df, temp_output_dir)
     # Verify
     # Check that unmapped reads were included
     mock_run.assert_any_call(
-        f'samtools view -h {aln_bam} -u "*" | samtools sort -n -@ 1 -o {temp_output_dir}.1.bam',
+        f'samtools view -h {aln_bam} -u r1 "*" | samtools sort -n -@ 1 -o {temp_output_dir}output_aln.bam',
         shell=True,
         check=True,
         stdout=subprocess.PIPE,
