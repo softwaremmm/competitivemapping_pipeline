@@ -54,7 +54,7 @@ workflow {
             manifest,
             species_list,
             params.seq_platform,
-            params.ref_for_fastqs,
+            params.refs_for_fastqs,
         )
     }
     else if (params.workflow == 'dynamic') {
@@ -75,7 +75,7 @@ workflow {
             sylph_dbs_ch,
             taxonomy_files_ch,
             params.fixed_refs,
-            params.ref_for_fastqs,
+            params.refs_for_fastqs,
             params.seq_platform,
         )
     }
@@ -91,7 +91,7 @@ workflow competitive_mapping_wf {
     manifest
     species_list
     seq_platform
-    ref_for_fastqs
+    refs_for_fastqs
 
     main:
 
@@ -111,15 +111,39 @@ workflow competitive_mapping_wf {
         .combine(manifest)
         .combine(species_list)
 
-    competitive_mapping_output = competitive_mapping(input_files_with_manifest, seq_platform, ref_for_fastqs, "false")
+    competitive_mapping(input_files_with_manifest, seq_platform, refs_for_fastqs, "false")
+
+    // The following will group reads by reference producing a channel of tuples (sample_name, ref_name, fastqs)
+    // where fastqs is a list for illumina and a single file for ont
+    competitive_mapping.out.ref_reads.view()
+    ref_reads = competitive_mapping.out.ref_reads.flatMap { sample_name, reads ->
+        def read_list = (reads instanceof List) ? reads : [reads]
+        read_list
+            .groupBy { it -> it.name.replaceFirst(/_reads_for_assembly.*$/, '') }
+            .collect { ref, ref_reads ->
+                def output_reads = ref_reads.size() == 1 ? ref_reads[0] : ref_reads
+                tuple(sample_name, ref, output_reads)
+            }
+    }
+    ref_reads.view()
+
+    // Then apply the has_enough_reads process to each tuple
+    // result is a channel of tuples (sample_name, ref_name, fastqs, has_enough_reads)
     threshold = seq_platform == 'illumina' ? params.illumina_threshold : params.ont_threshold
-    has_enough_reads(competitive_mapping_output.report_json, ref_for_fastqs, threshold)
+    has_enough_reads(
+        competitive_mapping.out.report_json.combine(
+            ref_reads.map { sample_name, ref_name, _reads -> tuple(sample_name, ref_name) },
+            by: 0
+        ),
+        threshold,
+    )
+    ref_reads = ref_reads.join(has_enough_reads.out, by: [0,1])
+
 
     emit:
-    report_json = competitive_mapping_output.report_json
-    report_csv = competitive_mapping_output.report_csv
-    ref_reads = competitive_mapping_output.ref_reads
-    cm_enough_reads = has_enough_reads.out
+    report_json = competitive_mapping.out.report_json
+    report_csv = competitive_mapping.out.report_csv
+    ref_reads = ref_reads
 }
 
 
@@ -130,7 +154,7 @@ workflow dynamic_competitive_mapping_wf {
     sylph_dbs // Paths .syldb files
     taxonomy_files // Paths to taxonomy tsv filse
     fixed_refs // optional comma-separated list of accessions to always include as references
-    ref_for_fastqs // optional reference to extract reads for from comp mapping
+    refs_for_fastqs // optional reference to extract reads for from comp mapping
     seq_platform
 
     main:
@@ -156,19 +180,36 @@ workflow dynamic_competitive_mapping_wf {
         .join(build_manifest.out.manifest)
         .join(build_manifest.out.contigs)
 
-    competitive_mapping(input_files_with_manifest, seq_platform, ref_for_fastqs, "true")
+    competitive_mapping(input_files_with_manifest, seq_platform, refs_for_fastqs, "true")
 
+    // The following will group reads by reference producing a channel of tuples (sample_name, ref_name, [fastqs])
+    ref_reads = competitive_mapping.out.ref_reads.flatMap { sample_name, reads ->
+        reads
+            .groupBy { it -> it.name.replaceFirst(/_reads_for_assembly.*$/, '') }
+            .collect { ref, ref_reads ->
+                tuple(sample_name, ref, ref_reads)
+            }
+    }
+
+    // Then apply the has_enough_reads process to each tuple
+    // result is a channel of tuples (sample_name, ref_name, [fastqs], has_enough_reads)
     threshold = seq_platform == 'illumina' ? params.illumina_threshold : params.ont_threshold
-    has_enough_reads(competitive_mapping.out.report_json, ref_for_fastqs, threshold)
+    has_enough_reads(
+        competitive_mapping.out.report_json.combine(
+            ref_reads.map { sample_name, ref_name, _reads -> tuple(sample_name, ref_name) },
+            by: 0
+        ),
+        threshold,
+    )
+    ref_reads = ref_reads.join(has_enough_reads.out, by: [0,1])
 
     emit:
     report_csv = competitive_mapping.out.report_csv
     report_json = competitive_mapping.out.report_json
+    ref_reads = ref_reads
     sylph_report = sylph.out.sylph_report
     sylph_query = sylph.out.sylph_query
     sylph_taxonomy_report = sylph.out.taxonomy_report
-    ref_reads = competitive_mapping.out.ref_reads
-    cm_enough_reads = has_enough_reads.out
     depth_plot = competitive_mapping.out.depth_plot
 }
 

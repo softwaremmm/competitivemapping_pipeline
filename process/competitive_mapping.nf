@@ -14,22 +14,19 @@ process competitive_mapping {
     input:
     tuple val(sample_name), path(fqs), path(manifest), path(contigs)
     val seq_platform
-    val ref_for_fastq
+    val refs_for_fastqs
     val make_depth_plot
 
     output:
-    tuple val(sample_name), path("reads_for_assembly*fastq.gz"), emit: ref_reads, optional: true
     tuple val(sample_name), path(competitive_mapping_report), emit: report_json
     tuple val(sample_name), path(competitive_mapping_csv), emit: report_csv
     tuple val(sample_name), path("depth_plot.pdf"), emit: depth_plot, optional: true
+    tuple val(sample_name), path("*_reads_for_assembly*fastq.gz"), emit: ref_reads, optional: true
 
     script:
-    ref_reads = "reads_for_assembly.fastq.gz"
-    ref_reads_1 = "reads_for_assembly_1.fastq.gz"
-    ref_reads_2 = "reads_for_assembly_2.fastq.gz"
     competitive_mapping_report = "species_comparison_report.json"
     competitive_mapping_csv = "species_comparison.csv"
-    ref_for_fastq_arg = ref_for_fastq == "" ? "" : "--ref_for_fastq " + ref_for_fastq
+    refs_for_fastqs_arg = refs_for_fastqs == "" ? "" : "--refs_for_fastqs " + refs_for_fastqs
     """
     manifest_mapper \
         --seq_platform ${seq_platform} \
@@ -38,29 +35,20 @@ process competitive_mapping {
         --cpus ${task.cpus} \
         -o aln.bam
 
+    mkdir -p out
     competitive_mapping \
         --input_bam aln.bam \
         --seq_platform ${seq_platform} \
         --contigs ${contigs} \
-        ${ref_for_fastq_arg} \
+        ${refs_for_fastqs_arg} \
         --cpus ${task.cpus} \
-        --output_root "out."
+        --output_root "out/"
 
-    mv out.species_comparison.json ${competitive_mapping_report}
-    mv out.species_comparison.csv ${competitive_mapping_csv}
+    mv out/species_comparison.json ${competitive_mapping_report}
+    mv out/species_comparison.csv ${competitive_mapping_csv}
 
-    # Rename filtered fastqs if we're filtering reads
-    if [ ${ref_for_fastq} != '' ]
-    then
-        if [ ${seq_platform} == 'ont' ]
-        then
-            mv out.reads.fastq.gz ${ref_reads}
-        elif [ ${seq_platform} == 'illumina' ]
-        then
-            mv out.reads_1.fastq.gz ${ref_reads_1}
-            mv out.reads_2.fastq.gz ${ref_reads_2}
-        fi
-    fi
+    # Move read files to the current working directory so they can be published
+    mv out/* .
 
     # Plot depths
     if [ ${make_depth_plot} == 'true' ]
@@ -123,18 +111,16 @@ process has_enough_reads {
     cpus 1
     memory "128MB"
 
-    debug true
     pod label: "name", value: "competitive_mapping_pipeline:has_enough_reads"
     pod label: "sample_id", value: "${params.sample_id}"
     pod label: "run_id", value: "${params.run_id}"
 
     input:
-    tuple val(sample_name), path(json)
-    val ref_name
+    tuple val(sample_name), path(json), val(ref_name)
     val threshold
 
     output:
-    tuple val(sample_name), stdout
+    tuple val(sample_name), val(ref_name), stdout
 
     script:
     ref_name_arg = ref_name == "" ? "--genome_name no_ref" : "--genome_name " + ref_name
