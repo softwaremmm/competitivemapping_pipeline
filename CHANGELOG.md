@@ -1,21 +1,29 @@
-## New
+## 4.0.1
 
-- restructure tests so that all test data is small and local. Runs faster and no longer needs knowledge bucket.
+- fix bump error
+
+## 4.0.0
+
+- add sylph process
+- add dynamic workflow which runs sylph, builds manifest and the uses standard comp mapping
+- enable fixed refs to be set even during dynamic workflow
+- allow fastqs to be extracted from one ref in dynamic mode
+
+- remove tie-break
+- remove "include_whole_genus" option when building manifest (add too many refs)
+
+- Produce depth plot of top species
+
 - manifest_builder now works with files ending `.fastq.gz` as well as `_genomic.fna.gz` (helps for testing and sip pipeline).
 - update skani to 0.3.0 to match version used in paper (only used in manifest building. No impact on myco)
 - use workflow param to choose workflow to run locally (quality of life for local running. No impact on myco)
+- move building manifest to its own process
 - ani_group can now be partially filled
 - default behaviour of manifest_builder is changed to not set ani_group with skani unless threshold provided. When requested it only gives an ani_group for groups with more than one reference
-- remove tie-break
-- remove "include_whole_genus" option when building manifest (add too many refs)
-- add sylph process
-- add dynamic workflow which runs sylph, builds manifest and the uses standard comp mapping"
-- enable fixed refs to be set even during dynamic workflow
-- move building manifest to its own process
-- allow fastqs to be extracted from one ref in dynamic mode
-- simplify bam to fastq code by fetching all rnames in one command. Note: this changes order of fastqs slightly
-- Produce depth plot of top species
 
+- simplify bam to fastq code by fetching all rnames in one command. Note: this changes order of fastqs slightly
+
+- restructure tests so that all test data is small and local. Runs faster and no longer needs knowledge bucket.
 
 ## 3.2.0
 
