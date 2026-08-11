@@ -1,3 +1,7 @@
+## 4.0.1
+
+- fix bump error
+
 ## 4.0.0
 
 - add sylph process
