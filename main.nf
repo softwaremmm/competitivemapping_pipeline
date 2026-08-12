@@ -115,7 +115,6 @@ workflow competitive_mapping_wf {
 
     // The following will group reads by reference producing a channel of tuples (sample_name, ref_name, fastqs)
     // where fastqs is a list for illumina and a single file for ont
-    competitive_mapping.out.ref_reads.view()
     ref_reads = competitive_mapping.out.ref_reads.flatMap { sample_name, reads ->
         def read_list = (reads instanceof List) ? reads : [reads]
         read_list
@@ -125,7 +124,6 @@ workflow competitive_mapping_wf {
                 tuple(sample_name, ref, output_reads)
             }
     }
-    ref_reads.view()
 
     // Then apply the has_enough_reads process to each tuple
     // result is a channel of tuples (sample_name, ref_name, fastqs, has_enough_reads)
@@ -182,17 +180,20 @@ workflow dynamic_competitive_mapping_wf {
 
     competitive_mapping(input_files_with_manifest, seq_platform, refs_for_fastqs, "true")
 
-    // The following will group reads by reference producing a channel of tuples (sample_name, ref_name, [fastqs])
+    // The following will group reads by reference producing a channel of tuples (sample_name, ref_name, fastqs)
+    // where fastqs is a list for illumina and a single file for ont
     ref_reads = competitive_mapping.out.ref_reads.flatMap { sample_name, reads ->
-        reads
+        def read_list = (reads instanceof List) ? reads : [reads]
+        read_list
             .groupBy { it -> it.name.replaceFirst(/_reads_for_assembly.*$/, '') }
             .collect { ref, ref_reads ->
-                tuple(sample_name, ref, ref_reads)
+                def output_reads = ref_reads.size() == 1 ? ref_reads[0] : ref_reads
+                tuple(sample_name, ref, output_reads)
             }
     }
 
     // Then apply the has_enough_reads process to each tuple
-    // result is a channel of tuples (sample_name, ref_name, [fastqs], has_enough_reads)
+    // result is a channel of tuples (sample_name, ref_name, fastqs, has_enough_reads)
     threshold = seq_platform == 'illumina' ? params.illumina_threshold : params.ont_threshold
     has_enough_reads(
         competitive_mapping.out.report_json.combine(
