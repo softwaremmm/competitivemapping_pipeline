@@ -91,7 +91,7 @@ workflow competitive_mapping_wf {
     manifest
     species_list
     seq_platform
-    refs_for_fastqs
+    refs_for_fastqs // optional comma-separated list of references to extract fastqs for
 
     main:
 
@@ -152,7 +152,7 @@ workflow dynamic_competitive_mapping_wf {
     sylph_dbs // Paths .syldb files
     taxonomy_files // Paths to taxonomy tsv filse
     fixed_refs // optional comma-separated list of accessions to always include as references
-    refs_for_fastqs // optional reference to extract reads for from comp mapping
+    refs_for_fastqs // optional comma-separated list of references to extract fastqs for
     seq_platform
 
     main:

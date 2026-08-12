@@ -1,3 +1,7 @@
+## New
+
+- (Breaking) the workflow output channel ref_reads now is made of tuples of form: (sample, ref_name, fastqs, has_enough_reads). And refs_for_fastqs should be comma separated list of references
+
 ## 4.0.1
 
 - fix bump error
