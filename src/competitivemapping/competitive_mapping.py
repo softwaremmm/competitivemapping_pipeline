@@ -160,6 +160,14 @@ def output_fastqs(
     """
     logger.info("Outputting FASTQs")
     rnames = contigs_df[contigs_df["reference"] == ref]["rname"].tolist()
+    if "species" in contigs_df.columns:
+        # compare lowercase after replacing spaces with underscores to avoid issues with species names
+        rnames += contigs_df[
+            (
+                contigs_df["species"].str.lower().str.replace(" ", "_")
+                == ref.lower().replace(" ", "_")
+            )
+        ]["rname"].tolist()
     if include_unmapped:
         rnames.append('"*"')
 

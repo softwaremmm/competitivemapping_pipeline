@@ -30,7 +30,9 @@ def check_threshold(json_file_path: str, threshold: int, genome_name: str) -> st
     # Extract the numreads value for the genome_name
     num_reads = None
     for reference in data.get("references", []):
-        if reference.get("genome_name") == genome_name:
+        if reference.get("genome_name") == genome_name or reference.get(
+            "species", ""
+        ).lower().replace(" ", "_") == genome_name.lower().replace(" ", "_"):
             num_reads = int(reference.get("numreads", None))
             break
 
