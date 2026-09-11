@@ -1,7 +1,7 @@
 process competitive_mapping {
     publishDir "${params.publish_dir}", enabled: params.publish_dir != "", mode: "copy", saveAs: { filename -> sample_name + "_" + filename }
     container {
-        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:4.0.1' : params.test_container_cm
+        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:0db6f0e' : params.test_container_cm
     }
 
     cpus 4
@@ -69,7 +69,7 @@ process competitive_mapping {
 process build_manifest {
     publishDir "${params.publish_dir}", enabled: params.publish_dir != "", mode: "copy", saveAs: { filename -> sample_name + "_" + filename }
     container {
-        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:4.0.1' : params.test_container_cm
+        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:0db6f0e' : params.test_container_cm
     }
 
     cpus 4
@@ -105,7 +105,7 @@ process build_manifest {
 
 process has_enough_reads {
     container {
-        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:4.0.1' : params.test_container_cm
+        params.test_container_cm == "" ? params.container_prefix + '/gpas/competitivemapping_pipeline:0db6f0e' : params.test_container_cm
     }
 
     cpus 1
