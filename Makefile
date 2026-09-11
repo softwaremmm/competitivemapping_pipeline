@@ -11,6 +11,7 @@ run_myco:
 		--manifest test_data/myco_manifest/manifest.fasta.gz \
 		--species_list test_data/myco_manifest/contigs.csv \
 		--publish_dir results \
+		--refs_for_fastqs "M.tuberculosis,M.pyrenivorans" \
 		-profile local_docker \
 		-resume
 
@@ -58,6 +59,7 @@ test:
 	nf-test test tests/nextflow/*.test
 
 test_local:
+	find tests/ -type d -name test_outputs | xargs rm -rf
 	pytest tests
 	docker build -t test_container_cm .
 	nf-test test tests/nextflow/*.test --profile local_docker
