@@ -36,11 +36,10 @@ nextflow_workflow {
 
             with(workflow.out.ref_reads) {
                 assert size() == 1
-                assert get(0)[1][0].contains("reads_for_assembly_1.fastq.gz")
-                assert get(0)[1][1].contains("reads_for_assembly_2.fastq.gz")
+                assert get(0)[2][0].contains("reads_for_assembly_1.fastq.gz")
+                assert get(0)[2][1].contains("reads_for_assembly_2.fastq.gz")
+                assert get(0)[3] == "true"
             }
-
-            assert workflow.out.cm_enough_reads[0][1] == 'true'
         }
     }
 
@@ -77,11 +76,11 @@ nextflow_workflow {
 
             with(workflow.out.ref_reads) {
                 assert size() == 1
-                assert get(0)[1][0].contains("reads_for_assembly_1.fastq.gz")
-                assert get(0)[1][1].contains("reads_for_assembly_2.fastq.gz")
+                assert get(0)[2][0].contains("reads_for_assembly_1.fastq.gz")
+                assert get(0)[2][1].contains("reads_for_assembly_2.fastq.gz")
+                assert get(0)[3] == "false"
             }
 
-            assert workflow.out.cm_enough_reads[0][1] == 'false'
         }
     }
 
@@ -118,10 +117,10 @@ nextflow_workflow {
 
             with(workflow.out.ref_reads) {
                 assert size() == 1
-                assert get(0)[1].contains("reads_for_assembly.fastq.gz")
+                assert get(0)[2].contains("reads_for_assembly.fastq.gz")
+                assert get(0)[3] == "true"
             }
 
-            assert workflow.out.cm_enough_reads[0][1] == 'true'
         }
     }
 
